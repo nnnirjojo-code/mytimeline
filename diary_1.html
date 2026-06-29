@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1C1917">
+  <title>我的手账</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg-desk: #1C1917;
+      --bg-detail: #111110;
+      --paper: #F7F2E8;
+      --paper-shadow: rgba(0,0,0,0.35);
+      --brown-dark: #3D2B1F;
+      --brown-mid: #7C5C48;
+      --brown-warm: #A0785A;
+      --brown-weekend: #C4956A;
+      --dot-text: #7C5C48;
+      --dot-img: #C4956A;
+      --bubble: rgba(255,255,255,0.06);
+      --bubble-border: rgba(255,255,255,0.10);
+      --font: 'Noto Serif SC', serif;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg-desk);
+      color: var(--paper);
+      user-select: none;
+    }
+
+    /* ─────────────── SCREENS ─────────────── */
+    .screen {
+      position: fixed; inset: 0;
+      overflow: hidden;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      will-change: transform, opacity;
+    }
+    .screen.hidden { opacity: 0; pointer-events: none; transform: translateX(30px); }
+    .screen.slide-left { transform: translateX(-30px); opacity: 0; pointer-events: none; }
+
+    /* ─────────────── CALENDAR SCREEN ─────────────── */
+    #screen-calendar {
+      background: var(--bg-desk);
+      display: flex; flex-direction: column;
+    }
+
+    /* Floating paper cards */
+    .papers-bg {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+    }
+    .paper-card {
+      position: absolute;
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 8px 32px var(--paper-shadow), 0 2px 8px rgba(0,0,0,0.2);
+      opacity: 0.07;
+      animation: paperFloat var(--dur, 8s) ease-in-out infinite alternate, paperDrift var(--drift, 12s) ease-in-out infinite alternate;
+    }
+    @keyframes paperFloat {
+      0% { transform: translateY(0px) rotate(var(--rot0, -3deg)); }
+      100% { transform: translateY(var(--ty, -18px)) rotate(var(--rot1, 3deg)); }
+    }
+    @keyframes paperDrift {
+      0% { left: var(--x0); }
+      100% { left: var(--x1); }
+    }
+
+    /* Header */
+    .cal-header {
+      position: relative; z-index: 2;
+      padding: 56px 24px 20px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+    }
+    .cal-month-label {
+      font-size: 13px; font-weight: 300; letter-spacing: 0.12em;
+      color: var(--brown-warm); opacity: 0.8;
+    }
+    .cal-year {
+      font-size: 28px; font-weight: 600; color: var(--paper);
+      line-height: 1; margin-top: 4px;
+    }
+    .cal-month {
+      font-size: 40px; font-weight: 700; color: var(--paper); line-height: 1;
+    }
+    .month-nav { display: flex; gap: 4px; }
+    .month-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: var(--paper); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .month-btn:active { background: rgba(255,255,255,0.15); }
+
+    /* Weekday labels */
+    .cal-weekdays {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 0 16px; margin-bottom: 4px;
+    }
+    .cal-weekday {
+      text-align: center; font-size: 11px; font-weight: 300;
+      letter-spacing: 0.08em; padding: 6px 0;
+      color: rgba(255,255,255,0.3);
+    }
+    .cal-weekday.weekend { color: var(--brown-weekend); opacity: 0.7; }
+
+    /* Calendar grid */
+    .cal-grid {
+      position: relative; z-index: 2;
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      padding: 0 12px; gap: 2px 0; flex: 1;
+    }
+    .cal-day {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 4px 0; cursor: pointer;
+    }
+    .day-circle {
+      width: var(--size, 34px); height: var(--size, 34px);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      transition: transform 0.15s, background 0.15s;
+      position: relative;
+    }
+    .cal-day:active .day-circle { transform: scale(0.9); }
+    .cal-day.has-record .day-circle { font-weight: 700; color: rgba(255,255,255,0.85); }
+    .cal-day.today .day-circle {
+      background: var(--brown-dark);
+      color: var(--paper); font-weight: 700;
+      width: 40px; height: 40px; font-size: 15px;
+    }
+    .cal-day.weekend .day-circle { color: var(--brown-weekend); }
+    .cal-day.weekend.has-record .day-circle { color: var(--brown-weekend); }
+    .cal-day.other-month .day-circle { opacity: 0.2; }
+    .cal-day.other-month { pointer-events: none; }
+
+    /* Dots under dates */
+    .day-dots { display: flex; gap: 3px; margin-top: 2px; min-height: 6px; }
+    .day-dot { width: 4px; height: 4px; border-radius: 50%; }
+    .day-dot.text { background: var(--dot-text); }
+    .day-dot.img { background: var(--dot-img); }
+
+    /* FAB */
+    .fab {
+      position: fixed; bottom: 32px; right: 24px; z-index: 10;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--brown-mid);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border: none; color: var(--paper);
+      font-size: 28px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .fab:active { transform: scale(0.92); background: var(--brown-dark); }
+
+    /* ─────────────── DETAIL / TIMELINE SCREEN ─────────────── */
+    #screen-detail {
+      background: var(--bg-detail);
+      display: flex; flex-direction: column;
+    }
+
+    /* Meteors */
+    .meteors-bg {
+      position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+    }
+    .meteor {
+      position: absolute;
+      width: 120px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      border-radius: 1px;
+      opacity: 0;
+      animation: meteorFall var(--dur, 3s) ease-in var(--delay, 0s) infinite;
+    }
+    @keyframes meteorFall {
+      0% { opacity: 0; transform: translate(0, 0) rotate(-25deg); }
+      10% { opacity: 1; }
+      60% { opacity: 0.4; }
+      100% { opacity: 0; transform: translate(280px, 180px) rotate(-25deg); }
+    }
+
+    /* Detail header */
+    .detail-header {
+      position: relative; z-index: 2;
+      padding: 54px 24px 16px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .back-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.7);
+      font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .back-btn:active { background: rgba(255,255,255,0.1); }
+    .detail-date-info { flex: 1; }
+    .detail-date-big { font-size: 32px; font-weight: 700; color: var(--paper); }
+    .detail-date-sub { font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; }
+
+    /* Timeline */
+    .timeline-scroll {
+      position: relative; z-index: 2;
+      flex: 1; overflow-y: auto; padding: 8px 20px 120px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .timeline-scroll::-webkit-scrollbar { display: none; }
+
+    .timeline-empty {
+      display: flex; flex-direction: column; align-items: center;
+      padding-top: 80px; color: rgba(255,255,255,0.2);
+      font-size: 14px; font-weight: 300; line-height: 2.5;
+      text-align: center;
+    }
+    .timeline-empty .empty-icon { font-size: 36px; opacity: 0.4; margin-bottom: 12px; }
+
+    .timeline-entry {
+      display: flex; gap: 16px; margin-bottom: 20px;
+      animation: entryFadeIn 0.4s ease both;
+    }
+    @keyframes entryFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .entry-time {
+      flex-shrink: 0; width: 44px;
+      font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,0.3); letter-spacing: 0.05em;
+      padding-top: 10px; text-align: right;
+    }
+    .entry-bubble {
+      flex: 1;
+      background: var(--bubble);
+      border: 1px solid var(--bubble-border);
+      border-radius: 16px 16px 16px 4px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      animation: floatEntry var(--float-dur, 4s) ease-in-out infinite alternate;
+    }
+    @keyframes floatEntry {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(var(--float-offset, -4px)); }
+    }
+    .entry-bubble:active { background: rgba(255,255,255,0.1); }
+    .entry-text-preview {
+      font-size: 14px; font-weight: 300; line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+    }
+    .entry-images-row {
+      display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
+    }
+    .entry-thumb {
+      width: 64px; height: 64px; border-radius: 10px;
+      object-fit: cover; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .entry-img-count {
+      font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;
+    }
+
+    /* Bottom sheet for full text */
+    .bottom-sheet-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 100; display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
+    .bottom-sheet {
+      width: 100%; max-height: 75vh;
+      background: #1A1714;
+      border-radius: 20px 20px 0 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 20px 24px 48px;
+      overflow-y: auto;
+      transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+    .sheet-handle { width: 36px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 20px; }
+    .sheet-time { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 12px; }
+    .sheet-text { font-size: 15px; font-weight: 300; line-height: 1.9; color: rgba(255,255,255,0.8); }
+    .sheet-images { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .sheet-image { width: calc(50% - 4px); border-radius: 12px; object-fit: cover; cursor: pointer; }
+    .sheet-delete-btn {
+      margin-top: 20px; width: 100%;
+      padding: 12px; border-radius: 10px;
+      border: 1px solid rgba(255,80,80,0.25);
+      background: rgba(255,80,80,0.06);
+      color: rgba(255,120,120,0.7); font-family: var(--font);
+      font-size: 13px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sheet-delete-btn:active { background: rgba(255,80,80,0.15); }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
+
+    /* ─────────────── ADD RECORD SCREEN ─────────────── */
+    #screen-add {
+      background: var(--bg-detail);
+      display: flex; flex-direction: column;
+    }
+
+    .add-header {
+      position: relative; z-index: 2;
+      padding: 54px 24px 16px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .add-title { flex: 1; font-size: 18px; font-weight: 500; color: rgba(255,255,255,0.7); }
+
+    .add-body {
+      position: relative; z-index: 2;
+      flex: 1; overflow-y: auto; padding: 8px 20px;
+      display: flex; flex-direction: column; gap: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .add-body::-webkit-scrollbar { display: none; }
+
+    .add-bubble {
+      background: var(--bubble);
+      border: 1px solid var(--bubble-border);
+      border-radius: 16px; padding: 16px;
+    }
+    .add-textarea {
+      width: 100%; min-height: 160px; max-height: 260px;
+      background: transparent; border: none; outline: none; resize: none;
+      font-family: var(--font); font-size: 15px; font-weight: 300;
+      line-height: 1.9; color: rgba(255,255,255,0.8);
+      -webkit-overflow-scrolling: touch;
+    }
+    .add-textarea::placeholder { color: rgba(255,255,255,0.2); }
+    .char-count {
+      text-align: right; font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,0.2); margin-top: 6px;
+    }
+    .char-count.warn { color: rgba(200,120,80,0.8); }
+
+    /* Image upload */
+    .img-upload-area { display: flex; gap: 8px; flex-wrap: wrap; }
+    .img-add-btn {
+      width: 72px; height: 72px; border-radius: 12px;
+      border: 1.5px dashed rgba(255,255,255,0.15);
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.25); font-size: 24px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .img-add-btn:active { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.4); }
+    .img-preview-wrap { position: relative; width: 72px; height: 72px; }
+    .img-preview {
+      width: 72px; height: 72px; border-radius: 12px;
+      object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .img-remove {
+      position: absolute; top: -5px; right: -5px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #2A1F1A; border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7); font-size: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .hidden-file { display: none; }
+
+    /* Submit button */
+    .add-footer {
+      position: relative; z-index: 2;
+      padding: 12px 20px 40px;
+    }
+    .submit-btn {
+      width: 100%; padding: 15px;
+      border-radius: 14px; border: none;
+      background: var(--brown-mid);
+      color: var(--paper); font-family: var(--font);
+      font-size: 16px; font-weight: 500;
+      cursor: pointer; letter-spacing: 0.08em;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .submit-btn:active { transform: scale(0.97); background: var(--brown-dark); }
+    .submit-btn:disabled { opacity: 0.4; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(60,40,30,0.95); color: rgba(255,255,255,0.85);
+      padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 300;
+      opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .loading-overlay.show { opacity: 1; pointer-events: all; }
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: var(--brown-warm);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ CALENDAR SCREEN ════════════════ -->
+<div class="screen" id="screen-calendar">
+  <div class="papers-bg" id="papersBg"></div>
+
+  <div class="cal-header">
+    <div>
+      <div class="cal-month-label" id="calYearLabel">2025年</div>
+      <div class="cal-month" id="calMonthLabel">六月</div>
+    </div>
+    <div class="month-nav">
+      <button class="month-btn" id="prevMonth">‹</button>
+      <button class="month-btn" id="nextMonth">›</button>
+    </div>
+  </div>
+
+  <div class="cal-weekdays">
+    <div class="cal-weekday weekend">日</div>
+    <div class="cal-weekday">一</div>
+    <div class="cal-weekday">二</div>
+    <div class="cal-weekday">三</div>
+    <div class="cal-weekday">四</div>
+    <div class="cal-weekday">五</div>
+    <div class="cal-weekday weekend">六</div>
+  </div>
+
+  <div class="cal-grid" id="calGrid"></div>
+
+  <button class="fab" id="fabAdd" title="添加记录">+</button>
+</div>
+
+<!-- ════════════════ DETAIL SCREEN ════════════════ -->
+<div class="screen hidden" id="screen-detail">
+  <div class="meteors-bg" id="meteorsBg"></div>
+
+  <div class="detail-header">
+    <button class="back-btn" id="backBtn">←</button>
+    <div class="detail-date-info">
+      <div class="detail-date-big" id="detailDateBig"></div>
+      <div class="detail-date-sub" id="detailDateSub"></div>
+    </div>
+    <button class="fab" style="position:relative;bottom:auto;right:auto;width:44px;height:44px;font-size:22px;" id="detailAddBtn">+</button>
+  </div>
+
+  <div class="timeline-scroll" id="timelineScroll"></div>
+</div>
+
+<!-- ════════════════ ADD SCREEN ════════════════ -->
+<div class="screen hidden" id="screen-add">
+  <div class="meteors-bg"></div>
+
+  <div class="add-header">
+    <button class="back-btn" id="addBackBtn">←</button>
+    <div class="add-title" id="addDateLabel">今天</div>
+  </div>
+
+  <div class="add-body">
+    <div class="add-bubble">
+      <textarea class="add-textarea" id="addTextarea" placeholder="写点什么…" maxlength="500"></textarea>
+      <div class="char-count" id="charCount">0 / 500</div>
+    </div>
+
+    <div class="add-bubble">
+      <div class="img-upload-area" id="imgUploadArea">
+        <button class="img-add-btn" id="imgAddBtn">＋</button>
+        <input type="file" accept="image/*" multiple class="hidden-file" id="imgFileInput">
+      </div>
+    </div>
+  </div>
+
+  <div class="add-footer">
+    <button class="submit-btn" id="submitBtn">记下来</button>
+  </div>
+</div>
+
+<!-- Bottom sheet -->
+<div class="bottom-sheet-overlay" id="bottomSheetOverlay">
+  <div class="bottom-sheet" id="bottomSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-time" id="sheetTime"></div>
+    <div class="sheet-text" id="sheetText"></div>
+    <div class="sheet-images" id="sheetImages"></div>
+    <button class="sheet-delete-btn" id="sheetDeleteBtn">删除这条记录</button>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
+  import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, where }
+    from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
+
+  /* ── Firebase config ── */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNq2USnHJOyM3RbouCq7b1n2VZ8GxLSSU",
+    authDomain: "mytimeline-7c3b7.firebaseapp.com",
+    projectId: "mytimeline-7c3b7",
+    messagingSenderId: "148289157568",
+    appId: "1:148289157568:web:981aa19c4b252d1f91f025",
+  };
+
+  /* ── Cloudinary config ── */
+  const CLOUDINARY_CLOUD = 'drmtcucy5';
+  const CLOUDINARY_PRESET = 'diaryupload';
+
+  let db, firebaseReady = false;
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    firebaseReady = true;
+  } catch(e) {
+    console.warn('Firebase not configured, using local storage mode.');
+  }
+
+  /* ────────────────────────────────────────────
+     LOCAL STORAGE FALLBACK (demo mode)
+  ──────────────────────────────────────────── */
+  const LOCAL_KEY = 'diary_entries_v1';
+  function localLoad() {
+    try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch { return []; }
+  }
+  function localSave(entries) {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(entries));
+  }
+
+  /* ────────────────────────────────────────────
+     STATE
+  ──────────────────────────────────────────── */
+  const today = new Date();
+  let currentYear = today.getFullYear();
+  let currentMonth = today.getMonth();
+  let selectedDate = null; // 'YYYY-MM-DD'
+  let addTargetDate = null;
+  let pendingImages = []; // { file, dataUrl }
+  let openEntryId = null; // for delete
+  let cachedEntries = {}; // date string → entries[]
+
+  const MONTHS_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  const WEEKDAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  /* ────────────────────────────────────────────
+     UTILS
+  ──────────────────────────────────────────── */
+  function dateKey(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+  function todayKey() { return dateKey(today.getFullYear(), today.getMonth(), today.getDate()); }
+  function fmtTime(ts) {
+    const d = ts instanceof Date ? ts : new Date(ts);
+    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+  function toast(msg, dur=2000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+  function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
+  function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+  /* ────────────────────────────────────────────
+     FLOATING PAPERS (calendar bg)
+  ──────────────────────────────────────────── */
+  function initPapers() {
+    const bg = document.getElementById('papersBg');
+    const sizes = [[160,200],[120,160],[200,140],[100,130],[180,120]];
+    sizes.forEach((s, i) => {
+      const p = document.createElement('div');
+      p.className = 'paper-card';
+      const x0 = 5 + i * 18;
+      const x1 = x0 + (Math.random() > 0.5 ? 6 : -6);
+      const ty = -(12 + Math.random() * 20);
+      const rot0 = -8 + Math.random() * 16;
+      const rot1 = -8 + Math.random() * 16;
+      Object.assign(p.style, {
+        width: s[0]+'px', height: s[1]+'px',
+        top: (5 + i * 14) + '%',
+        '--x0': x0 + '%', '--x1': x1 + '%',
+        left: x0 + '%',
+        '--dur': (6 + Math.random() * 5) + 's',
+        '--drift': (10 + Math.random() * 6) + 's',
+        '--ty': ty + 'px',
+        '--rot0': rot0 + 'deg', '--rot1': rot1 + 'deg',
+        animationDelay: (i * 0.7) + 's',
+      });
+      bg.appendChild(p);
+    });
+  }
+
+  /* ────────────────────────────────────────────
+     METEORS
+  ──────────────────────────────────────────── */
+  function initMeteors(container) {
+    for (let i = 0; i < 5; i++) {
+      const m = document.createElement('div');
+      m.className = 'meteor';
+      Object.assign(m.style, {
+        top: (10 + Math.random() * 50) + '%',
+        left: (Math.random() * 60) + '%',
+        '--dur': (2 + Math.random() * 2) + 's',
+        '--delay': (i * 3 + Math.random() * 4) + 's',
+        width: (80 + Math.random() * 100) + 'px',
+      });
+      container.appendChild(m);
+    }
+  }
+
+  /* ────────────────────────────────────────────
+     DATA LAYER (Firebase or localStorage)
+  ──────────────────────────────────────────── */
+  async function fetchEntriesForDate(dateStr) {
+    if (cachedEntries[dateStr]) return cachedEntries[dateStr];
+    let entries = [];
+    if (firebaseReady) {
+      try {
+        const q = query(collection(db, 'entries'), where('date', '==', dateStr), orderBy('ts', 'asc'));
+        const snap = await getDocs(q);
+        entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch(e) { console.warn(e); }
+    } else {
+      entries = localLoad().filter(e => e.date === dateStr).sort((a,b) => a.ts - b.ts);
+    }
+    cachedEntries[dateStr] = entries;
+    return entries;
+  }
+
+  async function fetchAllDates() {
+    // returns object: { 'YYYY-MM-DD': { hasText: bool, hasImg: bool } }
+    const result = {};
+    if (firebaseReady) {
+      try {
+        const snap = await getDocs(collection(db, 'entries'));
+        snap.docs.forEach(d => {
+          const data = d.data();
+          if (!result[data.date]) result[data.date] = { hasText: false, hasImg: false };
+          if (data.text) result[data.date].hasText = true;
+          if (data.images && data.images.length) result[data.date].hasImg = true;
+        });
+      } catch(e) {}
+    } else {
+      localLoad().forEach(e => {
+        if (!result[e.date]) result[e.date] = { hasText: false, hasImg: false };
+        if (e.text) result[e.date].hasText = true;
+        if (e.images && e.images.length) result[e.date].hasImg = true;
+      });
+    }
+    return result;
+  }
+
+  async function uploadToCloudinary(file) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+      method: 'POST', body: fd
+    });
+    if (!res.ok) throw new Error('Cloudinary upload failed');
+    const data = await res.json();
+    return data.secure_url;
+  }
+
+  async function saveEntry(dateStr, text, images) {
+    const ts = Date.now();
+    const entry = { date: dateStr, ts, text, images: [] };
+    if (firebaseReady) {
+      try {
+        const urls = [];
+        for (const img of images) {
+          const url = await uploadToCloudinary(img.file);
+          urls.push(url);
+        }
+        entry.images = urls;
+        const docRef = await addDoc(collection(db, 'entries'), { date: dateStr, ts, text, images: urls });
+        entry.id = docRef.id;
+      } catch(e) {
+        console.warn('Save failed, falling back to local:', e);
+        entry.id = 'local_' + ts;
+        entry.images = images.map(i => i.dataUrl);
+        const all = localLoad(); all.push(entry); localSave(all);
+      }
+    } else {
+      entry.id = 'local_' + ts;
+      entry.images = images.map(i => i.dataUrl);
+      const all = localLoad(); all.push(entry); localSave(all);
+    }
+    delete cachedEntries[dateStr];
+    return entry;
+  }
+
+  async function deleteEntry(entryId, dateStr) {
+    if (firebaseReady && !entryId.startsWith('local_')) {
+      try {
+        await deleteDoc(doc(db, 'entries', entryId));
+      } catch(e) { console.warn(e); }
+    } else {
+      const all = localLoad().filter(e => e.id !== entryId); localSave(all);
+    }
+    delete cachedEntries[dateStr];
+  }
+
+  /* ────────────────────────────────────────────
+     CALENDAR RENDER
+  ──────────────────────────────────────────── */
+  let allDateMeta = {};
+
+  async function renderCalendar() {
+    allDateMeta = await fetchAllDates();
+    renderCalendarGrid();
+  }
+
+  function renderCalendarGrid() {
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    document.getElementById('calYearLabel').textContent = currentYear + '年';
+    document.getElementById('calMonthLabel').textContent = MONTHS_ZH[currentMonth];
+
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+
+    const todayStr = todayKey();
+
+    // Prev month filler
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const cell = makeDay(currentYear, currentMonth - 1, prevDays - i, true);
+      grid.appendChild(cell);
+    }
+    // Current month
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = makeDay(currentYear, currentMonth, d, false);
+      grid.appendChild(cell);
+    }
+    // Next month filler
+    const total = firstDay + daysInMonth;
+    const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+    for (let d = 1; d <= rem; d++) {
+      const cell = makeDay(currentYear, currentMonth + 1, d, true);
+      grid.appendChild(cell);
+    }
+  }
+
+  function makeDay(year, month, day, otherMonth) {
+    const dKey = dateKey(year, month, day);
+    const isToday = dKey === todayKey();
+    const meta = allDateMeta[dKey] || {};
+    const isWeekend = [0,6].includes(new Date(year, month, day).getDay());
+    const size = 32 + Math.random() * 5; // slight random size
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' +
+      (isToday ? ' today' : '') +
+      (meta.hasText || meta.hasImg ? ' has-record' : '') +
+      (isWeekend ? ' weekend' : '') +
+      (otherMonth ? ' other-month' : '');
+
+    const circle = document.createElement('div');
+    circle.className = 'day-circle';
+    circle.textContent = day;
+    if (!isToday) circle.style.setProperty('--size', size + 'px');
+
+    const dots = document.createElement('div');
+    dots.className = 'day-dots';
+    if (meta.hasText) { const d = document.createElement('div'); d.className='day-dot text'; dots.appendChild(d); }
+    if (meta.hasImg) { const d = document.createElement('div'); d.className='day-dot img'; dots.appendChild(d); }
+
+    cell.appendChild(circle);
+    cell.appendChild(dots);
+
+    if (!otherMonth) {
+      cell.addEventListener('click', () => openDetail(dKey));
+    }
+    return cell;
+  }
+
+  /* ────────────────────────────────────────────
+     NAVIGATION
+  ──────────────────────────────────────────── */
+  function showScreen(id, direction='right') {
+    document.querySelectorAll('.screen').forEach(s => {
+      if (s.id === id) { s.classList.remove('hidden','slide-left'); }
+      else if (!s.classList.contains('hidden')) {
+        s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
+      }
+    });
+  }
+
+  async function openDetail(dateStr) {
+    selectedDate = dateStr;
+    const parts = dateStr.split('-');
+    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    document.getElementById('detailDateBig').textContent =
+      `${dt.getMonth()+1}月${dt.getDate()}日`;
+    document.getElementById('detailDateSub').textContent =
+      `${dt.getFullYear()} · ${WEEKDAYS_ZH[dt.getDay()]}`;
+    showScreen('screen-detail');
+    await renderTimeline(dateStr);
+  }
+
+  async function renderTimeline(dateStr) {
+    const scroll = document.getElementById('timelineScroll');
+    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
+
+    const entries = await fetchEntriesForDate(dateStr);
+    scroll.innerHTML = '';
+
+    if (!entries.length) {
+      scroll.innerHTML = `<div class="timeline-empty">
+        <div class="empty-icon">✦</div>
+        <div>这天还没有记录</div>
+        <div style="font-size:12px;opacity:0.6">点击 + 写下今天的心情</div>
+      </div>`;
+      return;
+    }
+
+    entries.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.className = 'timeline-entry';
+      row.style.animationDelay = (i * 0.08) + 's';
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'entry-time';
+      timeEl.textContent = fmtTime(entry.ts);
+
+      const bubble = document.createElement('div');
+      bubble.className = 'entry-bubble';
+      const dur = 3.5 + Math.random() * 2;
+      const offset = -(2 + Math.random() * 6);
+      bubble.style.setProperty('--float-dur', dur + 's');
+      bubble.style.setProperty('--float-offset', offset + 'px');
+      bubble.style.animationDelay = (i * 0.4) + 's';
+
+      if (entry.text) {
+        const preview = entry.text.length > 10 ? entry.text.slice(0,10) + '…' : entry.text;
+        const textEl = document.createElement('div');
+        textEl.className = 'entry-text-preview';
+        textEl.textContent = preview;
+        bubble.appendChild(textEl);
+      }
+      if (entry.images && entry.images.length) {
+        const row2 = document.createElement('div');
+        row2.className = 'entry-images-row';
+        entry.images.slice(0,3).forEach(url => {
+          const img = document.createElement('img');
+          img.className = 'entry-thumb';
+          img.src = url; img.alt = '';
+          img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
+          row2.appendChild(img);
+        });
+        bubble.appendChild(row2);
+        if (entry.images.length > 3) {
+          const cnt = document.createElement('div');
+          cnt.className = 'entry-img-count';
+          cnt.textContent = `共 ${entry.images.length} 张图片`;
+          bubble.appendChild(cnt);
+        }
+      }
+      bubble.addEventListener('click', () => openBottomSheet(entry, dateStr));
+
+      row.appendChild(timeEl);
+      row.appendChild(bubble);
+      scroll.appendChild(row);
+    });
+  }
+
+  /* ────────────────────────────────────────────
+     BOTTOM SHEET
+  ──────────────────────────────────────────── */
+  function openBottomSheet(entry, dateStr) {
+    openEntryId = { id: entry.id, date: dateStr };
+    document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
+    document.getElementById('sheetText').textContent = entry.text || '';
+    const imgs = document.getElementById('sheetImages');
+    imgs.innerHTML = '';
+    (entry.images || []).forEach(url => {
+      const img = document.createElement('img');
+      img.src = url; img.alt = '';
+      img.className = 'sheet-image';
+      img.addEventListener('click', () => openLightbox(url));
+      imgs.appendChild(img);
+    });
+    document.getElementById('bottomSheetOverlay').classList.add('open');
+  }
+
+  document.getElementById('bottomSheetOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet();
+  });
+  function closeBottomSheet() {
+    document.getElementById('bottomSheetOverlay').classList.remove('open');
+  }
+
+  document.getElementById('sheetDeleteBtn').addEventListener('click', async () => {
+    if (!openEntryId) return;
+    const { id, date } = openEntryId;
+    closeBottomSheet();
+    showLoading();
+    await deleteEntry(id, date);
+    hideLoading();
+    toast('已删除');
+    await renderTimeline(date);
+    // Refresh dots
+    allDateMeta = await fetchAllDates();
+    renderCalendarGrid();
+  });
+
+  /* ────────────────────────────────────────────
+     LIGHTBOX
+  ──────────────────────────────────────────── */
+  function openLightbox(url) {
+    document.getElementById('lightboxImg').src = url;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  document.getElementById('lightbox').addEventListener('click', () => {
+    document.getElementById('lightbox').classList.remove('open');
+  });
+
+  /* ────────────────────────────────────────────
+     ADD RECORD
+  ──────────────────────────────────────────── */
+  function openAdd(dateStr) {
+    addTargetDate = dateStr;
+    pendingImages = [];
+    document.getElementById('addTextarea').value = '';
+    document.getElementById('charCount').textContent = '0 / 500';
+    document.getElementById('charCount').classList.remove('warn');
+    rebuildImageArea();
+    const parts = dateStr.split('-');
+    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+    document.getElementById('addDateLabel').textContent =
+      dateStr === todayKey() ? '今天' : `${dt.getMonth()+1}月${dt.getDate()}日`;
+    showScreen('screen-add');
+    setTimeout(() => document.getElementById('addTextarea').focus(), 400);
+  }
+
+  document.getElementById('addTextarea').addEventListener('input', function() {
+    const len = this.value.length;
+    const countEl = document.getElementById('charCount');
+    countEl.textContent = len + ' / 500';
+    countEl.classList.toggle('warn', len > 400);
+  });
+
+  function rebuildImageArea() {
+    const area = document.getElementById('imgUploadArea');
+    area.innerHTML = '';
+    pendingImages.forEach((img, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'img-preview-wrap';
+      const el = document.createElement('img');
+      el.className = 'img-preview'; el.src = img.dataUrl;
+      const rm = document.createElement('div');
+      rm.className = 'img-remove'; rm.textContent = '×';
+      rm.addEventListener('click', () => { pendingImages.splice(i,1); rebuildImageArea(); });
+      wrap.appendChild(el); wrap.appendChild(rm);
+      area.appendChild(wrap);
+    });
+    if (pendingImages.length < 6) {
+      const btn = document.createElement('button');
+      btn.className = 'img-add-btn'; btn.textContent = '＋';
+      btn.addEventListener('click', () => document.getElementById('imgFileInput').click());
+      area.appendChild(btn);
+    }
+    const input = document.createElement('input');
+    input.type='file'; input.accept='image/*'; input.multiple=true;
+    input.className='hidden-file'; input.id='imgFileInput';
+    input.addEventListener('change', handleImageSelect);
+    area.appendChild(input);
+  }
+
+  async function handleImageSelect(e) {
+    const files = Array.from(e.target.files);
+    const remaining = 6 - pendingImages.length;
+    for (const file of files.slice(0, remaining)) {
+      const dataUrl = await readFileAsDataUrl(file);
+      pendingImages.push({ file, dataUrl });
+    }
+    rebuildImageArea();
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+
+  document.getElementById('submitBtn').addEventListener('click', async () => {
+    const text = document.getElementById('addTextarea').value.trim();
+    if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true; showLoading();
+    try {
+      await saveEntry(addTargetDate, text, pendingImages);
+      allDateMeta = await fetchAllDates();
+      renderCalendarGrid();
+      toast('记下来了 ✦');
+      // Return to timeline or calendar
+      if (selectedDate === addTargetDate) {
+        await renderTimeline(addTargetDate);
+        showScreen('screen-detail', 'left');
+      } else {
+        showScreen('screen-calendar', 'left');
+      }
+    } catch(e) {
+      toast('保存失败，请重试');
+      console.error(e);
+    }
+    hideLoading();
+    btn.disabled = false;
+  });
+
+  /* ────────────────────────────────────────────
+     BUTTON WIRING
+  ──────────────────────────────────────────── */
+  document.getElementById('fabAdd').addEventListener('click', () => openAdd(todayKey()));
+  document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
+  document.getElementById('addBackBtn').addEventListener('click', () => {
+    if (selectedDate) showScreen('screen-detail', 'left');
+    else showScreen('screen-calendar', 'left');
+  });
+  document.getElementById('backBtn').addEventListener('click', () => {
+    showScreen('screen-calendar', 'left');
+  });
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    currentMonth--; if (currentMonth < 0) { currentMonth=11; currentYear--; }
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    currentMonth++; if (currentMonth > 11) { currentMonth=0; currentYear++; }
+    renderCalendar();
+  });
+
+  /* ────────────────────────────────────────────
+     INIT
+  ──────────────────────────────────────────── */
+  initPapers();
+  document.querySelectorAll('.meteors-bg').forEach(initMeteors);
+  await renderCalendar();
+</script>
+</body>
+</html>
