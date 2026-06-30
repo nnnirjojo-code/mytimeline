@@ -26,6 +26,12 @@
       --bubble: rgba(255,255,255,0.06);
       --bubble-border: rgba(255,255,255,0.10);
       --font: 'Noto Serif SC', serif;
+      --tag-bg: rgba(216,90,48,0.18);
+      --tag-fg: #f0997b;
+      --tag-border: rgba(216,90,48,0.35);
+      --tag-bg-muted: rgba(255,255,255,0.04);
+      --tag-fg-muted: #a8a39b;
+      --tag-border-muted: rgba(255,255,255,0.1);
     }
 
     html, body {
@@ -164,6 +170,82 @@
       transition: transform 0.2s, background 0.2s;
     }
     .fab:active { transform: scale(0.92); background: var(--brown-dark); }
+
+    /* Tag cloud entry button (calendar) */
+    .tag-entry-btn {
+      position: fixed; bottom: 32px; left: 24px; z-index: 10;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--paper); font-size: 18px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .tag-entry-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
+
+    /* Tag pills */
+    .entry-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .entry-tag-pill {
+      background: var(--tag-bg); color: var(--tag-fg);
+      border-radius: 999px; padding: 2px 10px;
+      font-size: 11px; font-weight: 400; cursor: pointer;
+    }
+    .sheet-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+
+    /* Add screen: tag input */
+    .tag-selected-row, .tag-suggest-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag-suggest-label { font-size: 11px; color: rgba(255,255,255,0.3); margin: 10px 0 8px; }
+    .tag-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--tag-bg); color: var(--tag-fg);
+      border: 1px solid var(--tag-border);
+      border-radius: 999px; padding: 5px 12px;
+      font-size: 13px; font-family: var(--font); cursor: pointer;
+    }
+    .tag-chip .tag-remove { font-size: 12px; opacity: 0.7; }
+    .tag-chip-muted {
+      background: var(--tag-bg-muted); color: var(--tag-fg-muted);
+      border: 1px solid var(--tag-border-muted);
+      border-radius: 999px; padding: 5px 12px;
+      font-size: 13px; font-family: var(--font); cursor: pointer;
+    }
+    .tag-input {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
+      border-radius: 10px; padding: 8px 12px; font-size: 13px;
+      font-family: var(--font); outline: none;
+    }
+    .tag-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    /* Tag cloud screen */
+    #screen-tagcloud { background: var(--bg-detail); display: flex; flex-direction: column; }
+    .tagcloud-scroll {
+      position: relative; z-index: 2; flex: 1; overflow-y: auto;
+      padding: 8px 24px 60px; -webkit-overflow-scrolling: touch;
+    }
+    .tagcloud-wrap { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; padding-top: 20px; }
+    .tagcloud-item {
+      color: var(--tag-fg); cursor: pointer; font-weight: 400;
+      transition: opacity 0.2s;
+    }
+    .tagcloud-item:active { opacity: 0.6; }
+    .tagcloud-empty {
+      color: rgba(255,255,255,0.2); font-size: 14px; font-weight: 300;
+      text-align: center; padding-top: 80px; line-height: 2.2;
+    }
+
+    /* Tag timeline screen (reuses timeline styles) */
+    #screen-tagtimeline { background: var(--bg-detail); display: flex; flex-direction: column; }
+    .tagtimeline-scroll {
+      position: relative; z-index: 2; flex: 1; overflow-y: auto;
+      padding: 8px 20px 60px; -webkit-overflow-scrolling: touch;
+    }
+    .tagtimeline-scroll::-webkit-scrollbar { display: none; }
+    .entry-date-badge {
+      flex-shrink: 0; width: 54px; font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,0.3); letter-spacing: 0.02em;
+      padding-top: 10px; text-align: right; line-height: 1.5;
+    }
 
     /* ─────────────── DETAIL / TIMELINE SCREEN ─────────────── */
     #screen-detail {
@@ -454,6 +536,7 @@
   <div class="cal-grid" id="calGrid"></div>
 
   <button class="fab" id="fabAdd" title="添加记录">+</button>
+  <button class="tag-entry-btn" id="tagEntryBtn" title="标签">#</button>
 </div>
 
 <!-- ════════════════ DETAIL SCREEN ════════════════ -->
@@ -493,11 +576,44 @@
         <input type="file" accept="image/*" multiple class="hidden-file" id="imgFileInput">
       </div>
     </div>
+
+    <div class="add-bubble">
+      <div class="tag-selected-row" id="tagSelectedRow"></div>
+      <input class="tag-input" id="tagInput" placeholder="输入新标签，按回车确认" maxlength="20">
+      <div class="tag-suggest-label" id="tagSuggestLabel" style="display:none;">常用标签</div>
+      <div class="tag-suggest-row" id="tagSuggestRow"></div>
+    </div>
   </div>
 
   <div class="add-footer">
     <button class="submit-btn" id="submitBtn">记下来</button>
   </div>
+</div>
+
+<!-- ════════════════ TAG CLOUD SCREEN ════════════════ -->
+<div class="screen hidden" id="screen-tagcloud">
+  <div class="meteors-bg"></div>
+  <div class="detail-header">
+    <button class="back-btn" id="tagCloudBackBtn">←</button>
+    <div class="detail-date-info">
+      <div class="detail-date-big">标签</div>
+      <div class="detail-date-sub">点击查看对应时间线</div>
+    </div>
+  </div>
+  <div class="tagcloud-scroll" id="tagCloudScroll"></div>
+</div>
+
+<!-- ════════════════ TAG TIMELINE SCREEN ════════════════ -->
+<div class="screen hidden" id="screen-tagtimeline">
+  <div class="meteors-bg" id="tagTimelineMeteorsBg"></div>
+  <div class="detail-header">
+    <button class="back-btn" id="tagTimelineBackBtn">←</button>
+    <div class="detail-date-info">
+      <div class="detail-date-big" id="tagTimelineTitle"></div>
+      <div class="detail-date-sub" id="tagTimelineSub"></div>
+    </div>
+  </div>
+  <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
 </div>
 
 <!-- Bottom sheet -->
@@ -506,6 +622,7 @@
     <div class="sheet-handle"></div>
     <div class="sheet-time" id="sheetTime"></div>
     <div class="sheet-text" id="sheetText"></div>
+    <div class="sheet-tags-row" id="sheetTagsRow"></div>
     <div class="sheet-images" id="sheetImages"></div>
     <button class="sheet-delete-btn" id="sheetDeleteBtn">删除这条记录</button>
   </div>
@@ -574,6 +691,8 @@
   let pendingImages = []; // { file, dataUrl }
   let openEntryId = null; // for delete
   let cachedEntries = {}; // date string → entries[]
+  let pendingTags = []; // tags for current add-record session
+  let allTagsCache = null; // all distinct tags across entries, cached
 
   const MONTHS_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const WEEKDAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
@@ -686,6 +805,37 @@
     return result;
   }
 
+  async function fetchAllTags() {
+    // returns [{ tag, count, lastTs, entries: [{...entry, date}] }] sorted by count desc
+    if (allTagsCache) return allTagsCache;
+    const byTag = {};
+    function add(entry, dateStr) {
+      (entry.tags || []).forEach(tag => {
+        if (!byTag[tag]) byTag[tag] = { tag, count: 0, lastTs: 0, entries: [] };
+        byTag[tag].count++;
+        byTag[tag].lastTs = Math.max(byTag[tag].lastTs, entry.ts);
+        byTag[tag].entries.push({ ...entry, date: dateStr });
+      });
+    }
+    if (firebaseReady) {
+      try {
+        const snap = await getDocs(collection(db, 'entries'));
+        snap.docs.forEach(d => add({ id: d.id, ...d.data() }, d.data().date));
+      } catch(e) { console.warn(e); }
+    } else {
+      localLoad().forEach(e => add(e, e.date));
+    }
+    Object.values(byTag).forEach(t => t.entries.sort((a,b) => b.ts - a.ts));
+    allTagsCache = Object.values(byTag).sort((a,b) => b.count - a.count);
+    return allTagsCache;
+  }
+
+  async function fetchEntriesByTag(tag) {
+    const all = await fetchAllTags();
+    const found = all.find(t => t.tag === tag);
+    return found ? found.entries : [];
+  }
+
   async function uploadToCloudinary(file) {
     const fd = new FormData();
     fd.append('file', file);
@@ -698,9 +848,9 @@
     return data.secure_url;
   }
 
-  async function saveEntry(dateStr, text, images) {
+  async function saveEntry(dateStr, text, images, tags) {
     const ts = Date.now();
-    const entry = { date: dateStr, ts, text, images: [] };
+    const entry = { date: dateStr, ts, text, images: [], tags: tags || [] };
     if (firebaseReady) {
       try {
         const urls = [];
@@ -709,7 +859,7 @@
           urls.push(url);
         }
         entry.images = urls;
-        const docRef = await addDoc(collection(db, 'entries'), { date: dateStr, ts, text, images: urls });
+        const docRef = await addDoc(collection(db, 'entries'), { date: dateStr, ts, text, images: urls, tags: tags || [] });
         entry.id = docRef.id;
       } catch(e) {
         console.warn('Save failed, falling back to local:', e);
@@ -723,6 +873,7 @@
       const all = localLoad(); all.push(entry); localSave(all);
     }
     delete cachedEntries[dateStr];
+    allTagsCache = null;
     return entry;
   }
 
@@ -735,6 +886,7 @@
       const all = localLoad().filter(e => e.id !== entryId); localSave(all);
     }
     delete cachedEntries[dateStr];
+    allTagsCache = null;
   }
 
   /* ────────────────────────────────────────────
@@ -836,6 +988,114 @@
     await renderTimeline(dateStr);
   }
 
+  /* ────────────────────────────────────────────
+     TAG CLOUD
+  ──────────────────────────────────────────── */
+  async function openTagCloud() {
+    showScreen('screen-tagcloud');
+    const scroll = document.getElementById('tagCloudScroll');
+    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
+    const tags = await fetchAllTags();
+    scroll.innerHTML = '';
+    if (!tags.length) {
+      scroll.innerHTML = `<div class="tagcloud-empty">
+        <div>还没有标签</div>
+        <div style="font-size:12px;opacity:0.6">添加记录时可以打上标签</div>
+      </div>`;
+      return;
+    }
+    const maxCount = Math.max(...tags.map(t => t.count));
+    const wrap = document.createElement('div');
+    wrap.className = 'tagcloud-wrap';
+    tags.forEach(t => {
+      const ratio = maxCount > 1 ? t.count / maxCount : 1;
+      const fontSize = 13 + ratio * 13; // 13px ~ 26px
+      const el = document.createElement('span');
+      el.className = 'tagcloud-item';
+      el.style.fontSize = fontSize + 'px';
+      el.textContent = t.tag;
+      el.addEventListener('click', () => openTagTimeline(t.tag));
+      wrap.appendChild(el);
+    });
+    scroll.appendChild(wrap);
+  }
+
+  /* ────────────────────────────────────────────
+     TAG TIMELINE
+  ──────────────────────────────────────────── */
+  async function openTagTimeline(tag) {
+    showScreen('screen-tagtimeline');
+    document.getElementById('tagTimelineTitle').textContent = `# ${tag}`;
+    const scroll = document.getElementById('tagTimelineScroll');
+    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
+
+    const entries = await fetchEntriesByTag(tag);
+    document.getElementById('tagTimelineSub').textContent = `共 ${entries.length} 条记录`;
+    scroll.innerHTML = '';
+
+    if (!entries.length) {
+      scroll.innerHTML = `<div class="timeline-empty">
+        <div class="empty-icon">✦</div>
+        <div>这个标签下还没有记录</div>
+      </div>`;
+      return;
+    }
+
+    entries.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.className = 'timeline-entry';
+      row.style.animationDelay = (i * 0.08) + 's';
+
+      const parts = entry.date.split('-');
+      const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+      const dateEl = document.createElement('div');
+      dateEl.className = 'entry-date-badge';
+      dateEl.innerHTML = `${dt.getMonth()+1}月${dt.getDate()}日<br>${fmtTime(entry.ts)}`;
+
+      const bubble = document.createElement('div');
+      bubble.className = 'entry-bubble';
+      const dur = 3.5 + Math.random() * 2;
+      const offset = -(2 + Math.random() * 6);
+      bubble.style.setProperty('--float-dur', dur + 's');
+      bubble.style.setProperty('--float-offset', offset + 'px');
+      bubble.style.animationDelay = (i * 0.4) + 's';
+
+      if (entry.text) {
+        const preview = entry.text.length > 10 ? entry.text.slice(0,10) + '…' : entry.text;
+        const textEl = document.createElement('div');
+        textEl.className = 'entry-text-preview';
+        textEl.textContent = preview;
+        bubble.appendChild(textEl);
+      }
+      if (entry.images && entry.images.length) {
+        const row2 = document.createElement('div');
+        row2.className = 'entry-images-row';
+        entry.images.slice(0,3).forEach(url => {
+          const img = document.createElement('img');
+          img.className = 'entry-thumb';
+          img.src = url; img.alt = '';
+          img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
+          row2.appendChild(img);
+        });
+        bubble.appendChild(row2);
+        if (entry.images.length > 3) {
+          const cnt = document.createElement('div');
+          cnt.className = 'entry-img-count';
+          cnt.textContent = `共 ${entry.images.length} 张图片`;
+          bubble.appendChild(cnt);
+        }
+      }
+      if (entry.tags && entry.tags.length) {
+        bubble.appendChild(makeTagPillsRow(entry.tags));
+      }
+      bubble.addEventListener('click', () => openBottomSheet(entry, entry.date));
+
+      row.appendChild(dateEl);
+      row.appendChild(bubble);
+      scroll.appendChild(row);
+    });
+  }
+
   async function renderTimeline(dateStr) {
     const scroll = document.getElementById('timelineScroll');
     scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
@@ -894,6 +1154,9 @@
           bubble.appendChild(cnt);
         }
       }
+      if (entry.tags && entry.tags.length) {
+        bubble.appendChild(makeTagPillsRow(entry.tags));
+      }
       bubble.addEventListener('click', () => openBottomSheet(entry, dateStr));
 
       row.appendChild(timeEl);
@@ -903,12 +1166,40 @@
   }
 
   /* ────────────────────────────────────────────
+     TAG PILLS HELPER
+  ──────────────────────────────────────────── */
+  function makeTagPillsRow(tags, onClickOverride) {
+    const row = document.createElement('div');
+    row.className = 'entry-tags-row';
+    tags.forEach(tag => {
+      const pill = document.createElement('span');
+      pill.className = 'entry-tag-pill';
+      pill.textContent = tag;
+      pill.addEventListener('click', e => {
+        e.stopPropagation();
+        if (onClickOverride) onClickOverride(tag);
+        else openTagTimeline(tag);
+      });
+      row.appendChild(pill);
+    });
+    return row;
+  }
+
+  /* ────────────────────────────────────────────
      BOTTOM SHEET
   ──────────────────────────────────────────── */
   function openBottomSheet(entry, dateStr) {
     openEntryId = { id: entry.id, date: dateStr };
     document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
     document.getElementById('sheetText').textContent = entry.text || '';
+    const tagsRow = document.getElementById('sheetTagsRow');
+    tagsRow.innerHTML = '';
+    if (entry.tags && entry.tags.length) {
+      tagsRow.appendChild(makeTagPillsRow(entry.tags, tag => {
+        closeBottomSheet();
+        openTagTimeline(tag);
+      }));
+    }
     const imgs = document.getElementById('sheetImages');
     imgs.innerHTML = '';
     (entry.images || []).forEach(url => {
@@ -956,13 +1247,16 @@
   /* ────────────────────────────────────────────
      ADD RECORD
   ──────────────────────────────────────────── */
-  function openAdd(dateStr) {
+  async function openAdd(dateStr) {
     addTargetDate = dateStr;
     pendingImages = [];
+    pendingTags = [];
     document.getElementById('addTextarea').value = '';
     document.getElementById('charCount').textContent = '0 / 500';
     document.getElementById('charCount').classList.remove('warn');
+    document.getElementById('tagInput').value = '';
     rebuildImageArea();
+    rebuildTagArea();
     const parts = dateStr.split('-');
     const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
     document.getElementById('addDateLabel').textContent =
@@ -1024,6 +1318,70 @@
     });
   }
 
+  /* ────────────────────────────────────────────
+     TAG INPUT (add screen)
+  ──────────────────────────────────────────── */
+  function addPendingTag(raw) {
+    const tag = raw.trim().slice(0, 20);
+    if (!tag) return;
+    if (pendingTags.includes(tag)) return;
+    pendingTags.push(tag);
+    rebuildTagArea();
+  }
+
+  async function rebuildTagArea() {
+    const selectedRow = document.getElementById('tagSelectedRow');
+    selectedRow.innerHTML = '';
+    pendingTags.forEach(tag => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `<span>${tag}</span><span class="tag-remove">✕</span>`;
+      chip.querySelector('.tag-remove').addEventListener('click', () => {
+        pendingTags = pendingTags.filter(t => t !== tag);
+        rebuildTagArea();
+      });
+      selectedRow.appendChild(chip);
+    });
+
+    // Suggested (frequently used) tags, excluding already-selected ones
+    const suggestRow = document.getElementById('tagSuggestRow');
+    const suggestLabel = document.getElementById('tagSuggestLabel');
+    suggestRow.innerHTML = '';
+    try {
+      const allTags = await fetchAllTags();
+      const suggestions = allTags
+        .map(t => t.tag)
+        .filter(t => !pendingTags.includes(t))
+        .slice(0, 8);
+      if (suggestions.length) {
+        suggestLabel.style.display = 'block';
+        suggestions.forEach(tag => {
+          const chip = document.createElement('span');
+          chip.className = 'tag-chip-muted';
+          chip.textContent = tag;
+          chip.addEventListener('click', () => addPendingTag(tag));
+          suggestRow.appendChild(chip);
+        });
+      } else {
+        suggestLabel.style.display = 'none';
+      }
+    } catch(e) { /* ignore */ }
+  }
+
+  document.getElementById('tagInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',' || e.key === '，') {
+      e.preventDefault();
+      addPendingTag(e.target.value);
+      e.target.value = '';
+    }
+  });
+  document.getElementById('tagInput').addEventListener('blur', e => {
+    if (e.target.value.trim()) {
+      addPendingTag(e.target.value);
+      e.target.value = '';
+    }
+  });
+
   document.getElementById('submitBtn').addEventListener('click', async () => {
     const text = document.getElementById('addTextarea').value.trim();
     if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
@@ -1031,7 +1389,7 @@
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; showLoading();
     try {
-      await saveEntry(addTargetDate, text, pendingImages);
+      await saveEntry(addTargetDate, text, pendingImages, pendingTags);
       allDateMeta = await fetchAllDates();
       renderCalendarGrid();
       toast('记下来了 ✦');
@@ -1061,6 +1419,13 @@
   });
   document.getElementById('backBtn').addEventListener('click', () => {
     showScreen('screen-calendar', 'left');
+  });
+  document.getElementById('tagEntryBtn').addEventListener('click', () => openTagCloud());
+  document.getElementById('tagCloudBackBtn').addEventListener('click', () => {
+    showScreen('screen-calendar', 'left');
+  });
+  document.getElementById('tagTimelineBackBtn').addEventListener('click', () => {
+    showScreen('screen-tagcloud', 'left');
   });
   document.getElementById('prevMonth').addEventListener('click', () => {
     currentMonth--; if (currentMonth < 0) { currentMonth=11; currentYear--; }
