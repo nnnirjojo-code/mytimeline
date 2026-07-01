@@ -133,11 +133,6 @@
     .lock-box button:active {
       transform: scale(0.97);
     }
-    .lock-box .hint {
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
 
     /* ===== 鼠标光晕 ===== */
     #glow {
@@ -1485,7 +1480,6 @@
       <input type="password" id="passwordInput" placeholder="· · · · · ·" maxlength="20" autofocus />
       <div class="error" id="lockError"></div>
       <button id="unlockBtn">解锁</button>
-      <div class="hint">默认密码：<strong>123456</strong>（可在代码中修改）</div>
     </div>
   </div>
 
@@ -1639,7 +1633,7 @@
     // ============================================================
     //  密码管理
     // ============================================================
-    const CORRECT_PASSWORD = '123456'; // ← 在这里修改密码
+    const CORRECT_PASSWORD = 'jojotalkie'; // ← 密码已修改
 
     function checkPassword(input) {
       return input === CORRECT_PASSWORD;
@@ -1879,7 +1873,6 @@
         } else {
           allEntries = localLoad();
         }
-        // 按时间排序
         allEntries.sort((a, b) => a.ts - b.ts);
 
         const json = JSON.stringify(allEntries, null, 2);
@@ -1903,19 +1896,15 @@
           if (!Array.isArray(entries) || entries.length === 0) {
             throw new Error('无效的数据格式');
           }
-
-          // 检查是否包含必要字段
           const first = entries[0];
           if (!first.date || !first.ts) {
             throw new Error('数据格式不完整');
           }
 
           if (firebaseReady) {
-            // 导入到 Firebase
             let imported = 0;
             for (const entry of entries) {
               try {
-                // 检查是否已存在 (通过id或内容去重)
                 const existing = await fetchEntriesForDate(entry.date);
                 const exists = existing.some(e => e.text === entry.text && Math.abs(e.ts - entry.ts) < 60000);
                 if (!exists) {
@@ -1932,7 +1921,6 @@
             }
             toast(`✅ 导入了 ${imported} 条新记录`);
           } else {
-            // 导入到本地
             const existing = localLoad();
             const newEntries = entries.filter(entry => {
               return !existing.some(e => e.text === entry.text && Math.abs(e.ts - entry.ts) < 60000);
@@ -1941,7 +1929,6 @@
             toast(`✅ 导入了 ${newEntries.length} 条新记录`);
           }
 
-          // 刷新缓存
           cachedEntries = {};
           allTagsCache = null;
           await renderCalendar();
@@ -2701,20 +2688,16 @@
       function unlockApp() {
         isUnlocked = true;
         document.getElementById('lockScreen').classList.add('hidden');
-        // 显示所有屏幕
         document.querySelectorAll('.screen').forEach(s => {
           s.classList.remove('hidden');
         });
-        // 只显示日历
         document.querySelectorAll('.screen').forEach(s => {
           if (s.id !== 'screen-calendar') {
             s.classList.add('hidden');
           }
         });
         toast('🔓 欢迎回来！');
-        // 初始化数据
         renderCalendar();
-        // 启用光晕
         document.body.style.cursor = 'none';
       }
 
@@ -2734,29 +2717,22 @@
         if (e.key === 'Enter') {
           document.getElementById('unlockBtn').click();
         }
-        // 清除错误提示
         if (e.target.value.length > 0) {
           document.getElementById('lockError').textContent = '';
         }
       });
 
-      // 自动聚焦
       setTimeout(() => {
         document.getElementById('passwordInput').focus();
       }, 300);
 
-      // ===== 导出/导入按钮 =====
+      // ===== 导出/导入 =====
       document.getElementById('exportBtn').addEventListener('click', exportData);
 
-      // 导入功能：通过点击导出按钮旁边的隐藏触发，或者长按导出按钮？
-      // 用隐藏的 input 实现导入
       const importInput = document.getElementById('importFileInput');
-      // 双击导出按钮触发导入
-      let exportClickCount = 0;
       document.getElementById('exportBtn').addEventListener('dblclick', () => {
         importInput.click();
       });
-      // 提示用户
       toast('💡 单击导出 | 双击导入', 3000);
 
       importInput.addEventListener('change', (e) => {
@@ -2841,7 +2817,6 @@
         }
       })();
 
-      // ===== 初始化完成 =====
       console.log('✅ 我的手账已加载，请输入密码');
     })();
   </script>
