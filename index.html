@@ -183,6 +183,19 @@
     }
     .tag-entry-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
 
+    /* Week view button */
+    .week-entry-btn {
+      position: fixed; bottom: 100px; left: 24px; z-index: 10;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--paper); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+      font-family: var(--font);
+    }
+    .week-entry-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
+
     /* Tag pills */
     .entry-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
     .entry-tag-pill {
@@ -245,6 +258,79 @@
       flex-shrink: 0; width: 54px; font-size: 11px; font-weight: 300;
       color: rgba(255,255,255,0.3); letter-spacing: 0.02em;
       padding-top: 10px; text-align: right; line-height: 1.5;
+    }
+
+    /* ─────────────── WEEK VIEW SCREEN ─────────────── */
+    #screen-week {
+      background: var(--bg-detail);
+      display: flex; flex-direction: column;
+    }
+    .week-scroll {
+      position: relative; z-index: 2;
+      flex: 1; overflow-y: auto; padding: 8px 16px 120px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .week-scroll::-webkit-scrollbar { display: none; }
+    .week-day-group {
+      margin-bottom: 24px;
+      animation: fadeIn 0.35s ease both;
+    }
+    .week-day-header {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 8px 0 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 12px;
+    }
+    .week-day-name {
+      font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.7);
+    }
+    .week-day-date {
+      font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.3);
+    }
+    .week-day-empty {
+      font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.15);
+      padding: 12px 0 4px;
+      font-style: italic;
+    }
+    .week-entry {
+      display: flex; gap: 14px; margin-bottom: 12px;
+      animation: fadeIn 0.3s ease both;
+    }
+    .week-entry-time {
+      flex-shrink: 0; width: 44px;
+      font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,0.25);
+      text-align: right; padding-top: 6px;
+    }
+    .week-entry-bubble {
+      flex: 1;
+      background: var(--bubble);
+      border: 1px solid var(--bubble-border);
+      border-radius: 14px 14px 14px 4px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .week-entry-bubble:active { background: rgba(255,255,255,0.08); }
+    .week-entry-text {
+      font-size: 14px; font-weight: 300; line-height: 1.6;
+      color: rgba(255,255,255,0.7);
+    }
+    .week-entry-images {
+      display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap;
+    }
+    .week-entry-thumb {
+      width: 52px; height: 52px; border-radius: 8px;
+      object-fit: cover; border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+    }
+    .week-entry-tags {
+      display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;
+    }
+    .week-entry-tag {
+      background: var(--tag-bg); color: var(--tag-fg);
+      border-radius: 999px; padding: 1px 8px;
+      font-size: 10px; font-weight: 400; cursor: pointer;
     }
 
     /* ─────────────── DETAIL / TIMELINE SCREEN ─────────────── */
@@ -537,6 +623,24 @@
 
   <button class="fab" id="fabAdd" title="添加记录">+</button>
   <button class="tag-entry-btn" id="tagEntryBtn" title="标签">#</button>
+  <button class="week-entry-btn" id="weekEntryBtn" title="周视图">📅</button>
+</div>
+
+<!-- ════════════════ WEEK VIEW SCREEN ════════════════ -->
+<div class="screen hidden" id="screen-week">
+  <div class="meteors-bg"></div>
+  <div class="detail-header">
+    <button class="back-btn" id="weekBackBtn">←</button>
+    <div class="detail-date-info">
+      <div class="detail-date-big" id="weekTitle">本周</div>
+      <div class="detail-date-sub" id="weekSub">第 0 周</div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="month-btn" id="weekPrev">‹</button>
+      <button class="month-btn" id="weekNext">›</button>
+    </div>
+  </div>
+  <div class="week-scroll" id="weekScroll"></div>
 </div>
 
 <!-- ════════════════ DETAIL SCREEN ════════════════ -->
@@ -694,8 +798,12 @@
   let pendingTags = []; // tags for current add-record session
   let allTagsCache = null; // all distinct tags across entries, cached
 
+  // Week view state
+  let weekOffset = 0; // 0 = current week, -1 = last week, 1 = next week
+
   const MONTHS_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const WEEKDAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
+  const WEEKDAYS_SHORT = ['日','一','二','三','四','五','六'];
 
   /* ────────────────────────────────────────────
      UTILS
@@ -936,7 +1044,7 @@
     const isToday = dKey === todayKey();
     const meta = allDateMeta[dKey] || {};
     const isWeekend = [0,6].includes(new Date(year, month, day).getDay());
-    const size = 32 + Math.random() * 5; // slight random size
+    const size = 32 + Math.random() * 5;
 
     const cell = document.createElement('div');
     cell.className = 'cal-day' +
@@ -965,6 +1073,163 @@
   }
 
   /* ────────────────────────────────────────────
+     WEEK VIEW
+  ──────────────────────────────────────────── */
+  function getWeekRange(offset) {
+    const now = new Date();
+    const dayOfWeek = now.getDay(); // 0=Sun
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const base = new Date(now);
+    base.setDate(now.getDate() + mondayOffset + offset * 7);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      dates.push(d);
+    }
+    return dates;
+  }
+
+  function getWeekNumber(d) {
+    const start = new Date(d.getFullYear(), 0, 1);
+    const diff = (d - start) / 86400000;
+    return Math.ceil((diff + start.getDay() + 1) / 7);
+  }
+
+  async function renderWeekView() {
+    const dates = getWeekRange(weekOffset);
+    const scroll = document.getElementById('weekScroll');
+    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;">加载中…</div>';
+
+    // Title
+    const first = dates[0];
+    const last = dates[6];
+    document.getElementById('weekTitle').textContent =
+      `${first.getMonth()+1}月${first.getDate()}日 - ${last.getMonth()+1}月${last.getDate()}日`;
+    const weekNum = getWeekNumber(first);
+    document.getElementById('weekSub').textContent = `第 ${weekNum} 周`;
+
+    // Fetch all entries for each day
+    const dayEntries = {};
+    let hasAny = false;
+    for (const d of dates) {
+      const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+      const entries = await fetchEntriesForDate(key);
+      dayEntries[key] = entries;
+      if (entries.length) hasAny = true;
+    }
+
+    scroll.innerHTML = '';
+
+    if (!hasAny) {
+      scroll.innerHTML = `<div class="timeline-empty">
+        <div class="empty-icon">📅</div>
+        <div>这周还没有记录</div>
+        <div style="font-size:12px;opacity:0.6">点击 + 记录每一天</div>
+      </div>`;
+      return;
+    }
+
+    const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+    for (let i = 0; i < dates.length; i++) {
+      const d = dates[i];
+      const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+      const entries = dayEntries[key] || [];
+      const isToday = key === todayKey();
+      const isWeekend = [0,6].includes(d.getDay());
+
+      const group = document.createElement('div');
+      group.className = 'week-day-group';
+      group.style.animationDelay = (i * 0.06) + 's';
+
+      const header = document.createElement('div');
+      header.className = 'week-day-header';
+      header.style.borderBottomColor = isToday ? 'rgba(124,92,72,0.4)' : 'rgba(255,255,255,0.06)';
+      header.innerHTML = `
+        <span class="week-day-name" style="${isToday ? 'color:#C4956A;' : ''}${isWeekend ? 'color:#C4956A;' : ''}">
+          ${dayNames[d.getDay()]}${isToday ? ' · 今天' : ''}
+        </span>
+        <span class="week-day-date">${d.getMonth()+1}月${d.getDate()}日</span>
+      `;
+      group.appendChild(header);
+
+      if (entries.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'week-day-empty';
+        empty.textContent = '— 没有记录 —';
+        group.appendChild(empty);
+      } else {
+        entries.forEach((entry, idx) => {
+          const row = document.createElement('div');
+          row.className = 'week-entry';
+          row.style.animationDelay = (idx * 0.05 + 0.1) + 's';
+
+          const time = document.createElement('div');
+          time.className = 'week-entry-time';
+          time.textContent = fmtTime(entry.ts);
+
+          const bubble = document.createElement('div');
+          bubble.className = 'week-entry-bubble';
+
+          if (entry.text) {
+            const textEl = document.createElement('div');
+            textEl.className = 'week-entry-text';
+            textEl.textContent = entry.text;
+            bubble.appendChild(textEl);
+          }
+
+          if (entry.images && entry.images.length) {
+            const imgRow = document.createElement('div');
+            imgRow.className = 'week-entry-images';
+            entry.images.slice(0, 4).forEach(url => {
+              const img = document.createElement('img');
+              img.className = 'week-entry-thumb';
+              img.src = url;
+              img.addEventListener('click', e => {
+                e.stopPropagation();
+                openLightbox(url);
+              });
+              imgRow.appendChild(img);
+            });
+            if (entry.images.length > 4) {
+              const more = document.createElement('span');
+              more.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.3);display:flex;align-items:center;';
+              more.textContent = `+${entry.images.length - 4}`;
+              imgRow.appendChild(more);
+            }
+            bubble.appendChild(imgRow);
+          }
+
+          if (entry.tags && entry.tags.length) {
+            const tagRow = document.createElement('div');
+            tagRow.className = 'week-entry-tags';
+            entry.tags.forEach(tag => {
+              const pill = document.createElement('span');
+              pill.className = 'week-entry-tag';
+              pill.textContent = tag;
+              pill.addEventListener('click', e => {
+                e.stopPropagation();
+                openTagTimeline(tag);
+              });
+              tagRow.appendChild(pill);
+            });
+            bubble.appendChild(tagRow);
+          }
+
+          bubble.addEventListener('click', () => openBottomSheet(entry, key));
+
+          row.appendChild(time);
+          row.appendChild(bubble);
+          group.appendChild(row);
+        });
+      }
+
+      scroll.appendChild(group);
+    }
+  }
+
+  /* ────────────────────────────────────────────
      NAVIGATION
   ──────────────────────────────────────────── */
   function showScreen(id, direction='right') {
@@ -988,6 +1253,12 @@
     await renderTimeline(dateStr);
   }
 
+  async function openWeekView() {
+    weekOffset = 0;
+    showScreen('screen-week');
+    await renderWeekView();
+  }
+
   /* ────────────────────────────────────────────
      TAG CLOUD
   ──────────────────────────────────────────── */
@@ -1009,7 +1280,7 @@
     wrap.className = 'tagcloud-wrap';
     tags.forEach(t => {
       const ratio = maxCount > 1 ? t.count / maxCount : 1;
-      const fontSize = 13 + ratio * 13; // 13px ~ 26px
+      const fontSize = 13 + ratio * 13;
       const el = document.createElement('span');
       el.className = 'tagcloud-item';
       el.style.fontSize = fontSize + 'px';
@@ -1343,7 +1614,6 @@
       selectedRow.appendChild(chip);
     });
 
-    // Suggested (frequently used) tags, excluding already-selected ones
     const suggestRow = document.getElementById('tagSuggestRow');
     const suggestLabel = document.getElementById('tagSuggestLabel');
     suggestRow.innerHTML = '';
@@ -1393,7 +1663,6 @@
       allDateMeta = await fetchAllDates();
       renderCalendarGrid();
       toast('记下来了 ✦');
-      // Return to timeline or calendar
       if (selectedDate === addTargetDate) {
         await renderTimeline(addTargetDate);
         showScreen('screen-detail', 'left');
@@ -1434,6 +1703,20 @@
   document.getElementById('nextMonth').addEventListener('click', () => {
     currentMonth++; if (currentMonth > 11) { currentMonth=0; currentYear++; }
     renderCalendar();
+  });
+
+  // Week view buttons
+  document.getElementById('weekEntryBtn').addEventListener('click', () => openWeekView());
+  document.getElementById('weekBackBtn').addEventListener('click', () => {
+    showScreen('screen-calendar', 'left');
+  });
+  document.getElementById('weekPrev').addEventListener('click', async () => {
+    weekOffset--;
+    await renderWeekView();
+  });
+  document.getElementById('weekNext').addEventListener('click', async () => {
+    weekOffset++;
+    await renderWeekView();
   });
 
   /* ────────────────────────────────────────────
