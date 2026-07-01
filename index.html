@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>我的手账 · 动态光晕</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <title>我的手账 · 私密版</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
   <style>
     /* ===== 全局重置 ===== */
@@ -39,7 +37,6 @@
       height: 100%;
       overflow: hidden;
       font-family: var(--font-sans);
-      /* ═══ 鲜艳暖色光晕 (增强版) ═══ */
       background:
         radial-gradient(ellipse at 20% 40%, rgba(232, 122, 93, 0.45) 0%, rgba(232, 122, 93, 0.10) 50%, transparent 70%),
         radial-gradient(ellipse at 75% 25%, rgba(255, 180, 100, 0.40) 0%, rgba(255, 180, 100, 0.08) 45%, transparent 65%),
@@ -53,7 +50,96 @@
       cursor: none;
     }
 
-    /* ═══ 鼠标跟随光晕 ═══ */
+    /* ===== 密码锁屏 ===== */
+    #lockScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background:
+        radial-gradient(ellipse at 30% 30%, rgba(232, 122, 93, 0.30) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 70%, rgba(255, 200, 150, 0.20) 0%, transparent 50%),
+        #F5F0EA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      backdrop-filter: blur(4px);
+    }
+    #lockScreen.hidden {
+      display: none;
+    }
+    .lock-box {
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 40px 32px 32px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.50);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    }
+    .lock-box .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .lock-box h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .lock-box p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .lock-box input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1.5px solid rgba(0, 0, 0, 0.06);
+      font-size: 16px;
+      font-family: var(--font-sans);
+      background: rgba(255, 255, 255, 0.60);
+      outline: none;
+      transition: border-color 0.2s;
+      text-align: center;
+      letter-spacing: 4px;
+    }
+    .lock-box input:focus {
+      border-color: var(--accent);
+    }
+    .lock-box .error {
+      color: #E87A5D;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 20px;
+    }
+    .lock-box button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(232, 122, 93, 0.25);
+    }
+    .lock-box button:active {
+      transform: scale(0.97);
+    }
+    .lock-box .hint {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ===== 鼠标光晕 ===== */
     #glow {
       position: fixed;
       pointer-events: none;
@@ -77,11 +163,6 @@
       width: 260px;
       height: 260px;
       opacity: 0.9;
-      background: radial-gradient(circle,
-          rgba(255, 255, 240, 0.85) 0%,
-          rgba(255, 230, 200, 0.50) 25%,
-          rgba(255, 210, 180, 0.20) 50%,
-          transparent 75%);
     }
     @media (hover: none) and (pointer: coarse) {
       #glow {
@@ -92,7 +173,6 @@
       }
     }
 
-    /* ═══ 静态装饰光晕 ═══ */
     #glow-static {
       position: fixed;
       pointer-events: none;
@@ -103,7 +183,7 @@
         radial-gradient(ellipse at 70% 30%, rgba(232, 122, 93, 0.08) 0%, transparent 45%);
     }
 
-    /* ===== 通用 ===== */
+    /* ===== 屏幕 ===== */
     .screen {
       position: fixed;
       inset: 0;
@@ -175,7 +255,7 @@
       transform: scale(0.95);
     }
 
-    /* ===== 日历主页 ===== */
+    /* ===== 日历 ===== */
     #screen-calendar {
       background: transparent;
       display: flex;
@@ -229,7 +309,6 @@
     .month-btn:active {
       transform: scale(0.92);
     }
-
     .cal-weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -245,7 +324,6 @@
     .cal-weekday.weekend {
       color: var(--accent);
     }
-
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -321,7 +399,6 @@
       opacity: 0.8;
     }
 
-    /* ===== 底部工具栏 ===== */
     .bottom-tools {
       position: fixed;
       bottom: 96px;
@@ -858,20 +935,6 @@
       color: var(--text-secondary);
       font-family: var(--font-sans);
     }
-    .day-entry.only-image {
-      padding: 0;
-      border-bottom: none;
-    }
-    .day-entry.only-image .day-entry-images {
-      margin-top: 0;
-    }
-    .day-entry.only-image .day-entry-images img {
-      width: 100%;
-      height: auto;
-      max-height: 200px;
-      border-radius: var(--radius-sm);
-      object-fit: cover;
-    }
 
     /* ===== 添加页 ===== */
     #screen-add {
@@ -1405,18 +1468,33 @@
         width: 56px;
         height: 56px;
       }
+      .lock-box {
+        padding: 28px 20px 24px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- 静态装饰光晕 -->
+  <!-- ===== 密码锁屏 ===== -->
+  <div id="lockScreen">
+    <div class="lock-box">
+      <div class="icon">🔒</div>
+      <h2>我的手账</h2>
+      <p>请输入密码以访问你的私密日记</p>
+      <input type="password" id="passwordInput" placeholder="· · · · · ·" maxlength="20" autofocus />
+      <div class="error" id="lockError"></div>
+      <button id="unlockBtn">解锁</button>
+      <div class="hint">默认密码：<strong>123456</strong>（可在代码中修改）</div>
+    </div>
+  </div>
+
+  <!-- ===== 光晕 ===== -->
   <div id="glow-static"></div>
-  <!-- 鼠标跟随光晕 -->
   <div id="glow"></div>
 
-  <!-- ═══ 日历主页 ═══ -->
-  <div class="screen" id="screen-calendar">
+  <!-- ===== 日历主页 ===== -->
+  <div class="screen hidden" id="screen-calendar">
     <div class="nav-bar">
       <span></span>
       <span class="nav-title">📖 我的手账</span>
@@ -1445,10 +1523,11 @@
     <div class="bottom-tools">
       <button class="tool-btn active" id="weekEntryBtn" title="周视图">📋</button>
       <button class="tool-btn" id="tagEntryBtn" title="标签">🏷️</button>
+      <button class="tool-btn" id="exportBtn" title="导出数据">💾</button>
     </div>
   </div>
 
-  <!-- ═══ 周视图 ═══ -->
+  <!-- ===== 周视图 ===== -->
   <div class="screen hidden" id="screen-week">
     <div class="nav-bar">
       <button class="nav-back" id="weekBackBtn">←</button>
@@ -1466,7 +1545,7 @@
     <div class="week-scroll" id="weekScroll"></div>
   </div>
 
-  <!-- ═══ 详情页 ═══ -->
+  <!-- ===== 详情页 ===== -->
   <div class="screen hidden" id="screen-detail">
     <div class="nav-bar">
       <button class="nav-back" id="backBtn">←</button>
@@ -1478,7 +1557,7 @@
     <div class="timeline-scroll" id="timelineScroll"></div>
   </div>
 
-  <!-- ═══ 添加页 ═══ -->
+  <!-- ===== 添加页 ===== -->
   <div class="screen hidden" id="screen-add">
     <div class="nav-bar">
       <button class="nav-back" id="addBackBtn">←</button>
@@ -1508,7 +1587,7 @@
     </div>
   </div>
 
-  <!-- ═══ 标签云 ═══ -->
+  <!-- ===== 标签云 ===== -->
   <div class="screen hidden" id="screen-tagcloud">
     <div class="nav-bar">
       <button class="nav-back" id="tagCloudBackBtn">←</button>
@@ -1518,7 +1597,7 @@
     <div class="tagcloud-scroll" id="tagCloudScroll"></div>
   </div>
 
-  <!-- ═══ 标签时间线 ═══ -->
+  <!-- ===== 标签时间线 ===== -->
   <div class="screen hidden" id="screen-tagtimeline">
     <div class="nav-bar">
       <button class="nav-back" id="tagTimelineBackBtn">←</button>
@@ -1528,7 +1607,10 @@
     <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
   </div>
 
-  <!-- Bottom sheet -->
+  <!-- ===== 隐藏的文件输入（用于导入） ===== -->
+  <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+
+  <!-- ===== Bottom Sheet ===== -->
   <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
     <div class="bottom-sheet" id="bottomSheet">
       <div class="sheet-handle"></div>
@@ -1540,26 +1622,35 @@
     </div>
   </div>
 
-  <!-- Lightbox -->
+  <!-- ===== Lightbox ===== -->
   <div class="lightbox" id="lightbox">
     <img id="lightboxImg" src="" alt="">
   </div>
 
-  <!-- Toast -->
+  <!-- ===== Toast ===== -->
   <div class="toast" id="toast"></div>
 
-  <!-- Loading -->
+  <!-- ===== Loading ===== -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
   </div>
 
   <script>
     // ============================================================
+    //  密码管理
+    // ============================================================
+    const CORRECT_PASSWORD = '123456'; // ← 在这里修改密码
+
+    function checkPassword(input) {
+      return input === CORRECT_PASSWORD;
+    }
+
+    // ============================================================
     //  完整功能脚本 (Firebase + 本地存储 + 所有交互)
     // ============================================================
 
-    // ---------- 导入 Firebase (动态) ----------
     (async function() {
+      // ---------- 导入 Firebase ----------
       const { initializeApp } = await import(
         'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js'
       );
@@ -1605,6 +1696,7 @@
       let cachedEntries = {};
       let allTagsCache = null;
       let weekOffset = 0;
+      let isUnlocked = false;
 
       const MONTHS_ZH = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
       const WEEKDAYS_ZH = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -1643,6 +1735,7 @@
         return result;
       }
 
+      // ---------- 数据读取 ----------
       async function fetchEntriesForDate(dateStr) {
         if (cachedEntries[dateStr]) return cachedEntries[dateStr];
         let entries = [];
@@ -1712,6 +1805,7 @@
         return found ? found.entries : [];
       }
 
+      // ---------- 数据写入 ----------
       async function uploadToCloudinary(file) {
         const fd = new FormData();
         fd.append('file', file);
@@ -1768,6 +1862,98 @@
         }
         delete cachedEntries[dateStr];
         allTagsCache = null;
+      }
+
+      // ---------- 导出数据 ----------
+      async function exportData() {
+        showLoading();
+        let allEntries = [];
+        if (firebaseReady) {
+          try {
+            const snap = await getDocs(collection(db, 'entries'));
+            allEntries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          } catch (e) {
+            console.warn(e);
+            allEntries = localLoad();
+          }
+        } else {
+          allEntries = localLoad();
+        }
+        // 按时间排序
+        allEntries.sort((a, b) => a.ts - b.ts);
+
+        const json = JSON.stringify(allEntries, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `diary_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        hideLoading();
+        toast('✅ 数据已导出！');
+      }
+
+      // ---------- 导入数据 ----------
+      async function importData(file) {
+        showLoading();
+        try {
+          const text = await file.text();
+          const entries = JSON.parse(text);
+          if (!Array.isArray(entries) || entries.length === 0) {
+            throw new Error('无效的数据格式');
+          }
+
+          // 检查是否包含必要字段
+          const first = entries[0];
+          if (!first.date || !first.ts) {
+            throw new Error('数据格式不完整');
+          }
+
+          if (firebaseReady) {
+            // 导入到 Firebase
+            let imported = 0;
+            for (const entry of entries) {
+              try {
+                // 检查是否已存在 (通过id或内容去重)
+                const existing = await fetchEntriesForDate(entry.date);
+                const exists = existing.some(e => e.text === entry.text && Math.abs(e.ts - entry.ts) < 60000);
+                if (!exists) {
+                  await addDoc(collection(db, 'entries'), {
+                    date: entry.date,
+                    ts: entry.ts,
+                    text: entry.text || '',
+                    images: entry.images || [],
+                    tags: entry.tags || []
+                  });
+                  imported++;
+                }
+              } catch (e) { console.warn('导入单条失败:', e); }
+            }
+            toast(`✅ 导入了 ${imported} 条新记录`);
+          } else {
+            // 导入到本地
+            const existing = localLoad();
+            const newEntries = entries.filter(entry => {
+              return !existing.some(e => e.text === entry.text && Math.abs(e.ts - entry.ts) < 60000);
+            });
+            localSave([...existing, ...newEntries]);
+            toast(`✅ 导入了 ${newEntries.length} 条新记录`);
+          }
+
+          // 刷新缓存
+          cachedEntries = {};
+          allTagsCache = null;
+          await renderCalendar();
+          if (selectedDate) {
+            await renderTimeline(selectedDate);
+          }
+          hideLoading();
+        } catch (e) {
+          hideLoading();
+          toast('❌ 导入失败: ' + e.message);
+          console.error(e);
+        }
       }
 
       // ===== 日历渲染 =====
@@ -2511,6 +2697,75 @@
         await renderWeekView();
       }
 
+      // ===== 解锁 =====
+      function unlockApp() {
+        isUnlocked = true;
+        document.getElementById('lockScreen').classList.add('hidden');
+        // 显示所有屏幕
+        document.querySelectorAll('.screen').forEach(s => {
+          s.classList.remove('hidden');
+        });
+        // 只显示日历
+        document.querySelectorAll('.screen').forEach(s => {
+          if (s.id !== 'screen-calendar') {
+            s.classList.add('hidden');
+          }
+        });
+        toast('🔓 欢迎回来！');
+        // 初始化数据
+        renderCalendar();
+        // 启用光晕
+        document.body.style.cursor = 'none';
+      }
+
+      // ===== 密码验证 =====
+      document.getElementById('unlockBtn').addEventListener('click', () => {
+        const input = document.getElementById('passwordInput').value;
+        if (checkPassword(input)) {
+          unlockApp();
+        } else {
+          document.getElementById('lockError').textContent = '❌ 密码错误，请重试';
+          document.getElementById('passwordInput').value = '';
+          document.getElementById('passwordInput').focus();
+        }
+      });
+
+      document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('unlockBtn').click();
+        }
+        // 清除错误提示
+        if (e.target.value.length > 0) {
+          document.getElementById('lockError').textContent = '';
+        }
+      });
+
+      // 自动聚焦
+      setTimeout(() => {
+        document.getElementById('passwordInput').focus();
+      }, 300);
+
+      // ===== 导出/导入按钮 =====
+      document.getElementById('exportBtn').addEventListener('click', exportData);
+
+      // 导入功能：通过点击导出按钮旁边的隐藏触发，或者长按导出按钮？
+      // 用隐藏的 input 实现导入
+      const importInput = document.getElementById('importFileInput');
+      // 双击导出按钮触发导入
+      let exportClickCount = 0;
+      document.getElementById('exportBtn').addEventListener('dblclick', () => {
+        importInput.click();
+      });
+      // 提示用户
+      toast('💡 单击导出 | 双击导入', 3000);
+
+      importInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          importData(e.target.files[0]);
+        }
+        e.target.value = '';
+      });
+
       // ===== 按钮绑定 =====
       document.getElementById('fabAdd').addEventListener('click', () => openAdd(todayKey()));
       document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
@@ -2546,7 +2801,7 @@
       document.getElementById('weekToday').addEventListener('click', async () => { weekOffset = 0;
         await renderWeekView(); });
 
-      // ===== 鼠标光晕脚本 =====
+      // ===== 鼠标光晕 =====
       (function() {
         const glow = document.getElementById('glow');
         let isVisible = false;
@@ -2586,9 +2841,10 @@
         }
       })();
 
-      // ===== 初始化 =====
-      await renderCalendar();
+      // ===== 初始化完成 =====
+      console.log('✅ 我的手账已加载，请输入密码');
     })();
   </script>
+
 </body>
 </html>
