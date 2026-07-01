@@ -5,603 +5,920 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1C1917">
+  <meta name="theme-color" content="#F2F0ED">
   <title>我的手账</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
     :root {
-      --bg-desk: #1C1917;
-      --bg-detail: #111110;
-      --paper: #F7F2E8;
-      --paper-shadow: rgba(0,0,0,0.35);
-      --brown-dark: #3D2B1F;
-      --brown-mid: #7C5C48;
-      --brown-warm: #A0785A;
-      --brown-weekend: #C4956A;
-      --dot-text: #7C5C48;
-      --dot-img: #C4956A;
-      --bubble: rgba(255,255,255,0.06);
-      --bubble-border: rgba(255,255,255,0.10);
-      --font: 'Noto Serif SC', serif;
-      --tag-bg: rgba(216,90,48,0.18);
-      --tag-fg: #f0997b;
-      --tag-border: rgba(216,90,48,0.35);
-      --tag-bg-muted: rgba(255,255,255,0.04);
-      --tag-fg-muted: #a8a39b;
-      --tag-border-muted: rgba(255,255,255,0.1);
+      --bg: #F2F0ED;
+      --bg-card: #FFFFFF;
+      --bg-detail: #F5F5F5;
+      --text-primary: #1A1A1A;
+      --text-secondary: #6B6B6B;
+      --text-muted: #A8A8A8;
+      --accent: #E87A5D;
+      --accent-light: #F5E6E0;
+      --accent-dark: #D06A4F;
+      --border: #EEEEEE;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.04);
+      --shadow-xl: 0 24px 64px rgba(0,0,0,0.12), 0 12px 32px rgba(0,0,0,0.06);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
+      --font-sans: 'Inter', -apple-system, -apple-system, sans-serif;
+      --font-serif: 'Noto Serif SC', serif;
+      --tag-bg: #F5E6E0;
+      --tag-fg: #E87A5D;
+      --tag-border: transparent;
     }
 
     html, body {
       height: 100%;
       overflow: hidden;
-      font-family: var(--font);
-      background: var(--bg-desk);
-      color: var(--paper);
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
       user-select: none;
     }
 
-    /* ─────────────── SCREENS ─────────────── */
+    /* ===== 滚动条 ===== */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    /* ===== 屏幕切换 ===== */
     .screen {
       position: fixed; inset: 0;
       overflow: hidden;
-      transition: opacity 0.4s ease, transform 0.4s ease;
+      transition: opacity 0.35s ease, transform 0.35s ease;
       will-change: transform, opacity;
+      background: var(--bg);
     }
-    .screen.hidden { opacity: 0; pointer-events: none; transform: translateX(30px); }
-    .screen.slide-left { transform: translateX(-30px); opacity: 0; pointer-events: none; }
+    .screen.hidden { opacity: 0; pointer-events: none; transform: translateX(24px); }
+    .screen.slide-left { transform: translateX(-24px); opacity: 0; pointer-events: none; }
 
-    /* ─────────────── CALENDAR SCREEN ─────────────── */
+    /* ===== 顶部导航 ===== */
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 50px 20px 16px;
+      background: var(--bg);
+      position: relative;
+      z-index: 5;
+    }
+    .nav-back {
+      font-size: 20px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s;
+      border: none;
+      background: transparent;
+      font-family: var(--font-sans);
+    }
+    .nav-back:active { background: rgba(0,0,0,0.06); }
+    .nav-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .nav-action {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 20px;
+      transition: background 0.2s;
+      border: none;
+      background: transparent;
+      font-family: var(--font-sans);
+    }
+    .nav-action:active { background: var(--accent-light); }
+
+    /* ===== 日历页面 ===== */
     #screen-calendar {
-      background: var(--bg-desk);
-      display: flex; flex-direction: column;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Floating paper cards */
-    .papers-bg {
-      position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
-    }
-    .paper-card {
-      position: absolute;
-      background: var(--paper);
-      border-radius: 3px;
-      box-shadow: 0 8px 32px var(--paper-shadow), 0 2px 8px rgba(0,0,0,0.2);
-      opacity: 0.07;
-      animation: paperFloat var(--dur, 8s) ease-in-out infinite alternate, paperDrift var(--drift, 12s) ease-in-out infinite alternate;
-    }
-    @keyframes paperFloat {
-      0% { transform: translateY(0px) rotate(var(--rot0, -3deg)); }
-      100% { transform: translateY(var(--ty, -18px)) rotate(var(--rot1, 3deg)); }
-    }
-    @keyframes paperDrift {
-      0% { left: var(--x0); }
-      100% { left: var(--x1); }
-    }
-
-    /* Header */
     .cal-header {
-      position: relative; z-index: 2;
-      padding: 56px 24px 20px;
-      display: flex; align-items: flex-end; justify-content: space-between;
-    }
-    .cal-month-label {
-      font-size: 13px; font-weight: 300; letter-spacing: 0.12em;
-      color: var(--brown-warm); opacity: 0.8;
-    }
-    .cal-year {
-      font-size: 28px; font-weight: 600; color: var(--paper);
-      line-height: 1; margin-top: 4px;
+      padding: 12px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
     .cal-month {
-      font-size: 40px; font-weight: 700; color: var(--paper); line-height: 1;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .cal-year {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 400;
     }
     .month-nav { display: flex; gap: 4px; }
     .month-btn {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: var(--paper); font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+      font-family: var(--font-sans);
     }
-    .month-btn:active { background: rgba(255,255,255,0.15); }
+    .month-btn:active { background: var(--border); transform: scale(0.92); }
 
-    /* Weekday labels */
+    /* ===== 星期行 ===== */
     .cal-weekdays {
-      position: relative; z-index: 2;
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      padding: 0 16px; margin-bottom: 4px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 8px 16px 4px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+      letter-spacing: 0.3px;
     }
-    .cal-weekday {
-      text-align: center; font-size: 11px; font-weight: 300;
-      letter-spacing: 0.08em; padding: 6px 0;
-      color: rgba(255,255,255,0.3);
-    }
-    .cal-weekday.weekend { color: var(--brown-weekend); opacity: 0.7; }
+    .cal-weekday.weekend { color: var(--accent); }
 
-    /* Calendar grid */
+    /* ===== 日历网格 ===== */
     .cal-grid {
-      position: relative; z-index: 2;
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      padding: 0 12px; gap: 2px 0; flex: 1;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 0 12px;
+      flex: 1;
+      gap: 2px 0;
     }
     .cal-day {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 4px 0; cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 0;
+      cursor: pointer;
     }
     .day-circle {
-      width: var(--size, 34px); height: var(--size, 34px);
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 400;
-      color: rgba(255,255,255,0.55);
-      transition: transform 0.15s, background 0.15s;
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      font-family: var(--font-sans);
     }
-    .cal-day:active .day-circle { transform: scale(0.9); }
-    .cal-day.has-record .day-circle { font-weight: 700; color: rgba(255,255,255,0.85); }
+    .cal-day:active .day-circle { transform: scale(0.88); }
+    .cal-day.has-record .day-circle {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
     .cal-day.today .day-circle {
-      background: var(--brown-dark);
-      color: var(--paper); font-weight: 700;
-      width: 40px; height: 40px; font-size: 15px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 2px 12px rgba(232,122,93,0.30);
     }
-    .cal-day.weekend .day-circle { color: var(--brown-weekend); }
-    .cal-day.weekend.has-record .day-circle { color: var(--brown-weekend); }
+    .cal-day.weekend .day-circle { color: var(--accent); }
+    .cal-day.weekend.has-record .day-circle { color: var(--accent); }
     .cal-day.other-month .day-circle { opacity: 0.2; }
     .cal-day.other-month { pointer-events: none; }
 
-    /* Dots under dates */
-    .day-dots { display: flex; gap: 3px; margin-top: 2px; min-height: 6px; }
-    .day-dot { width: 4px; height: 4px; border-radius: 50%; }
-    .day-dot.text { background: var(--dot-text); }
-    .day-dot.img { background: var(--dot-img); }
+    .day-dots {
+      display: flex;
+      gap: 3px;
+      margin-top: 3px;
+      min-height: 6px;
+    }
+    .day-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+    .day-dot.text { background: var(--accent); opacity: 0.5; }
+    .day-dot.img { background: var(--accent); opacity: 0.25; }
 
-    /* FAB */
+    /* ===== FAB ===== */
     .fab {
-      position: fixed; bottom: 32px; right: 24px; z-index: 10;
-      width: 56px; height: 56px; border-radius: 50%;
-      background: var(--brown-mid);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      border: none; color: var(--paper);
-      font-size: 28px; line-height: 1; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: transform 0.2s, background 0.2s;
-    }
-    .fab:active { transform: scale(0.92); background: var(--brown-dark); }
-
-    /* Tag cloud entry button (calendar) */
-    .tag-entry-btn {
-      position: fixed; bottom: 32px; left: 24px; z-index: 10;
-      width: 48px; height: 48px; border-radius: 50%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--paper); font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, transform 0.2s;
-    }
-    .tag-entry-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
-
-    /* Week view button */
-    .week-entry-btn {
-      position: fixed; bottom: 100px; left: 24px; z-index: 10;
-      width: 48px; height: 48px; border-radius: 50%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--paper); font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s, transform 0.2s;
-      font-family: var(--font);
-    }
-    .week-entry-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.12); }
-
-    /* Tag pills */
-    .entry-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .entry-tag-pill {
-      background: var(--tag-bg); color: var(--tag-fg);
-      border-radius: 999px; padding: 2px 10px;
-      font-size: 11px; font-weight: 400; cursor: pointer;
-    }
-    .sheet-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
-
-    /* Add screen: tag input */
-    .tag-selected-row, .tag-suggest-row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tag-suggest-label { font-size: 11px; color: rgba(255,255,255,0.3); margin: 10px 0 8px; }
-    .tag-chip {
-      display: flex; align-items: center; gap: 5px;
-      background: var(--tag-bg); color: var(--tag-fg);
-      border: 1px solid var(--tag-border);
-      border-radius: 999px; padding: 5px 12px;
-      font-size: 13px; font-family: var(--font); cursor: pointer;
-    }
-    .tag-chip .tag-remove { font-size: 12px; opacity: 0.7; }
-    .tag-chip-muted {
-      background: var(--tag-bg-muted); color: var(--tag-fg-muted);
-      border: 1px solid var(--tag-border-muted);
-      border-radius: 999px; padding: 5px 12px;
-      font-size: 13px; font-family: var(--font); cursor: pointer;
-    }
-    .tag-input {
-      width: 100%; background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.8);
-      border-radius: 10px; padding: 8px 12px; font-size: 13px;
-      font-family: var(--font); outline: none;
-    }
-    .tag-input::placeholder { color: rgba(255,255,255,0.2); }
-
-    /* Tag cloud screen */
-    #screen-tagcloud { background: var(--bg-detail); display: flex; flex-direction: column; }
-    .tagcloud-scroll {
-      position: relative; z-index: 2; flex: 1; overflow-y: auto;
-      padding: 8px 24px 60px; -webkit-overflow-scrolling: touch;
-    }
-    .tagcloud-wrap { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; padding-top: 20px; }
-    .tagcloud-item {
-      color: var(--tag-fg); cursor: pointer; font-weight: 400;
-      transition: opacity 0.2s;
-    }
-    .tagcloud-item:active { opacity: 0.6; }
-    .tagcloud-empty {
-      color: rgba(255,255,255,0.2); font-size: 14px; font-weight: 300;
-      text-align: center; padding-top: 80px; line-height: 2.2;
-    }
-
-    /* Tag timeline screen (reuses timeline styles) */
-    #screen-tagtimeline { background: var(--bg-detail); display: flex; flex-direction: column; }
-    .tagtimeline-scroll {
-      position: relative; z-index: 2; flex: 1; overflow-y: auto;
-      padding: 8px 20px 60px; -webkit-overflow-scrolling: touch;
-    }
-    .tagtimeline-scroll::-webkit-scrollbar { display: none; }
-    .entry-date-badge {
-      flex-shrink: 0; width: 54px; font-size: 11px; font-weight: 300;
-      color: rgba(255,255,255,0.3); letter-spacing: 0.02em;
-      padding-top: 10px; text-align: right; line-height: 1.5;
-    }
-
-    /* ─────────────── WEEK VIEW SCREEN ─────────────── */
-    #screen-week {
-      background: var(--bg-detail);
-      display: flex; flex-direction: column;
-    }
-    .week-scroll {
-      position: relative; z-index: 2;
-      flex: 1; overflow-y: auto; padding: 8px 16px 120px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .week-scroll::-webkit-scrollbar { display: none; }
-    .week-day-group {
-      margin-bottom: 24px;
-      animation: fadeIn 0.35s ease both;
-    }
-    .week-day-header {
-      display: flex; align-items: baseline; gap: 12px;
-      padding: 8px 0 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 12px;
-    }
-    .week-day-name {
-      font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.7);
-    }
-    .week-day-date {
-      font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.3);
-    }
-    .week-day-empty {
-      font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.15);
-      padding: 12px 0 4px;
-      font-style: italic;
-    }
-    .week-entry {
-      display: flex; gap: 14px; margin-bottom: 12px;
-      animation: fadeIn 0.3s ease both;
-    }
-    .week-entry-time {
-      flex-shrink: 0; width: 44px;
-      font-size: 11px; font-weight: 300;
-      color: rgba(255,255,255,0.25);
-      text-align: right; padding-top: 6px;
-    }
-    .week-entry-bubble {
-      flex: 1;
-      background: var(--bubble);
-      border: 1px solid var(--bubble-border);
-      border-radius: 14px 14px 14px 4px;
-      padding: 10px 14px;
+      position: fixed;
+      bottom: 28px;
+      right: 50%;
+      transform: translateX(50%);
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 300;
+      box-shadow: 0 4px 16px rgba(232,122,93,0.30), 0 8px 32px rgba(232,122,93,0.12);
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      font-family: var(--font-sans);
     }
-    .week-entry-bubble:active { background: rgba(255,255,255,0.08); }
-    .week-entry-text {
-      font-size: 14px; font-weight: 300; line-height: 1.6;
-      color: rgba(255,255,255,0.7);
-    }
-    .week-entry-images {
-      display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap;
-    }
-    .week-entry-thumb {
-      width: 52px; height: 52px; border-radius: 8px;
-      object-fit: cover; border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
-    }
-    .week-entry-tags {
-      display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;
-    }
-    .week-entry-tag {
-      background: var(--tag-bg); color: var(--tag-fg);
-      border-radius: 999px; padding: 1px 8px;
-      font-size: 10px; font-weight: 400; cursor: pointer;
+    .fab:active {
+      transform: translateX(50%) scale(0.92);
     }
 
-    /* ─────────────── DETAIL / TIMELINE SCREEN ─────────────── */
+    /* ===== 底部工具栏 ===== */
+    .bottom-tools {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 6px 8px;
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      z-index: 10;
+    }
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-sans);
+    }
+    .tool-btn:active { background: var(--border); transform: scale(0.92); }
+    .tool-btn.active { background: var(--accent-light); color: var(--accent); }
+
+    /* ===== 详情/时间线 ===== */
     #screen-detail {
-      background: var(--bg-detail);
-      display: flex; flex-direction: column;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
     }
-
-    /* Meteors */
-    .meteors-bg {
-      position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+    .detail-date-big {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
     }
-    .meteor {
-      position: absolute;
-      width: 120px; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
-      border-radius: 1px;
-      opacity: 0;
-      animation: meteorFall var(--dur, 3s) ease-in var(--delay, 0s) infinite;
+    .detail-date-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
     }
-    @keyframes meteorFall {
-      0% { opacity: 0; transform: translate(0, 0) rotate(-25deg); }
-      10% { opacity: 1; }
-      60% { opacity: 0.4; }
-      100% { opacity: 0; transform: translate(280px, 180px) rotate(-25deg); }
-    }
-
-    /* Detail header */
-    .detail-header {
-      position: relative; z-index: 2;
-      padding: 54px 24px 16px;
-      display: flex; align-items: center; gap: 16px;
-    }
-    .back-btn {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.7);
-      font-size: 18px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .back-btn:active { background: rgba(255,255,255,0.1); }
-    .detail-date-info { flex: 1; }
-    .detail-date-big { font-size: 32px; font-weight: 700; color: var(--paper); }
-    .detail-date-sub { font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; }
-
-    /* Timeline */
     .timeline-scroll {
-      position: relative; z-index: 2;
-      flex: 1; overflow-y: auto; padding: 8px 20px 120px;
-      -webkit-overflow-scrolling: touch;
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 120px;
     }
-    .timeline-scroll::-webkit-scrollbar { display: none; }
-
     .timeline-empty {
-      display: flex; flex-direction: column; align-items: center;
-      padding-top: 80px; color: rgba(255,255,255,0.2);
-      font-size: 14px; font-weight: 300; line-height: 2.5;
       text-align: center;
+      padding-top: 80px;
+      color: var(--text-muted);
+      line-height: 2.5;
     }
     .timeline-empty .empty-icon { font-size: 36px; opacity: 0.4; margin-bottom: 12px; }
 
     .timeline-entry {
-      display: flex; gap: 16px; margin-bottom: 20px;
-      animation: entryFadeIn 0.4s ease both;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 14px;
+      animation: fadeUp 0.35s ease both;
     }
-    @keyframes entryFadeIn {
+    @keyframes fadeUp {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .entry-time {
-      flex-shrink: 0; width: 44px;
-      font-size: 11px; font-weight: 300;
-      color: rgba(255,255,255,0.3); letter-spacing: 0.05em;
-      padding-top: 10px; text-align: right;
-    }
-    .entry-bubble {
-      flex: 1;
-      background: var(--bubble);
-      border: 1px solid var(--bubble-border);
-      border-radius: 16px 16px 16px 4px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: background 0.2s;
-      animation: floatEntry var(--float-dur, 4s) ease-in-out infinite alternate;
-    }
-    @keyframes floatEntry {
-      0% { transform: translateY(0px); }
-      100% { transform: translateY(var(--float-offset, -4px)); }
-    }
-    .entry-bubble:active { background: rgba(255,255,255,0.1); }
-    .entry-text-preview {
-      font-size: 14px; font-weight: 300; line-height: 1.7;
-      color: rgba(255,255,255,0.75);
-    }
-    .entry-images-row {
-      display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
-    }
-    .entry-thumb {
-      width: 64px; height: 64px; border-radius: 10px;
-      object-fit: cover; cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .entry-img-count {
-      font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;
+      flex-shrink: 0;
+      width: 44px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: right;
+      padding-top: 14px;
+      font-family: var(--font-sans);
     }
 
-    /* Bottom sheet for full text */
+    /* ===== 卡片（时间线用） ===== */
+    .entry-bubble {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .entry-bubble:active {
+      transform: scale(0.97);
+      box-shadow: var(--shadow-sm);
+    }
+    .entry-text-preview {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+    .entry-images-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .entry-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-xs);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      transition: transform 0.2s;
+    }
+    .entry-thumb:active { transform: scale(0.95); }
+    .entry-img-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .entry-tags-row {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .entry-tag-pill {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tag-fg);
+      background: var(--tag-bg);
+      padding: 2px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      border: none;
+      font-family: var(--font-sans);
+    }
+    .entry-tag-pill:active { opacity: 0.6; }
+
+    /* ===== 周视图 ===== */
+    #screen-week {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .week-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 120px;
+    }
+    .week-range {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .week-sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    .week-nav {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .week-nav button {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 5px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: var(--font-sans);
+      box-shadow: var(--shadow-sm);
+    }
+    .week-nav button:active { transform: scale(0.95); }
+    .week-nav button.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .day-group {
+      margin-bottom: 28px;
+      animation: fadeUp 0.35s ease both;
+    }
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .day-name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .day-name.today { color: var(--accent); }
+    .day-date {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .day-empty {
+      font-size: 13px;
+      color: var(--text-muted);
+      padding: 6px 0 2px;
+      font-style: italic;
+    }
+
+    .week-entry-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .week-entry-card:active {
+      transform: scale(0.97);
+      box-shadow: var(--shadow-sm);
+    }
+    .week-entry-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .week-entry-time {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+    }
+    .week-entry-text {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+    .week-entry-images {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .week-entry-images img {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-xs);
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    .week-entry-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .week-entry-tag {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--tag-fg);
+      background: var(--tag-bg);
+      padding: 1px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font-sans);
+    }
+
+    /* ===== 添加页面 ===== */
+    #screen-add {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .add-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .add-bubble {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+    .add-textarea {
+      width: 100%;
+      min-height: 160px;
+      max-height: 260px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.8;
+      color: var(--text-primary);
+    }
+    .add-textarea::placeholder { color: var(--text-muted); }
+    .char-count {
+      text-align: right;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .char-count.warn { color: var(--accent); }
+
+    .img-upload-area {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .img-add-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 24px;
+      transition: all 0.2s;
+    }
+    .img-add-btn:active { border-color: var(--accent); color: var(--accent); }
+    .img-preview-wrap {
+      position: relative;
+      width: 68px;
+      height: 68px;
+    }
+    .img-preview {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1px solid var(--border);
+    }
+    .img-remove {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tag-selected-row, .tag-suggest-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag-suggest-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 8px 0 6px;
+    }
+    .tag-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--tag-bg);
+      color: var(--tag-fg);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      border: none;
+    }
+    .tag-chip .tag-remove {
+      font-size: 12px;
+      opacity: 0.6;
+      cursor: pointer;
+    }
+    .tag-chip-muted {
+      background: var(--border);
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .tag-chip-muted:active { background: var(--accent-light); color: var(--accent); }
+    .tag-input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1.5px solid var(--border);
+      color: var(--text-primary);
+      padding: 8px 0;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .tag-input:focus { border-color: var(--accent); }
+    .tag-input::placeholder { color: var(--text-muted); }
+
+    .add-footer {
+      padding: 8px 16px 40px;
+      background: var(--bg);
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(232,122,93,0.25);
+    }
+    .submit-btn:active { transform: scale(0.97); }
+    .submit-btn:disabled { opacity: 0.4; }
+
+    /* ===== 标签云 ===== */
+    #screen-tagcloud {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .tagcloud-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 20px 60px;
+    }
+    .tagcloud-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 20px;
+      align-items: center;
+      padding-top: 16px;
+    }
+    .tagcloud-item {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+      font-family: var(--font-sans);
+    }
+    .tagcloud-item:active { opacity: 0.5; }
+    .tagcloud-empty {
+      color: var(--text-muted);
+      text-align: center;
+      padding-top: 80px;
+      line-height: 2.5;
+    }
+
+    /* ===== 标签时间线 ===== */
+    #screen-tagtimeline {
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+    }
+    .tagtimeline-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 16px 60px;
+    }
+    .entry-date-badge {
+      flex-shrink: 0;
+      width: 54px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: right;
+      padding-top: 14px;
+      line-height: 1.5;
+      font-family: var(--font-sans);
+    }
+
+    /* ===== Bottom Sheet ===== */
     .bottom-sheet-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      z-index: 100; display: flex; align-items: flex-end;
-      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
     }
     .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
     .bottom-sheet {
-      width: 100%; max-height: 75vh;
-      background: #1A1714;
+      width: 100%;
+      max-height: 75vh;
+      background: var(--bg-card);
       border-radius: 20px 20px 0 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding: 20px 24px 48px;
+      padding: 20px 24px 40px;
       overflow-y: auto;
-      transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
-    .sheet-handle { width: 36px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 20px; }
-    .sheet-time { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.1em; margin-bottom: 12px; }
-    .sheet-text { font-size: 15px; font-weight: 300; line-height: 1.9; color: rgba(255,255,255,0.8); }
-    .sheet-images { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
-    .sheet-image { width: calc(50% - 4px); border-radius: 12px; object-fit: cover; cursor: pointer; }
+    .sheet-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+    }
+    .sheet-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-family: var(--font-sans);
+    }
+    .sheet-text {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--text-primary);
+      margin-top: 8px;
+    }
+    .sheet-images {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .sheet-image {
+      width: calc(50% - 4px);
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
     .sheet-delete-btn {
-      margin-top: 20px; width: 100%;
-      padding: 12px; border-radius: 10px;
-      border: 1px solid rgba(255,80,80,0.25);
-      background: rgba(255,80,80,0.06);
-      color: rgba(255,120,120,0.7); font-family: var(--font);
-      font-size: 13px; cursor: pointer;
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(232,122,93,0.25);
+      background: rgba(232,122,93,0.06);
+      color: var(--accent);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
       transition: background 0.2s;
     }
-    .sheet-delete-btn:active { background: rgba(255,80,80,0.15); }
+    .sheet-delete-btn:active { background: rgba(232,122,93,0.12); }
 
-    /* Lightbox */
+    /* ===== Lightbox ===== */
     .lightbox {
-      position: fixed; inset: 0; z-index: 200;
+      position: fixed; inset: 0;
+      z-index: 200;
       background: rgba(0,0,0,0.92);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
     }
     .lightbox.open { opacity: 1; pointer-events: all; }
-    .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
-
-    /* ─────────────── ADD RECORD SCREEN ─────────────── */
-    #screen-add {
-      background: var(--bg-detail);
-      display: flex; flex-direction: column;
+    .lightbox img {
+      max-width: 95vw;
+      max-height: 90vh;
+      border-radius: var(--radius-sm);
+      object-fit: contain;
     }
 
-    .add-header {
-      position: relative; z-index: 2;
-      padding: 54px 24px 16px;
-      display: flex; align-items: center; gap: 16px;
-    }
-    .add-title { flex: 1; font-size: 18px; font-weight: 500; color: rgba(255,255,255,0.7); }
-
-    .add-body {
-      position: relative; z-index: 2;
-      flex: 1; overflow-y: auto; padding: 8px 20px;
-      display: flex; flex-direction: column; gap: 12px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .add-body::-webkit-scrollbar { display: none; }
-
-    .add-bubble {
-      background: var(--bubble);
-      border: 1px solid var(--bubble-border);
-      border-radius: 16px; padding: 16px;
-    }
-    .add-textarea {
-      width: 100%; min-height: 160px; max-height: 260px;
-      background: transparent; border: none; outline: none; resize: none;
-      font-family: var(--font); font-size: 15px; font-weight: 300;
-      line-height: 1.9; color: rgba(255,255,255,0.8);
-      -webkit-overflow-scrolling: touch;
-    }
-    .add-textarea::placeholder { color: rgba(255,255,255,0.2); }
-    .char-count {
-      text-align: right; font-size: 11px; font-weight: 300;
-      color: rgba(255,255,255,0.2); margin-top: 6px;
-    }
-    .char-count.warn { color: rgba(200,120,80,0.8); }
-
-    /* Image upload */
-    .img-upload-area { display: flex; gap: 8px; flex-wrap: wrap; }
-    .img-add-btn {
-      width: 72px; height: 72px; border-radius: 12px;
-      border: 1.5px dashed rgba(255,255,255,0.15);
-      background: transparent; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: rgba(255,255,255,0.25); font-size: 24px;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .img-add-btn:active { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.4); }
-    .img-preview-wrap { position: relative; width: 72px; height: 72px; }
-    .img-preview {
-      width: 72px; height: 72px; border-radius: 12px;
-      object-fit: cover; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .img-remove {
-      position: absolute; top: -5px; right: -5px;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #2A1F1A; border: 1px solid rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.7); font-size: 10px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-    }
-    .hidden-file { display: none; }
-
-    /* Submit button */
-    .add-footer {
-      position: relative; z-index: 2;
-      padding: 12px 20px 40px;
-    }
-    .submit-btn {
-      width: 100%; padding: 15px;
-      border-radius: 14px; border: none;
-      background: var(--brown-mid);
-      color: var(--paper); font-family: var(--font);
-      font-size: 16px; font-weight: 500;
-      cursor: pointer; letter-spacing: 0.08em;
-      transition: background 0.2s, transform 0.15s;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    }
-    .submit-btn:active { transform: scale(0.97); background: var(--brown-dark); }
-    .submit-btn:disabled { opacity: 0.4; }
-
-    /* Toast */
+    /* ===== Toast ===== */
     .toast {
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(60,40,30,0.95); color: rgba(255,255,255,0.85);
-      padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 300;
-      opacity: 0; transition: all 0.3s; z-index: 999; white-space: nowrap;
-      border: 1px solid rgba(255,255,255,0.1);
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text-primary);
+      color: var(--bg-card);
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+      font-family: var(--font-sans);
+      box-shadow: var(--shadow-lg);
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Loading overlay */
+    /* ===== Loading ===== */
     .loading-overlay {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+      position: fixed; inset: 0;
+      z-index: 500;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
     }
     .loading-overlay.show { opacity: 1; pointer-events: all; }
     .spinner {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.1);
-      border-top-color: var(--brown-warm);
-      animation: spin 0.8s linear infinite;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== 隐藏工具 ===== */
+    .hidden-file { display: none; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 420px) {
+      .nav-bar { padding: 44px 16px 12px; }
+      .cal-month { font-size: 24px; }
+      .day-circle { width: 34px; height: 34px; font-size: 13px; }
+      .cal-day.today .day-circle { width: 36px; height: 36px; font-size: 14px; }
+      .week-range { font-size: 19px; }
+    }
   </style>
 </head>
 <body>
 
 <!-- ════════════════ CALENDAR SCREEN ════════════════ -->
 <div class="screen" id="screen-calendar">
-  <div class="papers-bg" id="papersBg"></div>
+  <div class="nav-bar">
+    <span></span>
+    <span class="nav-title">📖 我的手账</span>
+    <button class="nav-action" id="fabAdd">+ 记录</button>
+  </div>
 
   <div class="cal-header">
     <div>
-      <div class="cal-month-label" id="calYearLabel">2025年</div>
       <div class="cal-month" id="calMonthLabel">六月</div>
+      <div class="cal-year" id="calYearLabel">2026年</div>
     </div>
     <div class="month-nav">
       <button class="month-btn" id="prevMonth">‹</button>
@@ -621,23 +938,25 @@
 
   <div class="cal-grid" id="calGrid"></div>
 
-  <button class="fab" id="fabAdd" title="添加记录">+</button>
-  <button class="tag-entry-btn" id="tagEntryBtn" title="标签">#</button>
-  <button class="week-entry-btn" id="weekEntryBtn" title="周视图">📅</button>
+  <div class="bottom-tools">
+    <button class="tool-btn active" id="weekEntryBtn" title="周视图">📋</button>
+    <button class="tool-btn" id="tagEntryBtn" title="标签">🏷️</button>
+  </div>
 </div>
 
 <!-- ════════════════ WEEK VIEW SCREEN ════════════════ -->
 <div class="screen hidden" id="screen-week">
-  <div class="meteors-bg"></div>
-  <div class="detail-header">
-    <button class="back-btn" id="weekBackBtn">←</button>
-    <div class="detail-date-info">
-      <div class="detail-date-big" id="weekTitle">本周</div>
-      <div class="detail-date-sub" id="weekSub">第 0 周</div>
-    </div>
-    <div style="display:flex;gap:4px;">
-      <button class="month-btn" id="weekPrev">‹</button>
-      <button class="month-btn" id="weekNext">›</button>
+  <div class="nav-bar">
+    <button class="nav-back" id="weekBackBtn">←</button>
+    <span class="nav-title" id="weekTitle">本周</span>
+    <span></span>
+  </div>
+  <div style="padding:0 20px 12px;">
+    <div class="week-sub" id="weekSub">第 0 周</div>
+    <div class="week-nav">
+      <button id="weekPrev">← 上周</button>
+      <button class="active" id="weekToday">本周</button>
+      <button id="weekNext">下周 →</button>
     </div>
   </div>
   <div class="week-scroll" id="weekScroll"></div>
@@ -645,50 +964,42 @@
 
 <!-- ════════════════ DETAIL SCREEN ════════════════ -->
 <div class="screen hidden" id="screen-detail">
-  <div class="meteors-bg" id="meteorsBg"></div>
-
-  <div class="detail-header">
-    <button class="back-btn" id="backBtn">←</button>
-    <div class="detail-date-info">
+  <div class="nav-bar">
+    <button class="nav-back" id="backBtn">←</button>
+    <div>
       <div class="detail-date-big" id="detailDateBig"></div>
       <div class="detail-date-sub" id="detailDateSub"></div>
     </div>
-    <button class="fab" style="position:relative;bottom:auto;right:auto;width:44px;height:44px;font-size:22px;" id="detailAddBtn">+</button>
+    <button class="nav-action" id="detailAddBtn">+ 记录</button>
   </div>
-
   <div class="timeline-scroll" id="timelineScroll"></div>
 </div>
 
 <!-- ════════════════ ADD SCREEN ════════════════ -->
 <div class="screen hidden" id="screen-add">
-  <div class="meteors-bg"></div>
-
-  <div class="add-header">
-    <button class="back-btn" id="addBackBtn">←</button>
-    <div class="add-title" id="addDateLabel">今天</div>
+  <div class="nav-bar">
+    <button class="nav-back" id="addBackBtn">←</button>
+    <span class="nav-title" id="addDateLabel">今天</span>
+    <span></span>
   </div>
-
   <div class="add-body">
     <div class="add-bubble">
       <textarea class="add-textarea" id="addTextarea" placeholder="写点什么…" maxlength="500"></textarea>
       <div class="char-count" id="charCount">0 / 500</div>
     </div>
-
     <div class="add-bubble">
       <div class="img-upload-area" id="imgUploadArea">
         <button class="img-add-btn" id="imgAddBtn">＋</button>
         <input type="file" accept="image/*" multiple class="hidden-file" id="imgFileInput">
       </div>
     </div>
-
     <div class="add-bubble">
       <div class="tag-selected-row" id="tagSelectedRow"></div>
-      <input class="tag-input" id="tagInput" placeholder="输入新标签，按回车确认" maxlength="20">
+      <input class="tag-input" id="tagInput" placeholder="输入标签，按回车确认" maxlength="20">
       <div class="tag-suggest-label" id="tagSuggestLabel" style="display:none;">常用标签</div>
       <div class="tag-suggest-row" id="tagSuggestRow"></div>
     </div>
   </div>
-
   <div class="add-footer">
     <button class="submit-btn" id="submitBtn">记下来</button>
   </div>
@@ -696,26 +1007,20 @@
 
 <!-- ════════════════ TAG CLOUD SCREEN ════════════════ -->
 <div class="screen hidden" id="screen-tagcloud">
-  <div class="meteors-bg"></div>
-  <div class="detail-header">
-    <button class="back-btn" id="tagCloudBackBtn">←</button>
-    <div class="detail-date-info">
-      <div class="detail-date-big">标签</div>
-      <div class="detail-date-sub">点击查看对应时间线</div>
-    </div>
+  <div class="nav-bar">
+    <button class="nav-back" id="tagCloudBackBtn">←</button>
+    <span class="nav-title">🏷️ 标签</span>
+    <span></span>
   </div>
   <div class="tagcloud-scroll" id="tagCloudScroll"></div>
 </div>
 
 <!-- ════════════════ TAG TIMELINE SCREEN ════════════════ -->
 <div class="screen hidden" id="screen-tagtimeline">
-  <div class="meteors-bg" id="tagTimelineMeteorsBg"></div>
-  <div class="detail-header">
-    <button class="back-btn" id="tagTimelineBackBtn">←</button>
-    <div class="detail-date-info">
-      <div class="detail-date-big" id="tagTimelineTitle"></div>
-      <div class="detail-date-sub" id="tagTimelineSub"></div>
-    </div>
+  <div class="nav-bar">
+    <button class="nav-back" id="tagTimelineBackBtn">←</button>
+    <span class="nav-title" id="tagTimelineTitle"># 标签</span>
+    <span class="nav-action" id="tagTimelineSub" style="font-size:12px;font-weight:400;color:var(--text-muted);">0 条</span>
   </div>
   <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
 </div>
@@ -751,7 +1056,6 @@
   import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, where }
     from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
 
-  /* ── Firebase config ── */
   const firebaseConfig = {
     apiKey: "AIzaSyCNq2USnHJOyM3RbouCq7b1n2VZ8GxLSSU",
     authDomain: "mytimeline-7c3b7.firebaseapp.com",
@@ -760,7 +1064,6 @@
     appId: "1:148289157568:web:981aa19c4b252d1f91f025",
   };
 
-  /* ── Cloudinary config ── */
   const CLOUDINARY_CLOUD = 'drmtcucy5';
   const CLOUDINARY_PRESET = 'diaryupload';
 
@@ -769,45 +1072,29 @@
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     firebaseReady = true;
-  } catch(e) {
-    console.warn('Firebase not configured, using local storage mode.');
-  }
+  } catch(e) { console.warn('Firebase not configured, using local storage mode.'); }
 
-  /* ────────────────────────────────────────────
-     LOCAL STORAGE FALLBACK (demo mode)
-  ──────────────────────────────────────────── */
   const LOCAL_KEY = 'diary_entries_v1';
   function localLoad() {
     try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch { return []; }
   }
-  function localSave(entries) {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(entries));
-  }
+  function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)); }
 
-  /* ────────────────────────────────────────────
-     STATE
-  ──────────────────────────────────────────── */
   const today = new Date();
   let currentYear = today.getFullYear();
   let currentMonth = today.getMonth();
-  let selectedDate = null; // 'YYYY-MM-DD'
+  let selectedDate = null;
   let addTargetDate = null;
-  let pendingImages = []; // { file, dataUrl }
-  let openEntryId = null; // for delete
-  let cachedEntries = {}; // date string → entries[]
-  let pendingTags = []; // tags for current add-record session
-  let allTagsCache = null; // all distinct tags across entries, cached
-
-  // Week view state
-  let weekOffset = 0; // 0 = current week, -1 = last week, 1 = next week
+  let pendingImages = [];
+  let openEntryId = null;
+  let cachedEntries = {};
+  let pendingTags = [];
+  let allTagsCache = null;
+  let weekOffset = 0;
 
   const MONTHS_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const WEEKDAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
-  const WEEKDAYS_SHORT = ['日','一','二','三','四','五','六'];
 
-  /* ────────────────────────────────────────────
-     UTILS
-  ──────────────────────────────────────────── */
   function dateKey(y, m, d) {
     return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   }
@@ -824,56 +1111,6 @@
   function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
   function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
 
-  /* ────────────────────────────────────────────
-     FLOATING PAPERS (calendar bg)
-  ──────────────────────────────────────────── */
-  function initPapers() {
-    const bg = document.getElementById('papersBg');
-    const sizes = [[160,200],[120,160],[200,140],[100,130],[180,120]];
-    sizes.forEach((s, i) => {
-      const p = document.createElement('div');
-      p.className = 'paper-card';
-      const x0 = 5 + i * 18;
-      const x1 = x0 + (Math.random() > 0.5 ? 6 : -6);
-      const ty = -(12 + Math.random() * 20);
-      const rot0 = -8 + Math.random() * 16;
-      const rot1 = -8 + Math.random() * 16;
-      Object.assign(p.style, {
-        width: s[0]+'px', height: s[1]+'px',
-        top: (5 + i * 14) + '%',
-        '--x0': x0 + '%', '--x1': x1 + '%',
-        left: x0 + '%',
-        '--dur': (6 + Math.random() * 5) + 's',
-        '--drift': (10 + Math.random() * 6) + 's',
-        '--ty': ty + 'px',
-        '--rot0': rot0 + 'deg', '--rot1': rot1 + 'deg',
-        animationDelay: (i * 0.7) + 's',
-      });
-      bg.appendChild(p);
-    });
-  }
-
-  /* ────────────────────────────────────────────
-     METEORS
-  ──────────────────────────────────────────── */
-  function initMeteors(container) {
-    for (let i = 0; i < 5; i++) {
-      const m = document.createElement('div');
-      m.className = 'meteor';
-      Object.assign(m.style, {
-        top: (10 + Math.random() * 50) + '%',
-        left: (Math.random() * 60) + '%',
-        '--dur': (2 + Math.random() * 2) + 's',
-        '--delay': (i * 3 + Math.random() * 4) + 's',
-        width: (80 + Math.random() * 100) + 'px',
-      });
-      container.appendChild(m);
-    }
-  }
-
-  /* ────────────────────────────────────────────
-     DATA LAYER (Firebase or localStorage)
-  ──────────────────────────────────────────── */
   async function fetchEntriesForDate(dateStr) {
     if (cachedEntries[dateStr]) return cachedEntries[dateStr];
     let entries = [];
@@ -891,7 +1128,6 @@
   }
 
   async function fetchAllDates() {
-    // returns object: { 'YYYY-MM-DD': { hasText: bool, hasImg: bool } }
     const result = {};
     if (firebaseReady) {
       try {
@@ -914,7 +1150,6 @@
   }
 
   async function fetchAllTags() {
-    // returns [{ tag, count, lastTs, entries: [{...entry, date}] }] sorted by count desc
     if (allTagsCache) return allTagsCache;
     const byTag = {};
     function add(entry, dateStr) {
@@ -987,9 +1222,7 @@
 
   async function deleteEntry(entryId, dateStr) {
     if (firebaseReady && !entryId.startsWith('local_')) {
-      try {
-        await deleteDoc(doc(db, 'entries', entryId));
-      } catch(e) { console.warn(e); }
+      try { await deleteDoc(doc(db, 'entries', entryId)); } catch(e) { console.warn(e); }
     } else {
       const all = localLoad().filter(e => e.id !== entryId); localSave(all);
     }
@@ -997,11 +1230,8 @@
     allTagsCache = null;
   }
 
-  /* ────────────────────────────────────────────
-     CALENDAR RENDER
-  ──────────────────────────────────────────── */
+  // ===== CALENDAR =====
   let allDateMeta = {};
-
   async function renderCalendar() {
     allDateMeta = await fetchAllDates();
     renderCalendarGrid();
@@ -1010,32 +1240,24 @@
   function renderCalendarGrid() {
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-
     document.getElementById('calYearLabel').textContent = currentYear + '年';
     document.getElementById('calMonthLabel').textContent = MONTHS_ZH[currentMonth];
 
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const prevDays = new Date(currentYear, currentMonth, 0).getDate();
-
     const todayStr = todayKey();
 
-    // Prev month filler
     for (let i = firstDay - 1; i >= 0; i--) {
-      const cell = makeDay(currentYear, currentMonth - 1, prevDays - i, true);
-      grid.appendChild(cell);
+      grid.appendChild(makeDay(currentYear, currentMonth - 1, prevDays - i, true));
     }
-    // Current month
     for (let d = 1; d <= daysInMonth; d++) {
-      const cell = makeDay(currentYear, currentMonth, d, false);
-      grid.appendChild(cell);
+      grid.appendChild(makeDay(currentYear, currentMonth, d, false));
     }
-    // Next month filler
     const total = firstDay + daysInMonth;
     const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
     for (let d = 1; d <= rem; d++) {
-      const cell = makeDay(currentYear, currentMonth + 1, d, true);
-      grid.appendChild(cell);
+      grid.appendChild(makeDay(currentYear, currentMonth + 1, d, true));
     }
   }
 
@@ -1044,7 +1266,6 @@
     const isToday = dKey === todayKey();
     const meta = allDateMeta[dKey] || {};
     const isWeekend = [0,6].includes(new Date(year, month, day).getDay());
-    const size = 32 + Math.random() * 5;
 
     const cell = document.createElement('div');
     cell.className = 'cal-day' +
@@ -1056,7 +1277,6 @@
     const circle = document.createElement('div');
     circle.className = 'day-circle';
     circle.textContent = day;
-    if (!isToday) circle.style.setProperty('--size', size + 'px');
 
     const dots = document.createElement('div');
     dots.className = 'day-dots';
@@ -1065,19 +1285,16 @@
 
     cell.appendChild(circle);
     cell.appendChild(dots);
-
     if (!otherMonth) {
       cell.addEventListener('click', () => openDetail(dKey));
     }
     return cell;
   }
 
-  /* ────────────────────────────────────────────
-     WEEK VIEW
-  ──────────────────────────────────────────── */
+  // ===== WEEK VIEW =====
   function getWeekRange(offset) {
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0=Sun
+    const dayOfWeek = now.getDay();
     const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     const base = new Date(now);
     base.setDate(now.getDate() + mondayOffset + offset * 7);
@@ -1099,17 +1316,14 @@
   async function renderWeekView() {
     const dates = getWeekRange(weekOffset);
     const scroll = document.getElementById('weekScroll');
-    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;">加载中…</div>';
+    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
 
-    // Title
     const first = dates[0];
     const last = dates[6];
     document.getElementById('weekTitle').textContent =
       `${first.getMonth()+1}月${first.getDate()}日 - ${last.getMonth()+1}月${last.getDate()}日`;
-    const weekNum = getWeekNumber(first);
-    document.getElementById('weekSub').textContent = `第 ${weekNum} 周`;
+    document.getElementById('weekSub').textContent = `第 ${getWeekNumber(first)} 周`;
 
-    // Fetch all entries for each day
     const dayEntries = {};
     let hasAny = false;
     for (const d of dates) {
@@ -1120,269 +1334,114 @@
     }
 
     scroll.innerHTML = '';
-
     if (!hasAny) {
-      scroll.innerHTML = `<div class="timeline-empty">
-        <div class="empty-icon">📅</div>
-        <div>这周还没有记录</div>
-        <div style="font-size:12px;opacity:0.6">点击 + 记录每一天</div>
-      </div>`;
+      scroll.innerHTML = `<div class="timeline-empty"><div class="empty-icon">📋</div><div>这周还没有记录</div></div>`;
       return;
     }
 
     const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-
     for (let i = 0; i < dates.length; i++) {
       const d = dates[i];
       const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
       const entries = dayEntries[key] || [];
       const isToday = key === todayKey();
-      const isWeekend = [0,6].includes(d.getDay());
 
       const group = document.createElement('div');
-      group.className = 'week-day-group';
+      group.className = 'day-group';
       group.style.animationDelay = (i * 0.06) + 's';
 
       const header = document.createElement('div');
-      header.className = 'week-day-header';
-      header.style.borderBottomColor = isToday ? 'rgba(124,92,72,0.4)' : 'rgba(255,255,255,0.06)';
+      header.className = 'day-header';
       header.innerHTML = `
-        <span class="week-day-name" style="${isToday ? 'color:#C4956A;' : ''}${isWeekend ? 'color:#C4956A;' : ''}">
-          ${dayNames[d.getDay()]}${isToday ? ' · 今天' : ''}
-        </span>
-        <span class="week-day-date">${d.getMonth()+1}月${d.getDate()}日</span>
+        <span class="day-name${isToday ? ' today' : ''}">${dayNames[d.getDay()]}${isToday ? ' · 今天' : ''}</span>
+        <span class="day-date">${d.getMonth()+1}月${d.getDate()}日</span>
       `;
       group.appendChild(header);
 
       if (entries.length === 0) {
         const empty = document.createElement('div');
-        empty.className = 'week-day-empty';
+        empty.className = 'day-empty';
         empty.textContent = '— 没有记录 —';
         group.appendChild(empty);
       } else {
         entries.forEach((entry, idx) => {
-          const row = document.createElement('div');
-          row.className = 'week-entry';
-          row.style.animationDelay = (idx * 0.05 + 0.1) + 's';
+          const card = document.createElement('div');
+          card.className = 'week-entry-card';
+          card.style.animationDelay = (idx * 0.05 + 0.1) + 's';
 
-          const time = document.createElement('div');
-          time.className = 'week-entry-time';
-          time.textContent = fmtTime(entry.ts);
-
-          const bubble = document.createElement('div');
-          bubble.className = 'week-entry-bubble';
+          const meta = document.createElement('div');
+          meta.className = 'week-entry-meta';
+          meta.innerHTML = `<span class="week-entry-time">${fmtTime(entry.ts)}</span>`;
+          if (entry.tags && entry.tags.length) {
+            entry.tags.slice(0,3).forEach(tag => {
+              const pill = document.createElement('span');
+              pill.className = 'week-entry-tag';
+              pill.textContent = tag;
+              pill.addEventListener('click', e => { e.stopPropagation(); openTagTimeline(tag); });
+              meta.appendChild(pill);
+            });
+            if (entry.tags.length > 3) {
+              const more = document.createElement('span');
+              more.className = 'week-entry-tag';
+              more.textContent = `+${entry.tags.length - 3}`;
+              meta.appendChild(more);
+            }
+          }
+          card.appendChild(meta);
 
           if (entry.text) {
             const textEl = document.createElement('div');
             textEl.className = 'week-entry-text';
             textEl.textContent = entry.text;
-            bubble.appendChild(textEl);
+            card.appendChild(textEl);
           }
 
           if (entry.images && entry.images.length) {
             const imgRow = document.createElement('div');
             imgRow.className = 'week-entry-images';
-            entry.images.slice(0, 4).forEach(url => {
+            entry.images.slice(0,4).forEach(url => {
               const img = document.createElement('img');
-              img.className = 'week-entry-thumb';
               img.src = url;
-              img.addEventListener('click', e => {
-                e.stopPropagation();
-                openLightbox(url);
-              });
+              img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
               imgRow.appendChild(img);
             });
             if (entry.images.length > 4) {
               const more = document.createElement('span');
-              more.style.cssText = 'font-size:11px;color:rgba(255,255,255,0.3);display:flex;align-items:center;';
+              more.style.cssText = 'font-size:11px;color:var(--text-muted);display:flex;align-items:center;';
               more.textContent = `+${entry.images.length - 4}`;
               imgRow.appendChild(more);
             }
-            bubble.appendChild(imgRow);
+            card.appendChild(imgRow);
           }
 
-          if (entry.tags && entry.tags.length) {
-            const tagRow = document.createElement('div');
-            tagRow.className = 'week-entry-tags';
-            entry.tags.forEach(tag => {
-              const pill = document.createElement('span');
-              pill.className = 'week-entry-tag';
-              pill.textContent = tag;
-              pill.addEventListener('click', e => {
-                e.stopPropagation();
-                openTagTimeline(tag);
-              });
-              tagRow.appendChild(pill);
-            });
-            bubble.appendChild(tagRow);
-          }
-
-          bubble.addEventListener('click', () => openBottomSheet(entry, key));
-
-          row.appendChild(time);
-          row.appendChild(bubble);
-          group.appendChild(row);
+          card.addEventListener('click', () => openBottomSheet(entry, key));
+          group.appendChild(card);
         });
       }
-
       scroll.appendChild(group);
     }
   }
 
-  /* ────────────────────────────────────────────
-     NAVIGATION
-  ──────────────────────────────────────────── */
-  function showScreen(id, direction='right') {
-    document.querySelectorAll('.screen').forEach(s => {
-      if (s.id === id) { s.classList.remove('hidden','slide-left'); }
-      else if (!s.classList.contains('hidden')) {
-        s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
-      }
-    });
-  }
-
+  // ===== DETAIL =====
   async function openDetail(dateStr) {
     selectedDate = dateStr;
     const parts = dateStr.split('-');
     const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
-    document.getElementById('detailDateBig').textContent =
-      `${dt.getMonth()+1}月${dt.getDate()}日`;
-    document.getElementById('detailDateSub').textContent =
-      `${dt.getFullYear()} · ${WEEKDAYS_ZH[dt.getDay()]}`;
+    document.getElementById('detailDateBig').textContent = `${dt.getMonth()+1}月${dt.getDate()}日`;
+    document.getElementById('detailDateSub').textContent = `${dt.getFullYear()} · ${WEEKDAYS_ZH[dt.getDay()]}`;
     showScreen('screen-detail');
     await renderTimeline(dateStr);
   }
 
-  async function openWeekView() {
-    weekOffset = 0;
-    showScreen('screen-week');
-    await renderWeekView();
-  }
-
-  /* ────────────────────────────────────────────
-     TAG CLOUD
-  ──────────────────────────────────────────── */
-  async function openTagCloud() {
-    showScreen('screen-tagcloud');
-    const scroll = document.getElementById('tagCloudScroll');
-    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
-    const tags = await fetchAllTags();
-    scroll.innerHTML = '';
-    if (!tags.length) {
-      scroll.innerHTML = `<div class="tagcloud-empty">
-        <div>还没有标签</div>
-        <div style="font-size:12px;opacity:0.6">添加记录时可以打上标签</div>
-      </div>`;
-      return;
-    }
-    const maxCount = Math.max(...tags.map(t => t.count));
-    const wrap = document.createElement('div');
-    wrap.className = 'tagcloud-wrap';
-    tags.forEach(t => {
-      const ratio = maxCount > 1 ? t.count / maxCount : 1;
-      const fontSize = 13 + ratio * 13;
-      const el = document.createElement('span');
-      el.className = 'tagcloud-item';
-      el.style.fontSize = fontSize + 'px';
-      el.textContent = t.tag;
-      el.addEventListener('click', () => openTagTimeline(t.tag));
-      wrap.appendChild(el);
-    });
-    scroll.appendChild(wrap);
-  }
-
-  /* ────────────────────────────────────────────
-     TAG TIMELINE
-  ──────────────────────────────────────────── */
-  async function openTagTimeline(tag) {
-    showScreen('screen-tagtimeline');
-    document.getElementById('tagTimelineTitle').textContent = `# ${tag}`;
-    const scroll = document.getElementById('tagTimelineScroll');
-    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
-
-    const entries = await fetchEntriesByTag(tag);
-    document.getElementById('tagTimelineSub').textContent = `共 ${entries.length} 条记录`;
-    scroll.innerHTML = '';
-
-    if (!entries.length) {
-      scroll.innerHTML = `<div class="timeline-empty">
-        <div class="empty-icon">✦</div>
-        <div>这个标签下还没有记录</div>
-      </div>`;
-      return;
-    }
-
-    entries.forEach((entry, i) => {
-      const row = document.createElement('div');
-      row.className = 'timeline-entry';
-      row.style.animationDelay = (i * 0.08) + 's';
-
-      const parts = entry.date.split('-');
-      const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
-      const dateEl = document.createElement('div');
-      dateEl.className = 'entry-date-badge';
-      dateEl.innerHTML = `${dt.getMonth()+1}月${dt.getDate()}日<br>${fmtTime(entry.ts)}`;
-
-      const bubble = document.createElement('div');
-      bubble.className = 'entry-bubble';
-      const dur = 3.5 + Math.random() * 2;
-      const offset = -(2 + Math.random() * 6);
-      bubble.style.setProperty('--float-dur', dur + 's');
-      bubble.style.setProperty('--float-offset', offset + 'px');
-      bubble.style.animationDelay = (i * 0.4) + 's';
-
-      if (entry.text) {
-        const preview = entry.text.length > 10 ? entry.text.slice(0,10) + '…' : entry.text;
-        const textEl = document.createElement('div');
-        textEl.className = 'entry-text-preview';
-        textEl.textContent = preview;
-        bubble.appendChild(textEl);
-      }
-      if (entry.images && entry.images.length) {
-        const row2 = document.createElement('div');
-        row2.className = 'entry-images-row';
-        entry.images.slice(0,3).forEach(url => {
-          const img = document.createElement('img');
-          img.className = 'entry-thumb';
-          img.src = url; img.alt = '';
-          img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
-          row2.appendChild(img);
-        });
-        bubble.appendChild(row2);
-        if (entry.images.length > 3) {
-          const cnt = document.createElement('div');
-          cnt.className = 'entry-img-count';
-          cnt.textContent = `共 ${entry.images.length} 张图片`;
-          bubble.appendChild(cnt);
-        }
-      }
-      if (entry.tags && entry.tags.length) {
-        bubble.appendChild(makeTagPillsRow(entry.tags));
-      }
-      bubble.addEventListener('click', () => openBottomSheet(entry, entry.date));
-
-      row.appendChild(dateEl);
-      row.appendChild(bubble);
-      scroll.appendChild(row);
-    });
-  }
-
   async function renderTimeline(dateStr) {
     const scroll = document.getElementById('timelineScroll');
-    scroll.innerHTML = '<div style="color:rgba(255,255,255,0.15);text-align:center;padding:40px;font-size:13px;font-weight:300;">加载中…</div>';
-
+    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
     const entries = await fetchEntriesForDate(dateStr);
     scroll.innerHTML = '';
-
     if (!entries.length) {
-      scroll.innerHTML = `<div class="timeline-empty">
-        <div class="empty-icon">✦</div>
-        <div>这天还没有记录</div>
-        <div style="font-size:12px;opacity:0.6">点击 + 写下今天的心情</div>
-      </div>`;
+      scroll.innerHTML = `<div class="timeline-empty"><div class="empty-icon">✦</div><div>这天还没有记录</div></div>`;
       return;
     }
-
     entries.forEach((entry, i) => {
       const row = document.createElement('div');
       row.className = 'timeline-entry';
@@ -1394,17 +1453,11 @@
 
       const bubble = document.createElement('div');
       bubble.className = 'entry-bubble';
-      const dur = 3.5 + Math.random() * 2;
-      const offset = -(2 + Math.random() * 6);
-      bubble.style.setProperty('--float-dur', dur + 's');
-      bubble.style.setProperty('--float-offset', offset + 'px');
-      bubble.style.animationDelay = (i * 0.4) + 's';
 
       if (entry.text) {
-        const preview = entry.text.length > 10 ? entry.text.slice(0,10) + '…' : entry.text;
         const textEl = document.createElement('div');
         textEl.className = 'entry-text-preview';
-        textEl.textContent = preview;
+        textEl.textContent = entry.text;
         bubble.appendChild(textEl);
       }
       if (entry.images && entry.images.length) {
@@ -1413,7 +1466,7 @@
         entry.images.slice(0,3).forEach(url => {
           const img = document.createElement('img');
           img.className = 'entry-thumb';
-          img.src = url; img.alt = '';
+          img.src = url;
           img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
           row2.appendChild(img);
         });
@@ -1436,14 +1489,12 @@
     });
   }
 
-  /* ────────────────────────────────────────────
-     TAG PILLS HELPER
-  ──────────────────────────────────────────── */
+  // ===== TAG HELPERS =====
   function makeTagPillsRow(tags, onClickOverride) {
     const row = document.createElement('div');
     row.className = 'entry-tags-row';
     tags.forEach(tag => {
-      const pill = document.createElement('span');
+      const pill = document.createElement('button');
       pill.className = 'entry-tag-pill';
       pill.textContent = tag;
       pill.addEventListener('click', e => {
@@ -1456,9 +1507,86 @@
     return row;
   }
 
-  /* ────────────────────────────────────────────
-     BOTTOM SHEET
-  ──────────────────────────────────────────── */
+  // ===== TAG CLOUD =====
+  async function openTagCloud() {
+    showScreen('screen-tagcloud');
+    const scroll = document.getElementById('tagCloudScroll');
+    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+    const tags = await fetchAllTags();
+    scroll.innerHTML = '';
+    if (!tags.length) {
+      scroll.innerHTML = `<div class="tagcloud-empty"><div>还没有标签</div></div>`;
+      return;
+    }
+    const maxCount = Math.max(...tags.map(t => t.count));
+    const wrap = document.createElement('div');
+    wrap.className = 'tagcloud-wrap';
+    tags.forEach(t => {
+      const ratio = maxCount > 1 ? t.count / maxCount : 1;
+      const fontSize = 14 + ratio * 14;
+      const el = document.createElement('span');
+      el.className = 'tagcloud-item';
+      el.style.fontSize = fontSize + 'px';
+      el.textContent = t.tag;
+      el.addEventListener('click', () => openTagTimeline(t.tag));
+      wrap.appendChild(el);
+    });
+    scroll.appendChild(wrap);
+  }
+
+  // ===== TAG TIMELINE =====
+  async function openTagTimeline(tag) {
+    showScreen('screen-tagtimeline');
+    document.getElementById('tagTimelineTitle').textContent = `# ${tag}`;
+    const scroll = document.getElementById('tagTimelineScroll');
+    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+    const entries = await fetchEntriesByTag(tag);
+    document.getElementById('tagTimelineSub').textContent = `${entries.length} 条`;
+    scroll.innerHTML = '';
+    if (!entries.length) {
+      scroll.innerHTML = `<div class="timeline-empty"><div class="empty-icon">✦</div><div>这个标签下还没有记录</div></div>`;
+      return;
+    }
+    entries.forEach((entry, i) => {
+      const row = document.createElement('div');
+      row.className = 'timeline-entry';
+      row.style.animationDelay = (i * 0.08) + 's';
+      const parts = entry.date.split('-');
+      const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
+      const dateEl = document.createElement('div');
+      dateEl.className = 'entry-date-badge';
+      dateEl.innerHTML = `${dt.getMonth()+1}月${dt.getDate()}日<br>${fmtTime(entry.ts)}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'entry-bubble';
+      if (entry.text) {
+        const textEl = document.createElement('div');
+        textEl.className = 'entry-text-preview';
+        textEl.textContent = entry.text;
+        bubble.appendChild(textEl);
+      }
+      if (entry.images && entry.images.length) {
+        const row2 = document.createElement('div');
+        row2.className = 'entry-images-row';
+        entry.images.slice(0,3).forEach(url => {
+          const img = document.createElement('img');
+          img.className = 'entry-thumb';
+          img.src = url;
+          img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
+          row2.appendChild(img);
+        });
+        bubble.appendChild(row2);
+      }
+      if (entry.tags && entry.tags.length) {
+        bubble.appendChild(makeTagPillsRow(entry.tags));
+      }
+      bubble.addEventListener('click', () => openBottomSheet(entry, entry.date));
+      row.appendChild(dateEl);
+      row.appendChild(bubble);
+      scroll.appendChild(row);
+    });
+  }
+
+  // ===== BOTTOM SHEET =====
   function openBottomSheet(entry, dateStr) {
     openEntryId = { id: entry.id, date: dateStr };
     document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
@@ -1475,20 +1603,19 @@
     imgs.innerHTML = '';
     (entry.images || []).forEach(url => {
       const img = document.createElement('img');
-      img.src = url; img.alt = '';
-      img.className = 'sheet-image';
+      img.src = url; img.className = 'sheet-image';
       img.addEventListener('click', () => openLightbox(url));
       imgs.appendChild(img);
     });
     document.getElementById('bottomSheetOverlay').classList.add('open');
   }
 
-  document.getElementById('bottomSheetOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet();
-  });
   function closeBottomSheet() {
     document.getElementById('bottomSheetOverlay').classList.remove('open');
   }
+  document.getElementById('bottomSheetOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet();
+  });
 
   document.getElementById('sheetDeleteBtn').addEventListener('click', async () => {
     if (!openEntryId) return;
@@ -1499,14 +1626,11 @@
     hideLoading();
     toast('已删除');
     await renderTimeline(date);
-    // Refresh dots
     allDateMeta = await fetchAllDates();
     renderCalendarGrid();
   });
 
-  /* ────────────────────────────────────────────
-     LIGHTBOX
-  ──────────────────────────────────────────── */
+  // ===== LIGHTBOX =====
   function openLightbox(url) {
     document.getElementById('lightboxImg').src = url;
     document.getElementById('lightbox').classList.add('open');
@@ -1515,9 +1639,7 @@
     document.getElementById('lightbox').classList.remove('open');
   });
 
-  /* ────────────────────────────────────────────
-     ADD RECORD
-  ──────────────────────────────────────────── */
+  // ===== ADD RECORD =====
   async function openAdd(dateStr) {
     addTargetDate = dateStr;
     pendingImages = [];
@@ -1589,9 +1711,6 @@
     });
   }
 
-  /* ────────────────────────────────────────────
-     TAG INPUT (add screen)
-  ──────────────────────────────────────────── */
   function addPendingTag(raw) {
     const tag = raw.trim().slice(0, 20);
     if (!tag) return;
@@ -1619,14 +1738,11 @@
     suggestRow.innerHTML = '';
     try {
       const allTags = await fetchAllTags();
-      const suggestions = allTags
-        .map(t => t.tag)
-        .filter(t => !pendingTags.includes(t))
-        .slice(0, 8);
+      const suggestions = allTags.map(t => t.tag).filter(t => !pendingTags.includes(t)).slice(0, 8);
       if (suggestions.length) {
         suggestLabel.style.display = 'block';
         suggestions.forEach(tag => {
-          const chip = document.createElement('span');
+          const chip = document.createElement('button');
           chip.className = 'tag-chip-muted';
           chip.textContent = tag;
           chip.addEventListener('click', () => addPendingTag(tag));
@@ -1635,7 +1751,7 @@
       } else {
         suggestLabel.style.display = 'none';
       }
-    } catch(e) { /* ignore */ }
+    } catch(e) {}
   }
 
   document.getElementById('tagInput').addEventListener('keydown', e => {
@@ -1645,17 +1761,10 @@
       e.target.value = '';
     }
   });
-  document.getElementById('tagInput').addEventListener('blur', e => {
-    if (e.target.value.trim()) {
-      addPendingTag(e.target.value);
-      e.target.value = '';
-    }
-  });
 
   document.getElementById('submitBtn').addEventListener('click', async () => {
     const text = document.getElementById('addTextarea').value.trim();
     if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
-
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; showLoading();
     try {
@@ -1677,25 +1786,37 @@
     btn.disabled = false;
   });
 
-  /* ────────────────────────────────────────────
-     BUTTON WIRING
-  ──────────────────────────────────────────── */
+  // ===== NAVIGATION =====
+  function showScreen(id, direction='right') {
+    document.querySelectorAll('.screen').forEach(s => {
+      if (s.id === id) { s.classList.remove('hidden','slide-left'); }
+      else if (!s.classList.contains('hidden')) {
+        s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
+      }
+    });
+  }
+
+  async function openWeekView() {
+    weekOffset = 0;
+    showScreen('screen-week');
+    await renderWeekView();
+  }
+
+  // ===== BUTTONS =====
   document.getElementById('fabAdd').addEventListener('click', () => openAdd(todayKey()));
   document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
   document.getElementById('addBackBtn').addEventListener('click', () => {
     if (selectedDate) showScreen('screen-detail', 'left');
     else showScreen('screen-calendar', 'left');
   });
-  document.getElementById('backBtn').addEventListener('click', () => {
-    showScreen('screen-calendar', 'left');
-  });
+  document.getElementById('backBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+  document.getElementById('weekBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+  document.getElementById('tagCloudBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+  document.getElementById('tagTimelineBackBtn').addEventListener('click', () => showScreen('screen-tagcloud', 'left'));
+
   document.getElementById('tagEntryBtn').addEventListener('click', () => openTagCloud());
-  document.getElementById('tagCloudBackBtn').addEventListener('click', () => {
-    showScreen('screen-calendar', 'left');
-  });
-  document.getElementById('tagTimelineBackBtn').addEventListener('click', () => {
-    showScreen('screen-tagcloud', 'left');
-  });
+  document.getElementById('weekEntryBtn').addEventListener('click', () => openWeekView());
+
   document.getElementById('prevMonth').addEventListener('click', () => {
     currentMonth--; if (currentMonth < 0) { currentMonth=11; currentYear--; }
     renderCalendar();
@@ -1705,25 +1826,11 @@
     renderCalendar();
   });
 
-  // Week view buttons
-  document.getElementById('weekEntryBtn').addEventListener('click', () => openWeekView());
-  document.getElementById('weekBackBtn').addEventListener('click', () => {
-    showScreen('screen-calendar', 'left');
-  });
-  document.getElementById('weekPrev').addEventListener('click', async () => {
-    weekOffset--;
-    await renderWeekView();
-  });
-  document.getElementById('weekNext').addEventListener('click', async () => {
-    weekOffset++;
-    await renderWeekView();
-  });
+  document.getElementById('weekPrev').addEventListener('click', async () => { weekOffset--; await renderWeekView(); });
+  document.getElementById('weekNext').addEventListener('click', async () => { weekOffset++; await renderWeekView(); });
+  document.getElementById('weekToday').addEventListener('click', async () => { weekOffset = 0; await renderWeekView(); });
 
-  /* ────────────────────────────────────────────
-     INIT
-  ──────────────────────────────────────────── */
-  initPapers();
-  document.querySelectorAll('.meteors-bg').forEach(initMeteors);
+  // ===== INIT =====
   await renderCalendar();
 </script>
 </body>
