@@ -15,26 +15,20 @@
     :root {
       --bg: #F2F0ED;
       --bg-card: #FFFFFF;
-      --bg-detail: #F5F5F5;
       --text-primary: #1A1A1A;
       --text-secondary: #6B6B6B;
       --text-muted: #A8A8A8;
       --accent: #E87A5D;
       --accent-light: #F5E6E0;
-      --accent-dark: #D06A4F;
       --border: #EEEEEE;
+      --radius: 18px;
+      --radius-sm: 10px;
+      --radius-xs: 8px;
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
       --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03);
       --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.04);
-      --shadow-xl: 0 24px 64px rgba(0,0,0,0.12), 0 12px 32px rgba(0,0,0,0.06);
-      --radius: 16px;
-      --radius-sm: 10px;
-      --radius-xs: 8px;
-      --font-sans: 'Inter', -apple-system, -apple-system, sans-serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
       --font-serif: 'Noto Serif SC', serif;
-      --tag-bg: #F5E6E0;
-      --tag-fg: #E87A5D;
-      --tag-border: transparent;
     }
 
     html, body {
@@ -46,7 +40,6 @@
       user-select: none;
     }
 
-    /* ===== 滚动条 ===== */
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
@@ -148,7 +141,6 @@
     }
     .month-btn:active { background: var(--border); transform: scale(0.92); }
 
-    /* ===== 星期行 ===== */
     .cal-weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -161,7 +153,6 @@
     }
     .cal-weekday.weekend { color: var(--accent); }
 
-    /* ===== 日历网格 ===== */
     .cal-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -328,8 +319,6 @@
       padding-top: 14px;
       font-family: var(--font-sans);
     }
-
-    /* ===== 卡片（时间线用） ===== */
     .entry-bubble {
       flex: 1;
       background: var(--bg-card);
@@ -380,8 +369,8 @@
     .entry-tag-pill {
       font-size: 10px;
       font-weight: 500;
-      color: var(--tag-fg);
-      background: var(--tag-bg);
+      color: var(--accent);
+      background: var(--accent-light);
       padding: 2px 10px;
       border-radius: 999px;
       cursor: pointer;
@@ -391,7 +380,7 @@
     }
     .entry-tag-pill:active { opacity: 0.6; }
 
-    /* ===== 周视图 ===== */
+    /* ===== 周视图（融合版：独立卡片 + 强化层次） ===== */
     #screen-week {
       background: var(--bg);
       display: flex;
@@ -436,96 +425,193 @@
       background: var(--accent-light);
     }
 
-    .day-group {
-      margin-bottom: 28px;
-      animation: fadeUp 0.35s ease both;
-    }
-    .day-header {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1.5px solid var(--border);
-      margin-bottom: 12px;
-    }
-    .day-name {
-      font-size: 15px;
-      font-weight: 600;
-    }
-    .day-name.today { color: var(--accent); }
-    .day-date {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-    .day-empty {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding: 6px 0 2px;
-      font-style: italic;
-    }
-
-    .week-entry-card {
+    /* ===== 每日独立卡片 ===== */
+    .day-card {
       background: var(--bg-card);
       border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 12px;
       box-shadow: var(--shadow-md);
       border: 1px solid rgba(255,255,255,0.6);
-      cursor: pointer;
+      overflow: hidden;
+      margin-bottom: 20px;
       transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: cardIn 0.4s ease both;
     }
-    .week-entry-card:active {
-      transform: scale(0.97);
+    .day-card:active {
+      transform: scale(0.98);
       box-shadow: var(--shadow-sm);
     }
-    .week-entry-meta {
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .day-card.today {
+      border-color: var(--accent);
+      box-shadow: 0 4px 24px rgba(232,122,93,0.14), var(--shadow-md);
+    }
+    .day-card.today .day-card-header {
+      background: var(--accent-light);
+    }
+    .day-card.weekend .day-card-header {
+      background: rgba(232,122,93,0.04);
+    }
+
+    .day-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .day-card-date {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .day-card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .day-card-name.today { color: var(--accent); }
+    .day-card-name.weekend { color: var(--accent); }
+
+    .day-card-number {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .day-card-number.today { color: var(--accent); }
+
+    .day-card-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 2px 12px;
+      border-radius: 999px;
+    }
+    .day-card-badge.has-record {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .day-card-body {
+      padding: 14px 18px 16px;
+    }
+    .day-card-empty {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    /* ===== 卡片内部条目 ===== */
+    .day-entry {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+    }
+    .day-entry:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .day-entry:first-child {
+      padding-top: 0;
+    }
+
+    .day-entry-meta {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       flex-wrap: wrap;
     }
-    .week-entry-time {
+    .day-entry-time {
       font-size: 12px;
       font-weight: 500;
       color: var(--text-muted);
       font-family: var(--font-sans);
     }
-    .week-entry-text {
-      font-family: var(--font-serif);
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--text-primary);
-    }
-    .week-entry-images {
-      display: flex;
-      gap: 5px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .week-entry-images img {
-      width: 52px;
-      height: 52px;
-      border-radius: var(--radius-xs);
-      object-fit: cover;
-      border: 1px solid var(--border);
-    }
-    .week-entry-tags {
+    .day-entry-tags {
       display: flex;
       gap: 5px;
       flex-wrap: wrap;
-      margin-top: 6px;
     }
-    .week-entry-tag {
+    .day-entry-tag {
       font-size: 10px;
       font-weight: 500;
-      color: var(--tag-fg);
-      background: var(--tag-bg);
+      color: var(--accent);
+      background: var(--accent-light);
       padding: 1px 10px;
       border-radius: 999px;
       cursor: pointer;
       border: none;
       font-family: var(--font-sans);
+    }
+
+    .day-entry-text {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+    .day-entry-text .highlight {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .day-entry.has-image .day-entry-text {
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .day-entry-images {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .day-entry-images img {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .day-entry-images img:hover {
+      transform: scale(1.05);
+    }
+    .day-entry-images .more-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-sm);
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .day-entry.only-image {
+      padding: 0;
+      border-bottom: none;
+    }
+    .day-entry.only-image .day-entry-images {
+      margin-top: 0;
+    }
+    .day-entry.only-image .day-entry-images img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
     }
 
     /* ===== 添加页面 ===== */
@@ -636,8 +722,8 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      background: var(--tag-bg);
-      color: var(--tag-fg);
+      background: var(--accent-light);
+      color: var(--accent);
       border-radius: 999px;
       padding: 4px 12px;
       font-size: 13px;
@@ -892,16 +978,18 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ===== 隐藏工具 ===== */
     .hidden-file { display: none; }
 
-    /* ===== 响应式 ===== */
     @media (max-width: 420px) {
       .nav-bar { padding: 44px 16px 12px; }
       .cal-month { font-size: 24px; }
       .day-circle { width: 34px; height: 34px; font-size: 13px; }
       .cal-day.today .day-circle { width: 36px; height: 36px; font-size: 14px; }
       .week-range { font-size: 19px; }
+      .day-card-header { padding: 12px 14px; }
+      .day-card-body { padding: 10px 14px 12px; }
+      .day-card-number { font-size: 19px; }
+      .day-entry-images img { width: 56px; height: 56px; }
     }
   </style>
 </head>
@@ -1050,7 +1138,6 @@
   <div class="spinner"></div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
   import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, where }
@@ -1291,7 +1378,7 @@
     return cell;
   }
 
-  // ===== WEEK VIEW =====
+  // ===== WEEK VIEW (融合版) =====
   function getWeekRange(offset) {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -1340,85 +1427,126 @@
     }
 
     const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
     for (let i = 0; i < dates.length; i++) {
       const d = dates[i];
       const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
       const entries = dayEntries[key] || [];
       const isToday = key === todayKey();
+      const isWeekend = [0,6].includes(d.getDay());
 
-      const group = document.createElement('div');
-      group.className = 'day-group';
-      group.style.animationDelay = (i * 0.06) + 's';
+      // 每日独立卡片
+      const card = document.createElement('div');
+      card.className = 'day-card' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
 
+      // 卡片头部
       const header = document.createElement('div');
-      header.className = 'day-header';
-      header.innerHTML = `
-        <span class="day-name${isToday ? ' today' : ''}">${dayNames[d.getDay()]}${isToday ? ' · 今天' : ''}</span>
-        <span class="day-date">${d.getMonth()+1}月${d.getDate()}日</span>
-      `;
-      group.appendChild(header);
+      header.className = 'day-card-header';
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'day-card-date';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'day-card-name' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+      nameSpan.textContent = dayNames[d.getDay()] + (isToday ? ' · 今天' : '');
+      const numSpan = document.createElement('span');
+      numSpan.className = 'day-card-number' + (isToday ? ' today' : '');
+      numSpan.textContent = d.getDate();
+      dateDiv.appendChild(nameSpan);
+      dateDiv.appendChild(numSpan);
+
+      const badge = document.createElement('span');
+      badge.className = 'day-card-badge' + (entries.length > 0 ? ' has-record' : '');
+      badge.textContent = entries.length > 0 ? `${entries.length} 条` : '0 条';
+
+      header.appendChild(dateDiv);
+      header.appendChild(badge);
+      card.appendChild(header);
+
+      // 卡片主体
+      const body = document.createElement('div');
+      body.className = 'day-card-body';
 
       if (entries.length === 0) {
         const empty = document.createElement('div');
-        empty.className = 'day-empty';
-        empty.textContent = '— 没有记录 —';
-        group.appendChild(empty);
+        empty.className = 'day-card-empty';
+        empty.textContent = '— 今天没有记录 —';
+        body.appendChild(empty);
       } else {
         entries.forEach((entry, idx) => {
-          const card = document.createElement('div');
-          card.className = 'week-entry-card';
-          card.style.animationDelay = (idx * 0.05 + 0.1) + 's';
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'day-entry' + (entry.images && entry.images.length > 0 ? ' has-image' : '');
 
+          // 元信息：时间 + 标签
           const meta = document.createElement('div');
-          meta.className = 'week-entry-meta';
-          meta.innerHTML = `<span class="week-entry-time">${fmtTime(entry.ts)}</span>`;
+          meta.className = 'day-entry-meta';
+          const time = document.createElement('span');
+          time.className = 'day-entry-time';
+          time.textContent = fmtTime(entry.ts);
+          meta.appendChild(time);
+
           if (entry.tags && entry.tags.length) {
-            entry.tags.slice(0,3).forEach(tag => {
-              const pill = document.createElement('span');
-              pill.className = 'week-entry-tag';
+            const tagsDiv = document.createElement('div');
+            tagsDiv.className = 'day-entry-tags';
+            entry.tags.slice(0, 3).forEach(tag => {
+              const pill = document.createElement('button');
+              pill.className = 'day-entry-tag';
               pill.textContent = tag;
-              pill.addEventListener('click', e => { e.stopPropagation(); openTagTimeline(tag); });
-              meta.appendChild(pill);
+              pill.addEventListener('click', e => {
+                e.stopPropagation();
+                openTagTimeline(tag);
+              });
+              tagsDiv.appendChild(pill);
             });
             if (entry.tags.length > 3) {
-              const more = document.createElement('span');
-              more.className = 'week-entry-tag';
+              const more = document.createElement('button');
+              more.className = 'day-entry-tag';
               more.textContent = `+${entry.tags.length - 3}`;
-              meta.appendChild(more);
+              more.addEventListener('click', e => {
+                e.stopPropagation();
+                openTagTimeline(entry.tags[0]);
+              });
+              tagsDiv.appendChild(more);
             }
+            meta.appendChild(tagsDiv);
           }
-          card.appendChild(meta);
+          entryDiv.appendChild(meta);
 
+          // 文字
           if (entry.text) {
-            const textEl = document.createElement('div');
-            textEl.className = 'week-entry-text';
-            textEl.textContent = entry.text;
-            card.appendChild(textEl);
+            const textDiv = document.createElement('div');
+            textDiv.className = 'day-entry-text';
+            textDiv.textContent = entry.text;
+            entryDiv.appendChild(textDiv);
           }
 
-          if (entry.images && entry.images.length) {
+          // 图片
+          if (entry.images && entry.images.length > 0) {
             const imgRow = document.createElement('div');
-            imgRow.className = 'week-entry-images';
-            entry.images.slice(0,4).forEach(url => {
+            imgRow.className = 'day-entry-images';
+            entry.images.slice(0, 4).forEach(url => {
               const img = document.createElement('img');
               img.src = url;
-              img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
+              img.addEventListener('click', e => {
+                e.stopPropagation();
+                openLightbox(url);
+              });
               imgRow.appendChild(img);
             });
             if (entry.images.length > 4) {
-              const more = document.createElement('span');
-              more.style.cssText = 'font-size:11px;color:var(--text-muted);display:flex;align-items:center;';
+              const more = document.createElement('div');
+              more.className = 'more-badge';
               more.textContent = `+${entry.images.length - 4}`;
               imgRow.appendChild(more);
             }
-            card.appendChild(imgRow);
+            entryDiv.appendChild(imgRow);
           }
 
-          card.addEventListener('click', () => openBottomSheet(entry, key));
-          group.appendChild(card);
+          entryDiv.addEventListener('click', () => openBottomSheet(entry, key));
+          body.appendChild(entryDiv);
         });
       }
-      scroll.appendChild(group);
+
+      card.appendChild(body);
+      scroll.appendChild(card);
     }
   }
 
