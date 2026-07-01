@@ -60,7 +60,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 50px 20px 16px;
+      padding: 50px 20px 12px;
       background: var(--bg);
       position: relative;
       z-index: 5;
@@ -100,7 +100,7 @@
     }
     .nav-action:active { background: var(--accent-light); }
 
-    /* ===== 日历页面 ===== */
+    /* ===== 日历主页 ===== */
     #screen-calendar {
       background: var(--bg);
       display: flex;
@@ -108,10 +108,15 @@
     }
 
     .cal-header {
-      padding: 12px 20px 8px;
+      padding: 4px 20px 8px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+    }
+    .cal-left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
     }
     .cal-month {
       font-size: 28px;
@@ -119,7 +124,7 @@
       letter-spacing: -0.5px;
     }
     .cal-year {
-      font-size: 14px;
+      font-size: 15px;
       color: var(--text-secondary);
       font-weight: 400;
     }
@@ -144,7 +149,7 @@
     .cal-weekdays {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      padding: 8px 16px 4px;
+      padding: 10px 16px 4px;
       font-size: 11px;
       font-weight: 500;
       color: var(--text-muted);
@@ -158,29 +163,36 @@
       grid-template-columns: repeat(7, 1fr);
       padding: 0 12px;
       flex: 1;
-      gap: 2px 0;
+      gap: 4px 0;
+      align-content: start;
     }
+
     .cal-day {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 6px 0;
+      padding: 6px 0 4px;
       cursor: pointer;
+      border-radius: 12px;
+      transition: background 0.15s;
     }
+    .cal-day:active { background: rgba(0,0,0,0.03); }
+
     .day-circle {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      font-weight: 400;
+      font-size: 15px;
+      font-weight: 500;
       color: var(--text-secondary);
       transition: all 0.2s;
       font-family: var(--font-sans);
+      position: relative;
     }
-    .cal-day:active .day-circle { transform: scale(0.88); }
+
     .cal-day.has-record .day-circle {
       font-weight: 600;
       color: var(--text-primary);
@@ -196,19 +208,18 @@
     .cal-day.other-month .day-circle { opacity: 0.2; }
     .cal-day.other-month { pointer-events: none; }
 
-    .day-dots {
-      display: flex;
-      gap: 3px;
-      margin-top: 3px;
-      min-height: 6px;
-    }
+    /* 统一用一个实心圆点表示有记录 */
     .day-dot {
-      width: 5px;
-      height: 5px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
+      margin-top: 2px;
+      background: var(--accent);
+      opacity: 0.5;
+      transition: opacity 0.2s;
     }
-    .day-dot.text { background: var(--accent); opacity: 0.5; }
-    .day-dot.img { background: var(--accent); opacity: 0.25; }
+    .cal-day.today .day-dot { background: #fff; opacity: 0.7; }
+    .cal-day.has-record .day-dot { opacity: 0.7; }
 
     /* ===== FAB ===== */
     .fab {
@@ -380,7 +391,7 @@
     }
     .entry-tag-pill:active { opacity: 0.6; }
 
-    /* ===== 周视图（融合版：独立卡片 + 强化层次） ===== */
+    /* ===== 周视图 ===== */
     #screen-week {
       background: var(--bg);
       display: flex;
@@ -508,7 +519,6 @@
       padding: 4px 0;
     }
 
-    /* ===== 卡片内部条目 ===== */
     .day-entry {
       padding: 10px 0;
       border-bottom: 1px solid rgba(0,0,0,0.04);
@@ -981,10 +991,11 @@
     .hidden-file { display: none; }
 
     @media (max-width: 420px) {
-      .nav-bar { padding: 44px 16px 12px; }
+      .nav-bar { padding: 44px 16px 10px; }
       .cal-month { font-size: 24px; }
-      .day-circle { width: 34px; height: 34px; font-size: 13px; }
-      .cal-day.today .day-circle { width: 36px; height: 36px; font-size: 14px; }
+      .cal-year { font-size: 13px; }
+      .day-circle { width: 36px; height: 36px; font-size: 14px; }
+      .cal-day.today .day-circle { width: 38px; height: 38px; font-size: 15px; }
       .week-range { font-size: 19px; }
       .day-card-header { padding: 12px 14px; }
       .day-card-body { padding: 10px 14px 12px; }
@@ -1004,9 +1015,9 @@
   </div>
 
   <div class="cal-header">
-    <div>
-      <div class="cal-month" id="calMonthLabel">六月</div>
-      <div class="cal-year" id="calYearLabel">2026年</div>
+    <div class="cal-left">
+      <span class="cal-month" id="calMonthLabel">六月</span>
+      <span class="cal-year" id="calYearLabel">2026</span>
     </div>
     <div class="month-nav">
       <button class="month-btn" id="prevMonth">‹</button>
@@ -1327,7 +1338,7 @@
   function renderCalendarGrid() {
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-    document.getElementById('calYearLabel').textContent = currentYear + '年';
+    document.getElementById('calYearLabel').textContent = currentYear;
     document.getElementById('calMonthLabel').textContent = MONTHS_ZH[currentMonth];
 
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -1353,11 +1364,12 @@
     const isToday = dKey === todayKey();
     const meta = allDateMeta[dKey] || {};
     const isWeekend = [0,6].includes(new Date(year, month, day).getDay());
+    const hasRecord = meta.hasText || meta.hasImg;
 
     const cell = document.createElement('div');
     cell.className = 'cal-day' +
       (isToday ? ' today' : '') +
-      (meta.hasText || meta.hasImg ? ' has-record' : '') +
+      (hasRecord ? ' has-record' : '') +
       (isWeekend ? ' weekend' : '') +
       (otherMonth ? ' other-month' : '');
 
@@ -1365,20 +1377,21 @@
     circle.className = 'day-circle';
     circle.textContent = day;
 
-    const dots = document.createElement('div');
-    dots.className = 'day-dots';
-    if (meta.hasText) { const d = document.createElement('div'); d.className='day-dot text'; dots.appendChild(d); }
-    if (meta.hasImg) { const d = document.createElement('div'); d.className='day-dot img'; dots.appendChild(d); }
+    const dot = document.createElement('div');
+    dot.className = 'day-dot';
 
     cell.appendChild(circle);
-    cell.appendChild(dots);
+    if (hasRecord || isToday) {
+      cell.appendChild(dot);
+    }
+
     if (!otherMonth) {
       cell.addEventListener('click', () => openDetail(dKey));
     }
     return cell;
   }
 
-  // ===== WEEK VIEW (融合版) =====
+  // ===== WEEK VIEW =====
   function getWeekRange(offset) {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -1435,11 +1448,9 @@
       const isToday = key === todayKey();
       const isWeekend = [0,6].includes(d.getDay());
 
-      // 每日独立卡片
       const card = document.createElement('div');
       card.className = 'day-card' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
 
-      // 卡片头部
       const header = document.createElement('div');
       header.className = 'day-card-header';
       const dateDiv = document.createElement('div');
@@ -1461,7 +1472,6 @@
       header.appendChild(badge);
       card.appendChild(header);
 
-      // 卡片主体
       const body = document.createElement('div');
       body.className = 'day-card-body';
 
@@ -1471,11 +1481,10 @@
         empty.textContent = '— 今天没有记录 —';
         body.appendChild(empty);
       } else {
-        entries.forEach((entry, idx) => {
+        entries.forEach((entry) => {
           const entryDiv = document.createElement('div');
           entryDiv.className = 'day-entry' + (entry.images && entry.images.length > 0 ? ' has-image' : '');
 
-          // 元信息：时间 + 标签
           const meta = document.createElement('div');
           meta.className = 'day-entry-meta';
           const time = document.createElement('span');
@@ -1510,7 +1519,6 @@
           }
           entryDiv.appendChild(meta);
 
-          // 文字
           if (entry.text) {
             const textDiv = document.createElement('div');
             textDiv.className = 'day-entry-text';
@@ -1518,7 +1526,6 @@
             entryDiv.appendChild(textDiv);
           }
 
-          // 图片
           if (entry.images && entry.images.length > 0) {
             const imgRow = document.createElement('div');
             imgRow.className = 'day-entry-images';
