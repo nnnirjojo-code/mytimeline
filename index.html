@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#F2F0ED">
-  <title>我的手账</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+Screen&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>我的手账 · 动态光晕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    /* ===== 全局重置 ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     :root {
-      --bg: #F2F0ED;
       --bg-card: #FFFFFF;
       --text-primary: #1A1A1A;
       --text-secondary: #6B6B6B;
@@ -25,44 +27,109 @@
       --radius: 16px;
       --radius-sm: 10px;
       --radius-xs: 8px;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.03), 0 1px 4px rgba(0,0,0,0.02);
-      --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.03);
-      --shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.04);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 4px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.04);
       --font-sans: 'Inter', -apple-system, sans-serif;
       --font-serif: 'LXGW WenKai Screen', 'Noto Serif SC', serif;
     }
 
-    html, body {
+    html,
+    body {
       height: 100%;
       overflow: hidden;
       font-family: var(--font-sans);
-      background: var(--bg);
+      /* ═══ 鲜艳暖色光晕 (增强版) ═══ */
+      background:
+        radial-gradient(ellipse at 20% 40%, rgba(232, 122, 93, 0.45) 0%, rgba(232, 122, 93, 0.10) 50%, transparent 70%),
+        radial-gradient(ellipse at 75% 25%, rgba(255, 180, 100, 0.40) 0%, rgba(255, 180, 100, 0.08) 45%, transparent 65%),
+        radial-gradient(ellipse at 60% 85%, rgba(255, 140, 120, 0.35) 0%, rgba(255, 140, 120, 0.06) 45%, transparent 60%),
+        radial-gradient(ellipse at 90% 70%, rgba(232, 122, 93, 0.20) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% 80%, rgba(255, 200, 150, 0.25) 0%, transparent 50%),
+        #F5F0EA;
+      background-attachment: fixed;
       color: var(--text-primary);
       user-select: none;
+      cursor: none;
     }
 
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    /* ═══ 鼠标跟随光晕 ═══ */
+    #glow {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+          rgba(255, 255, 240, 0.70) 0%,
+          rgba(255, 230, 200, 0.40) 25%,
+          rgba(255, 210, 180, 0.15) 50%,
+          rgba(255, 200, 170, 0.05) 70%,
+          transparent 85%);
+      transform: translate(-50%, -50%);
+      transition: width 0.25s ease, height 0.25s ease, opacity 0.2s ease;
+      mix-blend-mode: soft-light;
+      will-change: transform;
+      filter: blur(2px);
+    }
+    #glow.active {
+      width: 260px;
+      height: 260px;
+      opacity: 0.9;
+      background: radial-gradient(circle,
+          rgba(255, 255, 240, 0.85) 0%,
+          rgba(255, 230, 200, 0.50) 25%,
+          rgba(255, 210, 180, 0.20) 50%,
+          transparent 75%);
+    }
+    @media (hover: none) and (pointer: coarse) {
+      #glow {
+        display: none;
+      }
+      body {
+        cursor: auto;
+      }
+    }
 
-    /* ===== 屏幕切换 ===== */
+    /* ═══ 静态装饰光晕 ═══ */
+    #glow-static {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(255, 200, 150, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 30%, rgba(232, 122, 93, 0.08) 0%, transparent 45%);
+    }
+
+    /* ===== 通用 ===== */
     .screen {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       overflow: hidden;
       transition: opacity 0.35s ease, transform 0.35s ease;
       will-change: transform, opacity;
-      background: var(--bg);
+      background: transparent;
+      z-index: 1;
     }
-    .screen.hidden { opacity: 0; pointer-events: none; transform: translateX(24px); }
-    .screen.slide-left { transform: translateX(-24px); opacity: 0; pointer-events: none; }
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(24px);
+    }
+    .screen.slide-left {
+      transform: translateX(-24px);
+      opacity: 0;
+      pointer-events: none;
+    }
 
-    /* ===== 顶部导航 ===== */
     .nav-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 50px 20px 12px;
-      background: var(--bg);
+      background: transparent;
       position: relative;
       z-index: 5;
     }
@@ -81,11 +148,14 @@
       background: transparent;
       font-family: var(--font-sans);
     }
-    .nav-back:active { background: rgba(0,0,0,0.06); }
+    .nav-back:active {
+      background: rgba(0, 0, 0, 0.06);
+    }
     .nav-title {
       font-size: 18px;
       font-weight: 600;
       letter-spacing: -0.3px;
+      text-shadow: 0 1px 8px rgba(255, 255, 255, 0.30);
     }
     .nav-action {
       font-size: 14px;
@@ -94,25 +164,30 @@
       cursor: pointer;
       padding: 6px 14px;
       border-radius: 20px;
-      transition: background 0.2s;
-      border: none;
-      background: transparent;
+      border: 1px solid rgba(232, 122, 93, 0.15);
+      background: rgba(255, 255, 255, 0.50);
+      backdrop-filter: blur(8px);
       font-family: var(--font-sans);
+      box-shadow: 0 2px 8px rgba(232, 122, 93, 0.06);
+      transition: all 0.2s;
     }
-    .nav-action:active { background: var(--accent-light); }
+    .nav-action:active {
+      transform: scale(0.95);
+    }
 
     /* ===== 日历主页 ===== */
     #screen-calendar {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
-
     .cal-header {
       padding: 4px 20px 8px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+      position: relative;
+      z-index: 1;
     }
     .cal-left {
       display: flex;
@@ -123,29 +198,37 @@
       font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.5px;
+      text-shadow: 0 1px 12px rgba(255, 255, 255, 0.20);
     }
     .cal-year {
       font-size: 15px;
       color: var(--text-secondary);
       font-weight: 400;
     }
-    .month-nav { display: flex; gap: 4px; }
+    .month-nav {
+      display: flex;
+      gap: 4px;
+    }
     .month-btn {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--bg-card);
+      border: 1px solid rgba(255, 255, 255, 0.50);
+      background: rgba(255, 255, 255, 0.40);
+      backdrop-filter: blur(8px);
       color: var(--text-secondary);
       font-size: 16px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
-      box-shadow: var(--shadow-sm);
       font-family: var(--font-sans);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s;
     }
-    .month-btn:active { background: var(--border); transform: scale(0.92); }
+    .month-btn:active {
+      transform: scale(0.92);
+    }
 
     .cal-weekdays {
       display: grid;
@@ -156,8 +239,12 @@
       color: var(--text-muted);
       text-align: center;
       letter-spacing: 0.3px;
+      position: relative;
+      z-index: 1;
     }
-    .cal-weekday.weekend { color: var(--accent); }
+    .cal-weekday.weekend {
+      color: var(--accent);
+    }
 
     .cal-grid {
       display: grid;
@@ -166,8 +253,9 @@
       flex: 1;
       gap: 4px 0;
       align-content: start;
+      position: relative;
+      z-index: 1;
     }
-
     .cal-day {
       display: flex;
       flex-direction: column;
@@ -175,10 +263,12 @@
       padding: 6px 0 4px;
       cursor: pointer;
       border-radius: 12px;
-      transition: background 0.15s;
+      position: relative;
+      z-index: 1;
     }
-    .cal-day:active { background: rgba(0,0,0,0.03); }
-
+    .cal-day:active {
+      background: rgba(0, 0, 0, 0.03);
+    }
     .day-circle {
       width: 40px;
       height: 40px;
@@ -189,11 +279,16 @@
       font-size: 15px;
       font-weight: 500;
       color: var(--text-secondary);
-      transition: all 0.2s;
       font-family: var(--font-sans);
       position: relative;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
     }
-
+    @media (hover: hover) {
+      .cal-day:hover .day-circle {
+        transform: scale(1.08);
+        box-shadow: 0 0 20px rgba(232, 122, 93, 0.15);
+      }
+    }
     .cal-day.has-record .day-circle {
       font-weight: 600;
       color: var(--text-primary);
@@ -202,26 +297,68 @@
       background: var(--accent);
       color: #fff;
       font-weight: 600;
-      box-shadow: 0 2px 12px rgba(232,122,93,0.30);
+      box-shadow: 0 4px 20px rgba(232, 122, 93, 0.40);
     }
-    .cal-day.weekend .day-circle { color: var(--accent); }
-    .cal-day.weekend.has-record .day-circle { color: var(--accent); }
-    .cal-day.other-month .day-circle { opacity: 0.2; }
-    .cal-day.other-month { pointer-events: none; }
-
+    .cal-day.weekend .day-circle {
+      color: var(--accent);
+    }
+    .cal-day.other-month .day-circle {
+      opacity: 0.2;
+    }
+    .cal-day.other-month {
+      pointer-events: none;
+    }
     .day-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
       margin-top: 2px;
       background: var(--accent);
-      opacity: 0.5;
-      transition: opacity 0.2s;
+      opacity: 0.6;
     }
-    .cal-day.today .day-dot { background: #fff; opacity: 0.7; }
-    .cal-day.has-record .day-dot { opacity: 0.7; }
+    .cal-day.today .day-dot {
+      background: #fff;
+      opacity: 0.8;
+    }
 
-    /* ===== FAB ===== */
+    /* ===== 底部工具栏 ===== */
+    .bottom-tools {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(16px);
+      padding: 6px 8px;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.50);
+      z-index: 10;
+    }
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      position: relative;
+      z-index: 1;
+      transition: all 0.2s;
+    }
+    .tool-btn:active {
+      transform: scale(0.92);
+    }
+    .tool-btn.active {
+      background: rgba(232, 122, 93, 0.15);
+      color: var(--accent);
+    }
+
     .fab {
       position: fixed;
       bottom: 28px;
@@ -235,76 +372,40 @@
       color: #fff;
       font-size: 28px;
       font-weight: 300;
-      box-shadow: 0 4px 16px rgba(232,122,93,0.30), 0 8px 32px rgba(232,122,93,0.12);
+      box-shadow: 0 4px 24px rgba(232, 122, 93, 0.40), 0 8px 40px rgba(232, 122, 93, 0.15);
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 10;
       font-family: var(--font-sans);
+      transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .fab:active {
       transform: translateX(50%) scale(0.92);
     }
 
-    /* ===== 底部工具栏 ===== */
-    .bottom-tools {
-      position: fixed;
-      bottom: 96px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      background: var(--bg-card);
-      padding: 6px 8px;
-      border-radius: 14px;
-      box-shadow: var(--shadow-lg);
-      border: 1px solid var(--border);
-      z-index: 10;
-    }
-    .tool-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-sans);
-    }
-    .tool-btn:active { background: var(--border); transform: scale(0.92); }
-    .tool-btn.active { background: var(--accent-light); color: var(--accent); }
-
-    /* ============================================================
-       详情/时间轴（视觉层次升级版）
-       ============================================================ */
-
+    /* ===== 详情页 ===== */
     #screen-detail {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
-
     .timeline-scroll {
       flex: 1;
       overflow-y: auto;
       padding: 8px 16px 120px;
+      position: relative;
+      z-index: 1;
     }
-
-    /* ===== 顶部统计条 ===== */
     .stats-bar {
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(12px);
       border-radius: 14px;
       padding: 12px 18px;
       margin-bottom: 18px;
       box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.50);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -334,7 +435,6 @@
       font-weight: 600;
     }
 
-    /* ===== 时间段分组 ===== */
     .time-section {
       margin-bottom: 20px;
     }
@@ -344,15 +444,15 @@
       color: var(--text-muted);
       letter-spacing: 1px;
       padding: 0 4px 6px;
-      border-bottom: 1.5px solid var(--border);
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.30);
       margin-bottom: 12px;
       display: flex;
       align-items: center;
       gap: 8px;
       font-family: var(--font-sans);
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.30);
     }
 
-    /* ===== 时间线条目 ===== */
     .entry {
       display: flex;
       gap: 12px;
@@ -360,10 +460,15 @@
       animation: fadeUp 0.35s ease both;
     }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-
     .entry-left {
       flex-shrink: 0;
       width: 44px;
@@ -384,28 +489,23 @@
       margin-top: 2px;
       font-family: var(--font-sans);
     }
-
-    /* ===== 卡片样式 ===== */
-
-    /* — 普通卡片 — */
     .entry-card {
       flex: 1;
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
       border-radius: 14px;
       padding: 13px 16px;
       box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.50);
       cursor: pointer;
       transition: all 0.2s;
     }
     .entry-card:active {
       transform: scale(0.97);
     }
-
-    /* — 有图片的卡片（更大、更突出） — */
     .entry-card.has-image {
       padding: 0 0 12px 0;
-      border-color: rgba(232,122,93,0.15);
+      border-color: rgba(232, 122, 93, 0.15);
       box-shadow: var(--shadow-md);
     }
     .entry-card.has-image .card-inner {
@@ -415,60 +515,20 @@
       padding: 0 16px;
       margin-top: 10px;
     }
-
-    /* — 今天第一条（特殊标记） — */
     .entry-card.first-of-day {
       border-left: 4px solid var(--accent);
       border-radius: 14px 14px 14px 4px;
     }
-
-    /* — 卡片内容 — */
     .entry-text {
       font-family: var(--font-serif);
       font-size: 15px;
       line-height: 1.8;
       color: var(--text-primary);
     }
-    /* 关键词高亮 */
     .entry-text .hl {
       color: var(--accent);
       font-weight: 500;
     }
-
-    .entry-tags {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-    .entry-tag {
-      font-size: 10px;
-      font-weight: 500;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: 1px 10px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-family: var(--font-sans);
-    }
-    .entry-tag:active { opacity: 0.6; }
-
-    .entry-images {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-    }
-    .entry-images img {
-      width: 60px;
-      height: 60px;
-      border-radius: var(--radius-xs);
-      object-fit: cover;
-      border: 1px solid var(--border);
-      cursor: pointer;
-    }
-
-    /* ===== 长文本折叠 ===== */
     .entry-text.collapsed {
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -484,28 +544,59 @@
       padding: 4px 0 0;
       font-family: var(--font-sans);
     }
-
-    /* ===== 今日第一记标记 ===== */
+    .entry-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .entry-tag {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(232, 122, 93, 0.12);
+      padding: 1px 10px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-sans);
+    }
+    .entry-tag:active {
+      opacity: 0.6;
+    }
+    .entry-images {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .entry-images img {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-xs);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
     .first-badge {
       display: inline-block;
       font-size: 10px;
       font-weight: 600;
       color: var(--accent);
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
       padding: 1px 10px;
       border-radius: 999px;
       margin-bottom: 4px;
       font-family: var(--font-sans);
     }
 
-    /* ===== 空状态 ===== */
     .empty-state-enhanced {
       text-align: center;
       padding: 60px 20px 40px;
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.50);
     }
     .empty-state-enhanced .empty-icon {
       font-size: 44px;
@@ -533,13 +624,13 @@
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      box-shadow: 0 2px 12px rgba(232,122,93,0.25);
+      box-shadow: 0 2px 12px rgba(232, 122, 93, 0.25);
       font-family: var(--font-sans);
     }
 
     /* ===== 周视图 ===== */
     #screen-week {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
@@ -547,6 +638,8 @@
       flex: 1;
       overflow-y: auto;
       padding: 8px 16px 120px;
+      position: relative;
+      z-index: 1;
     }
     .week-range {
       font-size: 22px;
@@ -565,8 +658,9 @@
       margin-top: 8px;
     }
     .week-nav button {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.50);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.50);
       border-radius: var(--radius-xs);
       padding: 5px 14px;
       font-size: 13px;
@@ -577,19 +671,21 @@
       font-family: var(--font-sans);
       box-shadow: var(--shadow-sm);
     }
-    .week-nav button:active { transform: scale(0.95); }
+    .week-nav button:active {
+      transform: scale(0.95);
+    }
     .week-nav button.active {
       border-color: var(--accent);
       color: var(--accent);
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
     }
 
-    /* ===== 每日独立卡片（周视图） ===== */
     .day-card {
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       box-shadow: var(--shadow-md);
-      border: 1px solid rgba(255,255,255,0.6);
+      border: 1px solid rgba(255, 255, 255, 0.50);
       overflow: hidden;
       margin-bottom: 20px;
       transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
@@ -599,29 +695,32 @@
       transform: scale(0.98);
       box-shadow: var(--shadow-sm);
     }
-
     @keyframes cardIn {
-      from { opacity: 0; transform: translateY(16px) scale(0.97); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
-
     .day-card.today {
       border-color: var(--accent);
-      box-shadow: 0 4px 24px rgba(232,122,93,0.14), var(--shadow-md);
+      box-shadow: 0 4px 24px rgba(232, 122, 93, 0.14), var(--shadow-md);
     }
     .day-card.today .day-card-header {
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.06);
     }
     .day-card.weekend .day-card-header {
-      background: rgba(232,122,93,0.04);
+      background: rgba(232, 122, 93, 0.03);
     }
-
     .day-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.30);
       transition: background 0.2s;
     }
     .day-card-date {
@@ -635,31 +734,34 @@
       color: var(--text-secondary);
       font-family: var(--font-sans);
     }
-    .day-card-name.today { color: var(--accent); }
-    .day-card-name.weekend { color: var(--accent); }
-
+    .day-card-name.today {
+      color: var(--accent);
+    }
+    .day-card-name.weekend {
+      color: var(--accent);
+    }
     .day-card-number {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
       font-family: var(--font-sans);
     }
-    .day-card-number.today { color: var(--accent); }
-
+    .day-card-number.today {
+      color: var(--accent);
+    }
     .day-card-badge {
       font-size: 11px;
       font-weight: 500;
       color: var(--text-muted);
-      background: var(--bg);
+      background: rgba(0, 0, 0, 0.04);
       padding: 2px 12px;
       border-radius: 999px;
       font-family: var(--font-sans);
     }
     .day-card-badge.has-record {
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
       color: var(--accent);
     }
-
     .day-card-body {
       padding: 14px 18px 16px;
     }
@@ -670,10 +772,9 @@
       padding: 4px 0;
       font-family: var(--font-serif);
     }
-
     .day-entry {
       padding: 10px 0;
-      border-bottom: 1px solid rgba(0,0,0,0.04);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     }
     .day-entry:last-child {
       border-bottom: none;
@@ -682,7 +783,6 @@
     .day-entry:first-child {
       padding-top: 0;
     }
-
     .day-entry-meta {
       display: flex;
       align-items: center;
@@ -705,14 +805,13 @@
       font-size: 10px;
       font-weight: 500;
       color: var(--accent);
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
       padding: 1px 10px;
       border-radius: 999px;
       cursor: pointer;
       border: none;
       font-family: var(--font-sans);
     }
-
     .day-entry-text {
       font-family: var(--font-serif);
       font-size: 14px;
@@ -724,12 +823,10 @@
       color: var(--accent);
       font-weight: 500;
     }
-
     .day-entry.has-image .day-entry-text {
       font-size: 15px;
       line-height: 1.8;
     }
-
     .day-entry-images {
       display: flex;
       gap: 6px;
@@ -761,7 +858,6 @@
       color: var(--text-secondary);
       font-family: var(--font-sans);
     }
-
     .day-entry.only-image {
       padding: 0;
       border-bottom: none;
@@ -777,9 +873,9 @@
       object-fit: cover;
     }
 
-    /* ===== 添加页面 ===== */
+    /* ===== 添加页 ===== */
     #screen-add {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
@@ -790,13 +886,16 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      position: relative;
+      z-index: 1;
     }
     .add-bubble {
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
       border-radius: var(--radius);
       padding: 16px;
       box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 255, 255, 0.50);
     }
     .add-textarea {
       width: 100%;
@@ -812,7 +911,9 @@
       line-height: 1.8;
       color: var(--text-primary);
     }
-    .add-textarea::placeholder { color: var(--text-muted); }
+    .add-textarea::placeholder {
+      color: var(--text-muted);
+    }
     .char-count {
       text-align: right;
       font-size: 11px;
@@ -820,8 +921,9 @@
       margin-top: 4px;
       font-family: var(--font-sans);
     }
-    .char-count.warn { color: var(--accent); }
-
+    .char-count.warn {
+      color: var(--accent);
+    }
     .img-upload-area {
       display: flex;
       gap: 8px;
@@ -831,8 +933,8 @@
       width: 68px;
       height: 68px;
       border-radius: var(--radius-sm);
-      border: 1.5px dashed var(--border);
-      background: transparent;
+      border: 1.5px dashed rgba(0, 0, 0, 0.10);
+      background: rgba(255, 255, 255, 0.30);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -841,7 +943,10 @@
       font-size: 24px;
       transition: all 0.2s;
     }
-    .img-add-btn:active { border-color: var(--accent); color: var(--accent); }
+    .img-add-btn:active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
     .img-preview-wrap {
       position: relative;
       width: 68px;
@@ -872,8 +977,12 @@
       box-shadow: var(--shadow-sm);
       font-family: var(--font-sans);
     }
-
-    .tag-selected-row, .tag-suggest-row {
+    .tag-selected-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag-suggest-row {
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
@@ -888,7 +997,7 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
       color: var(--accent);
       border-radius: 999px;
       padding: 4px 12px;
@@ -902,7 +1011,7 @@
       cursor: pointer;
     }
     .tag-chip-muted {
-      background: var(--border);
+      background: rgba(0, 0, 0, 0.04);
       color: var(--text-secondary);
       border-radius: 999px;
       padding: 4px 12px;
@@ -912,12 +1021,15 @@
       border: none;
       transition: all 0.2s;
     }
-    .tag-chip-muted:active { background: var(--accent-light); color: var(--accent); }
+    .tag-chip-muted:active {
+      background: rgba(232, 122, 93, 0.12);
+      color: var(--accent);
+    }
     .tag-input {
       width: 100%;
       background: transparent;
       border: none;
-      border-bottom: 1.5px solid var(--border);
+      border-bottom: 1.5px solid rgba(0, 0, 0, 0.06);
       color: var(--text-primary);
       padding: 8px 0;
       font-size: 14px;
@@ -925,12 +1037,17 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    .tag-input:focus { border-color: var(--accent); }
-    .tag-input::placeholder { color: var(--text-muted); }
-
+    .tag-input:focus {
+      border-color: var(--accent);
+    }
+    .tag-input::placeholder {
+      color: var(--text-muted);
+    }
     .add-footer {
       padding: 8px 16px 40px;
-      background: var(--bg);
+      background: transparent;
+      position: relative;
+      z-index: 1;
     }
     .submit-btn {
       width: 100%;
@@ -944,14 +1061,18 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 16px rgba(232,122,93,0.25);
+      box-shadow: 0 4px 16px rgba(232, 122, 93, 0.25);
     }
-    .submit-btn:active { transform: scale(0.97); }
-    .submit-btn:disabled { opacity: 0.4; }
+    .submit-btn:active {
+      transform: scale(0.97);
+    }
+    .submit-btn:disabled {
+      opacity: 0.4;
+    }
 
-    /* ===== 标签云 ===== */
+    /* ===== 标签页 ===== */
     #screen-tagcloud {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
@@ -959,6 +1080,8 @@
       flex: 1;
       overflow-y: auto;
       padding: 8px 20px 60px;
+      position: relative;
+      z-index: 1;
     }
     .tagcloud-wrap {
       display: flex;
@@ -974,7 +1097,9 @@
       transition: opacity 0.2s;
       font-family: var(--font-sans);
     }
-    .tagcloud-item:active { opacity: 0.5; }
+    .tagcloud-item:active {
+      opacity: 0.5;
+    }
     .tagcloud-empty {
       color: var(--text-muted);
       text-align: center;
@@ -983,9 +1108,8 @@
       font-family: var(--font-serif);
     }
 
-    /* ===== 标签时间线 ===== */
     #screen-tagtimeline {
-      background: var(--bg);
+      background: transparent;
       display: flex;
       flex-direction: column;
     }
@@ -993,6 +1117,8 @@
       flex: 1;
       overflow-y: auto;
       padding: 8px 16px 60px;
+      position: relative;
+      z-index: 1;
     }
     .entry-date-badge {
       flex-shrink: 0;
@@ -1005,36 +1131,87 @@
       line-height: 1.5;
       font-family: var(--font-sans);
     }
+    .timeline-entry {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      animation: fadeUp 0.35s ease both;
+    }
+    .entry-bubble {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.50);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .entry-bubble:active {
+      transform: scale(0.97);
+    }
+    .entry-text-preview {
+      font-family: var(--font-serif);
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+    .entry-text-preview .hl {
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .entry-images-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .entry-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-xs);
+      object-fit: cover;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
 
     /* ===== Bottom Sheet ===== */
     .bottom-sheet-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.30);
       z-index: 100;
       display: flex;
       align-items: flex-end;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
-    .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
+    .bottom-sheet-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
     .bottom-sheet {
       width: 100%;
       max-height: 75vh;
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(20px);
       border-radius: 20px 20px 0 0;
       padding: 20px 24px 40px;
       overflow-y: auto;
       transform: translateY(100%);
       transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+      border-top: 1px solid rgba(255, 255, 255, 0.50);
     }
-    .bottom-sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+    .bottom-sheet-overlay.open .bottom-sheet {
+      transform: translateY(0);
+    }
     .sheet-handle {
       width: 36px;
       height: 4px;
-      background: var(--border);
+      background: rgba(0, 0, 0, 0.08);
       border-radius: 2px;
       margin: 0 auto 16px;
     }
@@ -1061,7 +1238,7 @@
       font-size: 10px;
       font-weight: 500;
       color: var(--accent);
-      background: var(--accent-light);
+      background: rgba(232, 122, 93, 0.12);
       padding: 2px 10px;
       border-radius: 999px;
       border: none;
@@ -1086,8 +1263,8 @@
       width: 100%;
       padding: 12px;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(232,122,93,0.25);
-      background: rgba(232,122,93,0.06);
+      border: 1px solid rgba(232, 122, 93, 0.25);
+      background: rgba(232, 122, 93, 0.06);
       color: var(--accent);
       font-family: var(--font-sans);
       font-size: 13px;
@@ -1095,13 +1272,16 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .sheet-delete-btn:active { background: rgba(232,122,93,0.12); }
+    .sheet-delete-btn:active {
+      background: rgba(232, 122, 93, 0.12);
+    }
 
     /* ===== Lightbox ===== */
     .lightbox {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       z-index: 200;
-      background: rgba(0,0,0,0.92);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1109,7 +1289,10 @@
       pointer-events: none;
       transition: opacity 0.25s;
     }
-    .lightbox.open { opacity: 1; pointer-events: all; }
+    .lightbox.open {
+      opacity: 1;
+      pointer-events: all;
+    }
     .lightbox img {
       max-width: 95vw;
       max-height: 90vh;
@@ -1123,7 +1306,8 @@
       bottom: 100px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: var(--text-primary);
+      background: rgba(30, 30, 30, 0.85);
+      backdrop-filter: blur(12px);
       color: var(--bg-card);
       padding: 10px 24px;
       border-radius: 20px;
@@ -1134,16 +1318,20 @@
       z-index: 999;
       font-family: var(--font-sans);
       box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
-    /* ===== Loading ===== */
     .loading-overlay {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       z-index: 500;
-      background: rgba(255,255,255,0.6);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.40);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1151,1141 +1339,1256 @@
       pointer-events: none;
       transition: opacity 0.2s;
     }
-    .loading-overlay.show { opacity: 1; pointer-events: all; }
+    .loading-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
     .spinner {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      border: 3px solid var(--border);
+      border: 3px solid rgba(0, 0, 0, 0.04);
       border-top-color: var(--accent);
       animation: spin 0.7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-    .hidden-file { display: none; }
+    .hidden-file {
+      display: none;
+    }
 
     @media (max-width: 420px) {
-      .nav-bar { padding: 44px 16px 10px; }
-      .cal-month { font-size: 24px; }
-      .cal-year { font-size: 13px; }
-      .day-circle { width: 36px; height: 36px; font-size: 14px; }
-      .cal-day.today .day-circle { width: 38px; height: 38px; font-size: 15px; }
-      .week-range { font-size: 19px; }
-      .day-card-header { padding: 12px 14px; }
-      .day-card-body { padding: 10px 14px 12px; }
-      .day-card-number { font-size: 19px; }
-      .day-entry-images img { width: 56px; height: 56px; }
-      .entry-images img { width: 52px; height: 52px; }
-      .entry-card.has-image .entry-images img { width: 56px; height: 56px; }
+      .nav-bar {
+        padding: 44px 16px 10px;
+      }
+      .cal-month {
+        font-size: 24px;
+      }
+      .cal-year {
+        font-size: 13px;
+      }
+      .day-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+      .cal-day.today .day-circle {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+      }
+      .week-range {
+        font-size: 19px;
+      }
+      .day-card-header {
+        padding: 12px 14px;
+      }
+      .day-card-body {
+        padding: 10px 14px 12px;
+      }
+      .day-card-number {
+        font-size: 19px;
+      }
+      .day-entry-images img {
+        width: 56px;
+        height: 56px;
+      }
+      .entry-images img {
+        width: 52px;
+        height: 52px;
+      }
+      .entry-card.has-image .entry-images img {
+        width: 56px;
+        height: 56px;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- ════════════════ CALENDAR SCREEN ════════════════ -->
-<div class="screen" id="screen-calendar">
-  <div class="nav-bar">
-    <span></span>
-    <span class="nav-title">📖 我的手账</span>
-    <button class="nav-action" id="fabAdd">+ 记录</button>
-  </div>
+  <!-- 静态装饰光晕 -->
+  <div id="glow-static"></div>
+  <!-- 鼠标跟随光晕 -->
+  <div id="glow"></div>
 
-  <div class="cal-header">
-    <div class="cal-left">
-      <span class="cal-month" id="calMonthLabel">六月</span>
-      <span class="cal-year" id="calYearLabel">2026</span>
+  <!-- ═══ 日历主页 ═══ -->
+  <div class="screen" id="screen-calendar">
+    <div class="nav-bar">
+      <span></span>
+      <span class="nav-title">📖 我的手账</span>
+      <button class="nav-action" id="fabAdd">+ 记录</button>
     </div>
-    <div class="month-nav">
-      <button class="month-btn" id="prevMonth">‹</button>
-      <button class="month-btn" id="nextMonth">›</button>
-    </div>
-  </div>
-
-  <div class="cal-weekdays">
-    <div class="cal-weekday weekend">日</div>
-    <div class="cal-weekday">一</div>
-    <div class="cal-weekday">二</div>
-    <div class="cal-weekday">三</div>
-    <div class="cal-weekday">四</div>
-    <div class="cal-weekday">五</div>
-    <div class="cal-weekday weekend">六</div>
-  </div>
-
-  <div class="cal-grid" id="calGrid"></div>
-
-  <div class="bottom-tools">
-    <button class="tool-btn active" id="weekEntryBtn" title="周视图">📋</button>
-    <button class="tool-btn" id="tagEntryBtn" title="标签">🏷️</button>
-  </div>
-</div>
-
-<!-- ════════════════ WEEK VIEW SCREEN ════════════════ -->
-<div class="screen hidden" id="screen-week">
-  <div class="nav-bar">
-    <button class="nav-back" id="weekBackBtn">←</button>
-    <span class="nav-title" id="weekTitle">本周</span>
-    <span></span>
-  </div>
-  <div style="padding:0 20px 12px;">
-    <div class="week-sub" id="weekSub">第 0 周</div>
-    <div class="week-nav">
-      <button id="weekPrev">← 上周</button>
-      <button class="active" id="weekToday">本周</button>
-      <button id="weekNext">下周 →</button>
-    </div>
-  </div>
-  <div class="week-scroll" id="weekScroll"></div>
-</div>
-
-<!-- ════════════════ DETAIL SCREEN ════════════════ -->
-<div class="screen hidden" id="screen-detail">
-  <div class="nav-bar">
-    <button class="nav-back" id="backBtn">←</button>
-    <div>
-      <span class="nav-title" style="font-size:16px;" id="detailDateTitle">7月1日</span>
-    </div>
-    <button class="nav-action" id="detailAddBtn">+ 记录</button>
-  </div>
-  <div class="timeline-scroll" id="timelineScroll"></div>
-</div>
-
-<!-- ════════════════ ADD SCREEN ════════════════ -->
-<div class="screen hidden" id="screen-add">
-  <div class="nav-bar">
-    <button class="nav-back" id="addBackBtn">←</button>
-    <span class="nav-title" id="addDateLabel">今天</span>
-    <span></span>
-  </div>
-  <div class="add-body">
-    <div class="add-bubble">
-      <textarea class="add-textarea" id="addTextarea" placeholder="写点什么…" maxlength="500"></textarea>
-      <div class="char-count" id="charCount">0 / 500</div>
-    </div>
-    <div class="add-bubble">
-      <div class="img-upload-area" id="imgUploadArea">
-        <button class="img-add-btn" id="imgAddBtn">＋</button>
-        <input type="file" accept="image/*" multiple class="hidden-file" id="imgFileInput">
+    <div class="cal-header">
+      <div class="cal-left">
+        <span class="cal-month" id="calMonthLabel">六月</span>
+        <span class="cal-year" id="calYearLabel">2026</span>
+      </div>
+      <div class="month-nav">
+        <button class="month-btn" id="prevMonth">‹</button>
+        <button class="month-btn" id="nextMonth">›</button>
       </div>
     </div>
-    <div class="add-bubble">
-      <div class="tag-selected-row" id="tagSelectedRow"></div>
-      <input class="tag-input" id="tagInput" placeholder="输入标签，按回车确认" maxlength="20">
-      <div class="tag-suggest-label" id="tagSuggestLabel" style="display:none;">常用标签</div>
-      <div class="tag-suggest-row" id="tagSuggestRow"></div>
+    <div class="cal-weekdays">
+      <div class="cal-weekday weekend">日</div>
+      <div class="cal-weekday">一</div>
+      <div class="cal-weekday">二</div>
+      <div class="cal-weekday">三</div>
+      <div class="cal-weekday">四</div>
+      <div class="cal-weekday">五</div>
+      <div class="cal-weekday weekend">六</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="bottom-tools">
+      <button class="tool-btn active" id="weekEntryBtn" title="周视图">📋</button>
+      <button class="tool-btn" id="tagEntryBtn" title="标签">🏷️</button>
     </div>
   </div>
-  <div class="add-footer">
-    <button class="submit-btn" id="submitBtn">记下来</button>
+
+  <!-- ═══ 周视图 ═══ -->
+  <div class="screen hidden" id="screen-week">
+    <div class="nav-bar">
+      <button class="nav-back" id="weekBackBtn">←</button>
+      <span class="nav-title" id="weekTitle">本周</span>
+      <span></span>
+    </div>
+    <div style="padding:0 20px 12px;">
+      <div class="week-sub" id="weekSub">第 0 周</div>
+      <div class="week-nav">
+        <button id="weekPrev">← 上周</button>
+        <button class="active" id="weekToday">本周</button>
+        <button id="weekNext">下周 →</button>
+      </div>
+    </div>
+    <div class="week-scroll" id="weekScroll"></div>
   </div>
-</div>
 
-<!-- ════════════════ TAG CLOUD SCREEN ════════════════ -->
-<div class="screen hidden" id="screen-tagcloud">
-  <div class="nav-bar">
-    <button class="nav-back" id="tagCloudBackBtn">←</button>
-    <span class="nav-title">🏷️ 标签</span>
-    <span></span>
+  <!-- ═══ 详情页 ═══ -->
+  <div class="screen hidden" id="screen-detail">
+    <div class="nav-bar">
+      <button class="nav-back" id="backBtn">←</button>
+      <div>
+        <span class="nav-title" style="font-size:16px;" id="detailDateTitle">7月1日</span>
+      </div>
+      <button class="nav-action" id="detailAddBtn">+ 记录</button>
+    </div>
+    <div class="timeline-scroll" id="timelineScroll"></div>
   </div>
-  <div class="tagcloud-scroll" id="tagCloudScroll"></div>
-</div>
 
-<!-- ════════════════ TAG TIMELINE SCREEN ════════════════ -->
-<div class="screen hidden" id="screen-tagtimeline">
-  <div class="nav-bar">
-    <button class="nav-back" id="tagTimelineBackBtn">←</button>
-    <span class="nav-title" id="tagTimelineTitle"># 标签</span>
-    <span class="nav-action" id="tagTimelineSub" style="font-size:12px;font-weight:400;color:var(--text-muted);">0 条</span>
-  </div>
-  <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
-</div>
-
-<!-- Bottom sheet -->
-<div class="bottom-sheet-overlay" id="bottomSheetOverlay">
-  <div class="bottom-sheet" id="bottomSheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-time" id="sheetTime"></div>
-    <div class="sheet-text" id="sheetText"></div>
-    <div class="sheet-tags-row" id="sheetTagsRow"></div>
-    <div class="sheet-images" id="sheetImages"></div>
-    <button class="sheet-delete-btn" id="sheetDeleteBtn">删除这条记录</button>
-  </div>
-</div>
-
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox">
-  <img id="lightboxImg" src="" alt="">
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<!-- Loading -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-</div>
-
-<script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js';
-  import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, where }
-    from 'https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js';
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCNq2USnHJOyM3RbouCq7b1n2VZ8GxLSSU",
-    authDomain: "mytimeline-7c3b7.firebaseapp.com",
-    projectId: "mytimeline-7c3b7",
-    messagingSenderId: "148289157568",
-    appId: "1:148289157568:web:981aa19c4b252d1f91f025",
-  };
-
-  const CLOUDINARY_CLOUD = 'drmtcucy5';
-  const CLOUDINARY_PRESET = 'diaryupload';
-
-  let db, firebaseReady = false;
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    firebaseReady = true;
-  } catch(e) { console.warn('Firebase not configured, using local storage mode.'); }
-
-  const LOCAL_KEY = 'diary_entries_v1';
-  function localLoad() {
-    try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch { return []; }
-  }
-  function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)); }
-
-  const today = new Date();
-  let currentYear = today.getFullYear();
-  let currentMonth = today.getMonth();
-  let selectedDate = null;
-  let addTargetDate = null;
-  let pendingImages = [];
-  let openEntryId = null;
-  let cachedEntries = {};
-  let pendingTags = [];
-  let allTagsCache = null;
-  let weekOffset = 0;
-
-  const MONTHS_ZH = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-  const WEEKDAYS_ZH = ['周日','周一','周二','周三','周四','周五','周六'];
-
-  function dateKey(y, m, d) {
-    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  }
-  function todayKey() { return dateKey(today.getFullYear(), today.getMonth(), today.getDate()); }
-  function fmtTime(ts) {
-    const d = ts instanceof Date ? ts : new Date(ts);
-    return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  }
-  function toast(msg, dur=2000) {
-    const el = document.getElementById('toast');
-    el.textContent = msg; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), dur);
-  }
-  function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
-  function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
-
-  // 关键词高亮
-  function highlightKeywords(text) {
-    const keywords = ['开心', '高兴', '兴奋', '激动', '幸福', '温暖', '感动', '难过', '失落', '疲惫', '累', '重要', '特别', '第一次', '终于', '梦', '梦境', '美好', '喜欢', '爱'];
-    let result = text;
-    keywords.forEach(kw => {
-      const regex = new RegExp(kw, 'g');
-      result = result.replace(regex, `<span class="hl">${kw}</span>`);
-    });
-    return result;
-  }
-
-  async function fetchEntriesForDate(dateStr) {
-    if (cachedEntries[dateStr]) return cachedEntries[dateStr];
-    let entries = [];
-    if (firebaseReady) {
-      try {
-        const q = query(collection(db, 'entries'), where('date', '==', dateStr), orderBy('ts', 'asc'));
-        const snap = await getDocs(q);
-        entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch(e) { console.warn(e); }
-    } else {
-      entries = localLoad().filter(e => e.date === dateStr).sort((a,b) => a.ts - b.ts);
-    }
-    cachedEntries[dateStr] = entries;
-    return entries;
-  }
-
-  async function fetchAllDates() {
-    const result = {};
-    if (firebaseReady) {
-      try {
-        const snap = await getDocs(collection(db, 'entries'));
-        snap.docs.forEach(d => {
-          const data = d.data();
-          if (!result[data.date]) result[data.date] = { hasText: false, hasImg: false };
-          if (data.text) result[data.date].hasText = true;
-          if (data.images && data.images.length) result[data.date].hasImg = true;
-        });
-      } catch(e) {}
-    } else {
-      localLoad().forEach(e => {
-        if (!result[e.date]) result[e.date] = { hasText: false, hasImg: false };
-        if (e.text) result[e.date].hasText = true;
-        if (e.images && e.images.length) result[e.date].hasImg = true;
-      });
-    }
-    return result;
-  }
-
-  async function fetchAllTags() {
-    if (allTagsCache) return allTagsCache;
-    const byTag = {};
-    function add(entry, dateStr) {
-      (entry.tags || []).forEach(tag => {
-        if (!byTag[tag]) byTag[tag] = { tag, count: 0, lastTs: 0, entries: [] };
-        byTag[tag].count++;
-        byTag[tag].lastTs = Math.max(byTag[tag].lastTs, entry.ts);
-        byTag[tag].entries.push({ ...entry, date: dateStr });
-      });
-    }
-    if (firebaseReady) {
-      try {
-        const snap = await getDocs(collection(db, 'entries'));
-        snap.docs.forEach(d => add({ id: d.id, ...d.data() }, d.data().date));
-      } catch(e) { console.warn(e); }
-    } else {
-      localLoad().forEach(e => add(e, e.date));
-    }
-    Object.values(byTag).forEach(t => t.entries.sort((a,b) => b.ts - a.ts));
-    allTagsCache = Object.values(byTag).sort((a,b) => b.count - a.count);
-    return allTagsCache;
-  }
-
-  async function fetchEntriesByTag(tag) {
-    const all = await fetchAllTags();
-    const found = all.find(t => t.tag === tag);
-    return found ? found.entries : [];
-  }
-
-  async function uploadToCloudinary(file) {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', CLOUDINARY_PRESET);
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
-      method: 'POST', body: fd
-    });
-    if (!res.ok) throw new Error('Cloudinary upload failed');
-    const data = await res.json();
-    return data.secure_url;
-  }
-
-  async function saveEntry(dateStr, text, images, tags) {
-    const ts = Date.now();
-    const entry = { date: dateStr, ts, text, images: [], tags: tags || [] };
-    if (firebaseReady) {
-      try {
-        const urls = [];
-        for (const img of images) {
-          const url = await uploadToCloudinary(img.file);
-          urls.push(url);
-        }
-        entry.images = urls;
-        const docRef = await addDoc(collection(db, 'entries'), { date: dateStr, ts, text, images: urls, tags: tags || [] });
-        entry.id = docRef.id;
-      } catch(e) {
-        console.warn('Save failed, falling back to local:', e);
-        entry.id = 'local_' + ts;
-        entry.images = images.map(i => i.dataUrl);
-        const all = localLoad(); all.push(entry); localSave(all);
-      }
-    } else {
-      entry.id = 'local_' + ts;
-      entry.images = images.map(i => i.dataUrl);
-      const all = localLoad(); all.push(entry); localSave(all);
-    }
-    delete cachedEntries[dateStr];
-    allTagsCache = null;
-    return entry;
-  }
-
-  async function deleteEntry(entryId, dateStr) {
-    if (firebaseReady && !entryId.startsWith('local_')) {
-      try { await deleteDoc(doc(db, 'entries', entryId)); } catch(e) { console.warn(e); }
-    } else {
-      const all = localLoad().filter(e => e.id !== entryId); localSave(all);
-    }
-    delete cachedEntries[dateStr];
-    allTagsCache = null;
-  }
-
-  // ===== CALENDAR =====
-  let allDateMeta = {};
-  async function renderCalendar() {
-    allDateMeta = await fetchAllDates();
-    renderCalendarGrid();
-  }
-
-  function renderCalendarGrid() {
-    const grid = document.getElementById('calGrid');
-    grid.innerHTML = '';
-    document.getElementById('calYearLabel').textContent = currentYear;
-    document.getElementById('calMonthLabel').textContent = MONTHS_ZH[currentMonth];
-
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-    const prevDays = new Date(currentYear, currentMonth, 0).getDate();
-    const todayStr = todayKey();
-
-    for (let i = firstDay - 1; i >= 0; i--) {
-      grid.appendChild(makeDay(currentYear, currentMonth - 1, prevDays - i, true));
-    }
-    for (let d = 1; d <= daysInMonth; d++) {
-      grid.appendChild(makeDay(currentYear, currentMonth, d, false));
-    }
-    const total = firstDay + daysInMonth;
-    const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
-    for (let d = 1; d <= rem; d++) {
-      grid.appendChild(makeDay(currentYear, currentMonth + 1, d, true));
-    }
-  }
-
-  function makeDay(year, month, day, otherMonth) {
-    const dKey = dateKey(year, month, day);
-    const isToday = dKey === todayKey();
-    const meta = allDateMeta[dKey] || {};
-    const isWeekend = [0,6].includes(new Date(year, month, day).getDay());
-    const hasRecord = meta.hasText || meta.hasImg;
-
-    const cell = document.createElement('div');
-    cell.className = 'cal-day' +
-      (isToday ? ' today' : '') +
-      (hasRecord ? ' has-record' : '') +
-      (isWeekend ? ' weekend' : '') +
-      (otherMonth ? ' other-month' : '');
-
-    const circle = document.createElement('div');
-    circle.className = 'day-circle';
-    circle.textContent = day;
-
-    const dot = document.createElement('div');
-    dot.className = 'day-dot';
-
-    cell.appendChild(circle);
-    if (hasRecord || isToday) {
-      cell.appendChild(dot);
-    }
-
-    if (!otherMonth) {
-      cell.addEventListener('click', () => openDetail(dKey));
-    }
-    return cell;
-  }
-
-  // ===== WEEK VIEW =====
-  function getWeekRange(offset) {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const base = new Date(now);
-    base.setDate(now.getDate() + mondayOffset + offset * 7);
-    const dates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(base);
-      d.setDate(base.getDate() + i);
-      dates.push(d);
-    }
-    return dates;
-  }
-
-  function getWeekNumber(d) {
-    const start = new Date(d.getFullYear(), 0, 1);
-    const diff = (d - start) / 86400000;
-    return Math.ceil((diff + start.getDay() + 1) / 7);
-  }
-
-  async function renderWeekView() {
-    const dates = getWeekRange(weekOffset);
-    const scroll = document.getElementById('weekScroll');
-    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
-
-    const first = dates[0];
-    const last = dates[6];
-    document.getElementById('weekTitle').textContent =
-      `${first.getMonth()+1}月${first.getDate()}日 - ${last.getMonth()+1}月${last.getDate()}日`;
-    document.getElementById('weekSub').textContent = `第 ${getWeekNumber(first)} 周`;
-
-    const dayEntries = {};
-    let hasAny = false;
-    for (const d of dates) {
-      const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
-      const entries = await fetchEntriesForDate(key);
-      dayEntries[key] = entries;
-      if (entries.length) hasAny = true;
-    }
-
-    scroll.innerHTML = '';
-    if (!hasAny) {
-      scroll.innerHTML = `<div class="empty-state-enhanced"><div class="empty-icon">📋</div><h3>这周还没有记录</h3><p>开始记录你的每一天吧 ✦</p></div>`;
-      return;
-    }
-
-    const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-
-    for (let i = 0; i < dates.length; i++) {
-      const d = dates[i];
-      const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
-      const entries = dayEntries[key] || [];
-      const isToday = key === todayKey();
-      const isWeekend = [0,6].includes(d.getDay());
-
-      const card = document.createElement('div');
-      card.className = 'day-card' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
-
-      const header = document.createElement('div');
-      header.className = 'day-card-header';
-      const dateDiv = document.createElement('div');
-      dateDiv.className = 'day-card-date';
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'day-card-name' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
-      nameSpan.textContent = dayNames[d.getDay()] + (isToday ? ' · 今天' : '');
-      const numSpan = document.createElement('span');
-      numSpan.className = 'day-card-number' + (isToday ? ' today' : '');
-      numSpan.textContent = d.getDate();
-      dateDiv.appendChild(nameSpan);
-      dateDiv.appendChild(numSpan);
-
-      const badge = document.createElement('span');
-      badge.className = 'day-card-badge' + (entries.length > 0 ? ' has-record' : '');
-      badge.textContent = entries.length > 0 ? `${entries.length} 条` : '0 条';
-
-      header.appendChild(dateDiv);
-      header.appendChild(badge);
-      card.appendChild(header);
-
-      const body = document.createElement('div');
-      body.className = 'day-card-body';
-
-      if (entries.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'day-card-empty';
-        empty.textContent = '— 今天没有记录 —';
-        body.appendChild(empty);
-      } else {
-        entries.forEach((entry) => {
-          const entryDiv = document.createElement('div');
-          entryDiv.className = 'day-entry' + (entry.images && entry.images.length > 0 ? ' has-image' : '');
-
-          const meta = document.createElement('div');
-          meta.className = 'day-entry-meta';
-          const time = document.createElement('span');
-          time.className = 'day-entry-time';
-          time.textContent = fmtTime(entry.ts);
-          meta.appendChild(time);
-
-          if (entry.tags && entry.tags.length) {
-            const tagsDiv = document.createElement('div');
-            tagsDiv.className = 'day-entry-tags';
-            entry.tags.slice(0, 3).forEach(tag => {
-              const pill = document.createElement('button');
-              pill.className = 'day-entry-tag';
-              pill.textContent = tag;
-              pill.addEventListener('click', e => {
-                e.stopPropagation();
-                openTagTimeline(tag);
-              });
-              tagsDiv.appendChild(pill);
-            });
-            if (entry.tags.length > 3) {
-              const more = document.createElement('button');
-              more.className = 'day-entry-tag';
-              more.textContent = `+${entry.tags.length - 3}`;
-              more.addEventListener('click', e => {
-                e.stopPropagation();
-                openTagTimeline(entry.tags[0]);
-              });
-              tagsDiv.appendChild(more);
-            }
-            meta.appendChild(tagsDiv);
-          }
-          entryDiv.appendChild(meta);
-
-          if (entry.text) {
-            const textDiv = document.createElement('div');
-            textDiv.className = 'day-entry-text';
-            textDiv.innerHTML = highlightKeywords(entry.text);
-            entryDiv.appendChild(textDiv);
-          }
-
-          if (entry.images && entry.images.length > 0) {
-            const imgRow = document.createElement('div');
-            imgRow.className = 'day-entry-images';
-            entry.images.slice(0, 4).forEach(url => {
-              const img = document.createElement('img');
-              img.src = url;
-              img.addEventListener('click', e => {
-                e.stopPropagation();
-                openLightbox(url);
-              });
-              imgRow.appendChild(img);
-            });
-            if (entry.images.length > 4) {
-              const more = document.createElement('div');
-              more.className = 'more-badge';
-              more.textContent = `+${entry.images.length - 4}`;
-              imgRow.appendChild(more);
-            }
-            entryDiv.appendChild(imgRow);
-          }
-
-          entryDiv.addEventListener('click', () => openBottomSheet(entry, key));
-          body.appendChild(entryDiv);
-        });
-      }
-
-      card.appendChild(body);
-      scroll.appendChild(card);
-    }
-  }
-
-  // ===== DETAIL（时间轴·视觉层次升级版） =====
-  async function openDetail(dateStr) {
-    selectedDate = dateStr;
-    const parts = dateStr.split('-');
-    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
-    document.getElementById('detailDateTitle').textContent = `${dt.getMonth()+1}月${dt.getDate()}日 · ${WEEKDAYS_ZH[dt.getDay()]}`;
-    showScreen('screen-detail');
-    await renderTimeline(dateStr);
-  }
-
-  function getTimePeriod(hour) {
-    if (hour < 12) return { label: '☀️ 上午', emoji: '☀️' };
-    if (hour < 18) return { label: '🌤️ 下午', emoji: '🌤️' };
-    return { label: '🌙 晚上', emoji: '🌙' };
-  }
-
-  function toggleText(id, btn) {
-    const el = document.getElementById(id);
-    if (el.classList.contains('collapsed')) {
-      el.classList.remove('collapsed');
-      btn.textContent = '收起 ↑';
-    } else {
-      el.classList.add('collapsed');
-      btn.textContent = '展开全文 ↓';
-    }
-  }
-
-  async function renderTimeline(dateStr) {
-    const scroll = document.getElementById('timelineScroll');
-    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
-    const entries = await fetchEntriesForDate(dateStr);
-    scroll.innerHTML = '';
-
-    if (!entries.length) {
-      scroll.innerHTML = `
-        <div class="empty-state-enhanced">
-          <div class="empty-icon">📝</div>
-          <h3>今天还没有记录</h3>
-          <p>不如花几分钟<br>把今天的心情写下来 ✦</p>
-          <button class="empty-cta" onclick="document.getElementById('detailAddBtn').click()">✍️ 写点什么</button>
+  <!-- ═══ 添加页 ═══ -->
+  <div class="screen hidden" id="screen-add">
+    <div class="nav-bar">
+      <button class="nav-back" id="addBackBtn">←</button>
+      <span class="nav-title" id="addDateLabel">今天</span>
+      <span></span>
+    </div>
+    <div class="add-body">
+      <div class="add-bubble">
+        <textarea class="add-textarea" id="addTextarea" placeholder="写点什么…" maxlength="500"></textarea>
+        <div class="char-count" id="charCount">0 / 500</div>
+      </div>
+      <div class="add-bubble">
+        <div class="img-upload-area" id="imgUploadArea">
+          <button class="img-add-btn" id="imgAddBtn">＋</button>
+          <input type="file" accept="image/*" multiple class="hidden-file" id="imgFileInput">
         </div>
-      `;
-      return;
-    }
-
-    // 统计信息
-    let imgCount = 0;
-    entries.forEach(e => { if (e.images) imgCount += e.images.length; });
-
-    const dt = new Date(dateStr + 'T00:00:00');
-    const statsBar = document.createElement('div');
-    statsBar.className = 'stats-bar';
-    statsBar.innerHTML = `
-      <div class="left">
-        <span class="date">${dt.getMonth()+1}月${dt.getDate()}日</span>
-        <span class="weekday">${WEEKDAYS_ZH[dt.getDay()]}</span>
       </div>
-      <div class="right">
-        <strong>${entries.length}</strong> 条 · <strong>${imgCount}</strong> 张图
+      <div class="add-bubble">
+        <div class="tag-selected-row" id="tagSelectedRow"></div>
+        <input class="tag-input" id="tagInput" placeholder="输入标签，按回车确认" maxlength="20">
+        <div class="tag-suggest-label" id="tagSuggestLabel" style="display:none;">常用标签</div>
+        <div class="tag-suggest-row" id="tagSuggestRow"></div>
       </div>
-    `;
-    scroll.appendChild(statsBar);
+    </div>
+    <div class="add-footer">
+      <button class="submit-btn" id="submitBtn">记下来</button>
+    </div>
+  </div>
 
-    // 按时间段分组
-    const groups = { morning: [], afternoon: [], evening: [] };
-    entries.forEach((entry, idx) => {
-      const hour = new Date(entry.ts).getHours();
-      if (hour < 12) groups.morning.push({ ...entry, index: idx + 1 });
-      else if (hour < 18) groups.afternoon.push({ ...entry, index: idx + 1 });
-      else groups.evening.push({ ...entry, index: idx + 1 });
-    });
+  <!-- ═══ 标签云 ═══ -->
+  <div class="screen hidden" id="screen-tagcloud">
+    <div class="nav-bar">
+      <button class="nav-back" id="tagCloudBackBtn">←</button>
+      <span class="nav-title">🏷️ 标签</span>
+      <span></span>
+    </div>
+    <div class="tagcloud-scroll" id="tagCloudScroll"></div>
+  </div>
 
-    const groupConfig = [
-      { key: 'morning', label: '☀️ 上午' },
-      { key: 'afternoon', label: '🌤️ 下午' },
-      { key: 'evening', label: '🌙 晚上' }
-    ];
+  <!-- ═══ 标签时间线 ═══ -->
+  <div class="screen hidden" id="screen-tagtimeline">
+    <div class="nav-bar">
+      <button class="nav-back" id="tagTimelineBackBtn">←</button>
+      <span class="nav-title" id="tagTimelineTitle"># 标签</span>
+      <span class="nav-action" id="tagTimelineSub" style="font-size:12px;font-weight:400;color:var(--text-muted);">0 条</span>
+    </div>
+    <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
+  </div>
 
-    let globalIndex = 0;
+  <!-- Bottom sheet -->
+  <div class="bottom-sheet-overlay" id="bottomSheetOverlay">
+    <div class="bottom-sheet" id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-time" id="sheetTime"></div>
+      <div class="sheet-text" id="sheetText"></div>
+      <div class="sheet-tags-row" id="sheetTagsRow"></div>
+      <div class="sheet-images" id="sheetImages"></div>
+      <button class="sheet-delete-btn" id="sheetDeleteBtn">删除这条记录</button>
+    </div>
+  </div>
 
-    groupConfig.forEach(g => {
-      const items = groups[g.key];
-      if (!items.length) return;
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="">
+  </div>
 
-      const section = document.createElement('div');
-      section.className = 'time-section';
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-      const label = document.createElement('div');
-      label.className = 'time-section-label';
-      label.textContent = g.label;
-      section.appendChild(label);
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
 
-      items.forEach((entry, idx) => {
-        globalIndex++;
-        const isFirstOfDay = globalIndex === 1;
-        const hasImage = entry.images && entry.images.length > 0;
-        const textLength = entry.text ? entry.text.length : 0;
-        const isLong = textLength > 60;
+  <script>
+    // ============================================================
+    //  完整功能脚本 (Firebase + 本地存储 + 所有交互)
+    // ============================================================
 
-        const row = document.createElement('div');
-        row.className = 'entry';
-        row.style.animationDelay = (idx * 0.05) + 's';
+    // ---------- 导入 Firebase (动态) ----------
+    (async function() {
+      const { initializeApp } = await import(
+        'https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js'
+      );
+      const { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, query, orderBy, where } =
+        await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
 
-        const left = document.createElement('div');
-        left.className = 'entry-left';
-        left.innerHTML = `
-          <span class="entry-time">${fmtTime(entry.ts)}</span>
-          <span class="entry-index">#${globalIndex}</span>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCNq2USnHJOyM3RbouCq7b1n2VZ8GxLSSU",
+        authDomain: "mytimeline-7c3b7.firebaseapp.com",
+        projectId: "mytimeline-7c3b7",
+        messagingSenderId: "148289157568",
+        appId: "1:148289157568:web:981aa19c4b252d1f91f025",
+      };
+
+      const CLOUDINARY_CLOUD = 'drmtcucy5';
+      const CLOUDINARY_PRESET = 'diaryupload';
+
+      let db,
+        firebaseReady = false;
+      try {
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        firebaseReady = true;
+      } catch (e) {
+        console.warn('Firebase not configured, using local storage mode.');
+      }
+
+      const LOCAL_KEY = 'diary_entries_v1';
+
+      function localLoad() {
+        try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); } catch { return []; }
+      }
+
+      function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)); }
+
+      const today = new Date();
+      let currentYear = today.getFullYear();
+      let currentMonth = today.getMonth();
+      let selectedDate = null;
+      let addTargetDate = null;
+      let pendingImages = [];
+      let openEntryId = null;
+      let cachedEntries = {};
+      let allTagsCache = null;
+      let weekOffset = 0;
+
+      const MONTHS_ZH = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+      const WEEKDAYS_ZH = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+      function dateKey(y, m, d) {
+        return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      }
+
+      function todayKey() { return dateKey(today.getFullYear(), today.getMonth(), today.getDate()); }
+
+      function fmtTime(ts) {
+        const d = ts instanceof Date ? ts : new Date(ts);
+        return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      }
+
+      function toast(msg, dur = 2000) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), dur);
+      }
+
+      function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
+
+      function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+      function highlightKeywords(text) {
+        const keywords = ['开心', '高兴', '兴奋', '激动', '幸福', '温暖', '感动', '难过', '失落', '疲惫', '累', '重要', '特别', '第一次',
+          '终于', '梦', '梦境', '美好', '喜欢', '爱'
+        ];
+        let result = text;
+        keywords.forEach(kw => {
+          const regex = new RegExp(kw, 'g');
+          result = result.replace(regex, `<span class="hl">${kw}</span>`);
+        });
+        return result;
+      }
+
+      async function fetchEntriesForDate(dateStr) {
+        if (cachedEntries[dateStr]) return cachedEntries[dateStr];
+        let entries = [];
+        if (firebaseReady) {
+          try {
+            const q = query(collection(db, 'entries'), where('date', '==', dateStr), orderBy('ts', 'asc'));
+            const snap = await getDocs(q);
+            entries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          } catch (e) { console.warn(e); }
+        } else {
+          entries = localLoad().filter(e => e.date === dateStr).sort((a, b) => a.ts - b.ts);
+        }
+        cachedEntries[dateStr] = entries;
+        return entries;
+      }
+
+      async function fetchAllDates() {
+        const result = {};
+        if (firebaseReady) {
+          try {
+            const snap = await getDocs(collection(db, 'entries'));
+            snap.docs.forEach(d => {
+              const data = d.data();
+              if (!result[data.date]) result[data.date] = { hasText: false, hasImg: false };
+              if (data.text) result[data.date].hasText = true;
+              if (data.images && data.images.length) result[data.date].hasImg = true;
+            });
+          } catch (e) {}
+        } else {
+          localLoad().forEach(e => {
+            if (!result[e.date]) result[e.date] = { hasText: false, hasImg: false };
+            if (e.text) result[e.date].hasText = true;
+            if (e.images && e.images.length) result[e.date].hasImg = true;
+          });
+        }
+        return result;
+      }
+
+      async function fetchAllTags() {
+        if (allTagsCache) return allTagsCache;
+        const byTag = {};
+
+        function add(entry, dateStr) {
+          (entry.tags || []).forEach(tag => {
+            if (!byTag[tag]) byTag[tag] = { tag, count: 0, lastTs: 0, entries: [] };
+            byTag[tag].count++;
+            byTag[tag].lastTs = Math.max(byTag[tag].lastTs, entry.ts);
+            byTag[tag].entries.push({ ...entry, date: dateStr });
+          });
+        }
+        if (firebaseReady) {
+          try {
+            const snap = await getDocs(collection(db, 'entries'));
+            snap.docs.forEach(d => add({ id: d.id, ...d.data() }, d.data().date));
+          } catch (e) { console.warn(e); }
+        } else {
+          localLoad().forEach(e => add(e, e.date));
+        }
+        Object.values(byTag).forEach(t => t.entries.sort((a, b) => b.ts - a.ts));
+        allTagsCache = Object.values(byTag).sort((a, b) => b.count - a.count);
+        return allTagsCache;
+      }
+
+      async function fetchEntriesByTag(tag) {
+        const all = await fetchAllTags();
+        const found = all.find(t => t.tag === tag);
+        return found ? found.entries : [];
+      }
+
+      async function uploadToCloudinary(file) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', CLOUDINARY_PRESET);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+          method: 'POST',
+          body: fd
+        });
+        if (!res.ok) throw new Error('Cloudinary upload failed');
+        const data = await res.json();
+        return data.secure_url;
+      }
+
+      async function saveEntry(dateStr, text, images, tags) {
+        const ts = Date.now();
+        const entry = { date: dateStr, ts, text, images: [], tags: tags || [] };
+        if (firebaseReady) {
+          try {
+            const urls = [];
+            for (const img of images) {
+              const url = await uploadToCloudinary(img.file);
+              urls.push(url);
+            }
+            entry.images = urls;
+            const docRef = await addDoc(collection(db, 'entries'), { date: dateStr, ts, text, images: urls, tags: tags ||
+                [] });
+            entry.id = docRef.id;
+          } catch (e) {
+            console.warn('Save failed, falling back to local:', e);
+            entry.id = 'local_' + ts;
+            entry.images = images.map(i => i.dataUrl);
+            const all = localLoad();
+            all.push(entry);
+            localSave(all);
+          }
+        } else {
+          entry.id = 'local_' + ts;
+          entry.images = images.map(i => i.dataUrl);
+          const all = localLoad();
+          all.push(entry);
+          localSave(all);
+        }
+        delete cachedEntries[dateStr];
+        allTagsCache = null;
+        return entry;
+      }
+
+      async function deleteEntry(entryId, dateStr) {
+        if (firebaseReady && !entryId.startsWith('local_')) {
+          try { await deleteDoc(doc(db, 'entries', entryId)); } catch (e) { console.warn(e); }
+        } else {
+          const all = localLoad().filter(e => e.id !== entryId);
+          localSave(all);
+        }
+        delete cachedEntries[dateStr];
+        allTagsCache = null;
+      }
+
+      // ===== 日历渲染 =====
+      let allDateMeta = {};
+
+      async function renderCalendar() {
+        allDateMeta = await fetchAllDates();
+        renderCalendarGrid();
+      }
+
+      function renderCalendarGrid() {
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+        document.getElementById('calYearLabel').textContent = currentYear;
+        document.getElementById('calMonthLabel').textContent = MONTHS_ZH[currentMonth];
+
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+        const todayStr = todayKey();
+
+        for (let i = firstDay - 1; i >= 0; i--) {
+          grid.appendChild(makeDay(currentYear, currentMonth - 1, prevDays - i, true));
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+          grid.appendChild(makeDay(currentYear, currentMonth, d, false));
+        }
+        const total = firstDay + daysInMonth;
+        const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+        for (let d = 1; d <= rem; d++) {
+          grid.appendChild(makeDay(currentYear, currentMonth + 1, d, true));
+        }
+      }
+
+      function makeDay(year, month, day, otherMonth) {
+        const dKey = dateKey(year, month, day);
+        const isToday = dKey === todayKey();
+        const meta = allDateMeta[dKey] || {};
+        const isWeekend = [0, 6].includes(new Date(year, month, day).getDay());
+        const hasRecord = meta.hasText || meta.hasImg;
+
+        const cell = document.createElement('div');
+        cell.className = 'cal-day' +
+          (isToday ? ' today' : '') +
+          (hasRecord ? ' has-record' : '') +
+          (isWeekend ? ' weekend' : '') +
+          (otherMonth ? ' other-month' : '');
+
+        const circle = document.createElement('div');
+        circle.className = 'day-circle';
+        circle.textContent = day;
+
+        const dot = document.createElement('div');
+        dot.className = 'day-dot';
+
+        cell.appendChild(circle);
+        if (hasRecord || isToday) {
+          cell.appendChild(dot);
+        }
+
+        if (!otherMonth) {
+          cell.addEventListener('click', () => openDetail(dKey));
+        }
+        return cell;
+      }
+
+      // ===== 周视图 =====
+      function getWeekRange(offset) {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const base = new Date(now);
+        base.setDate(now.getDate() + mondayOffset + offset * 7);
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(base);
+          d.setDate(base.getDate() + i);
+          dates.push(d);
+        }
+        return dates;
+      }
+
+      function getWeekNumber(d) {
+        const start = new Date(d.getFullYear(), 0, 1);
+        const diff = (d - start) / 86400000;
+        return Math.ceil((diff + start.getDay() + 1) / 7);
+      }
+
+      async function renderWeekView() {
+        const dates = getWeekRange(weekOffset);
+        const scroll = document.getElementById('weekScroll');
+        scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+
+        const first = dates[0];
+        const last = dates[6];
+        document.getElementById('weekTitle').textContent =
+          `${first.getMonth()+1}月${first.getDate()}日 - ${last.getMonth()+1}月${last.getDate()}日`;
+        document.getElementById('weekSub').textContent = `第 ${getWeekNumber(first)} 周`;
+
+        const dayEntries = {};
+        let hasAny = false;
+        for (const d of dates) {
+          const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+          const entries = await fetchEntriesForDate(key);
+          dayEntries[key] = entries;
+          if (entries.length) hasAny = true;
+        }
+
+        scroll.innerHTML = '';
+        if (!hasAny) {
+          scroll.innerHTML =
+            `<div class="empty-state-enhanced"><div class="empty-icon">📋</div><h3>这周还没有记录</h3><p>开始记录你的每一天吧 ✦</p></div>`;
+          return;
+        }
+
+        const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+        for (let i = 0; i < dates.length; i++) {
+          const d = dates[i];
+          const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+          const entries = dayEntries[key] || [];
+          const isToday = key === todayKey();
+          const isWeekend = [0, 6].includes(d.getDay());
+
+          const card = document.createElement('div');
+          card.className = 'day-card' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+
+          const header = document.createElement('div');
+          header.className = 'day-card-header';
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'day-card-date';
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'day-card-name' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+          nameSpan.textContent = dayNames[d.getDay()] + (isToday ? ' · 今天' : '');
+          const numSpan = document.createElement('span');
+          numSpan.className = 'day-card-number' + (isToday ? ' today' : '');
+          numSpan.textContent = d.getDate();
+          dateDiv.appendChild(nameSpan);
+          dateDiv.appendChild(numSpan);
+
+          const badge = document.createElement('span');
+          badge.className = 'day-card-badge' + (entries.length > 0 ? ' has-record' : '');
+          badge.textContent = entries.length > 0 ? `${entries.length} 条` : '0 条';
+
+          header.appendChild(dateDiv);
+          header.appendChild(badge);
+          card.appendChild(header);
+
+          const body = document.createElement('div');
+          body.className = 'day-card-body';
+
+          if (entries.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'day-card-empty';
+            empty.textContent = '— 今天没有记录 —';
+            body.appendChild(empty);
+          } else {
+            entries.forEach((entry) => {
+              const entryDiv = document.createElement('div');
+              entryDiv.className = 'day-entry' + (entry.images && entry.images.length > 0 ? ' has-image' : '');
+
+              const meta = document.createElement('div');
+              meta.className = 'day-entry-meta';
+              const time = document.createElement('span');
+              time.className = 'day-entry-time';
+              time.textContent = fmtTime(entry.ts);
+              meta.appendChild(time);
+
+              if (entry.tags && entry.tags.length) {
+                const tagsDiv = document.createElement('div');
+                tagsDiv.className = 'day-entry-tags';
+                entry.tags.slice(0, 3).forEach(tag => {
+                  const pill = document.createElement('button');
+                  pill.className = 'day-entry-tag';
+                  pill.textContent = tag;
+                  pill.addEventListener('click', e => {
+                    e.stopPropagation();
+                    openTagTimeline(tag);
+                  });
+                  tagsDiv.appendChild(pill);
+                });
+                if (entry.tags.length > 3) {
+                  const more = document.createElement('button');
+                  more.className = 'day-entry-tag';
+                  more.textContent = `+${entry.tags.length - 3}`;
+                  more.addEventListener('click', e => {
+                    e.stopPropagation();
+                    openTagTimeline(entry.tags[0]);
+                  });
+                  tagsDiv.appendChild(more);
+                }
+                meta.appendChild(tagsDiv);
+              }
+              entryDiv.appendChild(meta);
+
+              if (entry.text) {
+                const textDiv = document.createElement('div');
+                textDiv.className = 'day-entry-text';
+                textDiv.innerHTML = highlightKeywords(entry.text);
+                entryDiv.appendChild(textDiv);
+              }
+
+              if (entry.images && entry.images.length > 0) {
+                const imgRow = document.createElement('div');
+                imgRow.className = 'day-entry-images';
+                entry.images.slice(0, 4).forEach(url => {
+                  const img = document.createElement('img');
+                  img.src = url;
+                  img.addEventListener('click', e => {
+                    e.stopPropagation();
+                    openLightbox(url);
+                  });
+                  imgRow.appendChild(img);
+                });
+                if (entry.images.length > 4) {
+                  const more = document.createElement('div');
+                  more.className = 'more-badge';
+                  more.textContent = `+${entry.images.length - 4}`;
+                  imgRow.appendChild(more);
+                }
+                entryDiv.appendChild(imgRow);
+              }
+
+              entryDiv.addEventListener('click', () => openBottomSheet(entry, key));
+              body.appendChild(entryDiv);
+            });
+          }
+
+          card.appendChild(body);
+          scroll.appendChild(card);
+        }
+      }
+
+      // ===== 详情页 =====
+      async function openDetail(dateStr) {
+        selectedDate = dateStr;
+        const parts = dateStr.split('-');
+        const dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+        document.getElementById('detailDateTitle').textContent = `${dt.getMonth()+1}月${dt.getDate()}日 · ${WEEKDAYS_ZH[dt.getDay()]}`;
+        showScreen('screen-detail');
+        await renderTimeline(dateStr);
+      }
+
+      function toggleText(id, btn) {
+        const el = document.getElementById(id);
+        if (el.classList.contains('collapsed')) {
+          el.classList.remove('collapsed');
+          btn.textContent = '收起 ↑';
+        } else {
+          el.classList.add('collapsed');
+          btn.textContent = '展开全文 ↓';
+        }
+      }
+
+      async function renderTimeline(dateStr) {
+        const scroll = document.getElementById('timelineScroll');
+        scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+        const entries = await fetchEntriesForDate(dateStr);
+        scroll.innerHTML = '';
+
+        if (!entries.length) {
+          scroll.innerHTML = `
+            <div class="empty-state-enhanced">
+              <div class="empty-icon">📝</div>
+              <h3>今天还没有记录</h3>
+              <p>不如花几分钟<br>把今天的心情写下来 ✦</p>
+              <button class="empty-cta" onclick="document.getElementById('detailAddBtn').click()">✍️ 写点什么</button>
+            </div>
+          `;
+          return;
+        }
+
+        let imgCount = 0;
+        entries.forEach(e => { if (e.images) imgCount += e.images.length; });
+
+        const dt = new Date(dateStr + 'T00:00:00');
+        const statsBar = document.createElement('div');
+        statsBar.className = 'stats-bar';
+        statsBar.innerHTML = `
+          <div class="left">
+            <span class="date">${dt.getMonth()+1}月${dt.getDate()}日</span>
+            <span class="weekday">${WEEKDAYS_ZH[dt.getDay()]}</span>
+          </div>
+          <div class="right">
+            <strong>${entries.length}</strong> 条 · <strong>${imgCount}</strong> 张图
+          </div>
         `;
+        scroll.appendChild(statsBar);
 
-        const card = document.createElement('div');
-        card.className = 'entry-card' +
-          (hasImage ? ' has-image' : '') +
-          (isFirstOfDay ? ' first-of-day' : '');
+        const groups = { morning: [], afternoon: [], evening: [] };
+        entries.forEach((entry, idx) => {
+          const hour = new Date(entry.ts).getHours();
+          if (hour < 12) groups.morning.push({ ...entry, index: idx + 1 });
+          else if (hour < 18) groups.afternoon.push({ ...entry, index: idx + 1 });
+          else groups.evening.push({ ...entry, index: idx + 1 });
+        });
 
-        const inner = document.createElement('div');
-        inner.className = 'card-inner';
+        const groupConfig = [
+          { key: 'morning', label: '☀️ 上午' },
+          { key: 'afternoon', label: '🌤️ 下午' },
+          { key: 'evening', label: '🌙 晚上' }
+        ];
 
-        if (isFirstOfDay) {
-          const badge = document.createElement('div');
-          badge.className = 'first-badge';
-          badge.textContent = '✦ 今天第一记';
-          inner.appendChild(badge);
+        let globalIndex = 0;
+
+        groupConfig.forEach(g => {
+          const items = groups[g.key];
+          if (!items.length) return;
+
+          const section = document.createElement('div');
+          section.className = 'time-section';
+
+          const label = document.createElement('div');
+          label.className = 'time-section-label';
+          label.textContent = g.label;
+          section.appendChild(label);
+
+          items.forEach((entry, idx) => {
+            globalIndex++;
+            const isFirstOfDay = globalIndex === 1;
+            const hasImage = entry.images && entry.images.length > 0;
+            const textLength = entry.text ? entry.text.length : 0;
+            const isLong = textLength > 60;
+
+            const row = document.createElement('div');
+            row.className = 'entry';
+            row.style.animationDelay = (idx * 0.05) + 's';
+
+            const left = document.createElement('div');
+            left.className = 'entry-left';
+            left.innerHTML = `
+              <span class="entry-time">${fmtTime(entry.ts)}</span>
+              <span class="entry-index">#${globalIndex}</span>
+            `;
+
+            const card = document.createElement('div');
+            card.className = 'entry-card' +
+              (hasImage ? ' has-image' : '') +
+              (isFirstOfDay ? ' first-of-day' : '');
+
+            const inner = document.createElement('div');
+            inner.className = 'card-inner';
+
+            if (isFirstOfDay) {
+              const badge = document.createElement('div');
+              badge.className = 'first-badge';
+              badge.textContent = '✦ 今天第一记';
+              inner.appendChild(badge);
+            }
+
+            if (entry.tags && entry.tags.length) {
+              const tagsDiv = document.createElement('div');
+              tagsDiv.className = 'entry-tags';
+              entry.tags.forEach(tag => {
+                const pill = document.createElement('button');
+                pill.className = 'entry-tag';
+                pill.textContent = tag;
+                pill.addEventListener('click', e => {
+                  e.stopPropagation();
+                  openTagTimeline(tag);
+                });
+                tagsDiv.appendChild(pill);
+              });
+              inner.appendChild(tagsDiv);
+            }
+
+            if (entry.text) {
+              const textDiv = document.createElement('div');
+              textDiv.className = 'entry-text' + (isLong ? ' collapsed' : '');
+              textDiv.id = 'text_' + entry.id + '_' + globalIndex;
+              textDiv.innerHTML = highlightKeywords(entry.text);
+              inner.appendChild(textDiv);
+
+              if (isLong) {
+                const btn = document.createElement('button');
+                btn.className = 'expand-btn';
+                btn.textContent = '展开全文 ↓';
+                btn.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  toggleText(textDiv.id, btn);
+                });
+                inner.appendChild(btn);
+              }
+            }
+
+            card.appendChild(inner);
+
+            if (hasImage) {
+              const imgRow = document.createElement('div');
+              imgRow.className = 'entry-images';
+              entry.images.slice(0, 4).forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.addEventListener('click', e => {
+                  e.stopPropagation();
+                  openLightbox(url);
+                });
+                imgRow.appendChild(img);
+              });
+              if (entry.images.length > 4) {
+                const more = document.createElement('span');
+                more.style.cssText = 'font-size:11px;color:var(--text-muted);display:flex;align-items:center;';
+                more.textContent = `+${entry.images.length - 4}`;
+                imgRow.appendChild(more);
+              }
+              card.appendChild(imgRow);
+            }
+
+            card.addEventListener('click', () => openBottomSheet(entry, dateStr));
+
+            row.appendChild(left);
+            row.appendChild(card);
+            section.appendChild(row);
+          });
+
+          scroll.appendChild(section);
+        });
+      }
+
+      // ===== 标签相关 =====
+      function makeTagPillsRow(tags, onClickOverride) {
+        const row = document.createElement('div');
+        row.className = 'sheet-tags-row';
+        tags.forEach(tag => {
+          const pill = document.createElement('button');
+          pill.className = 'sheet-tag';
+          pill.textContent = tag;
+          pill.addEventListener('click', e => {
+            e.stopPropagation();
+            if (onClickOverride) onClickOverride(tag);
+            else openTagTimeline(tag);
+          });
+          row.appendChild(pill);
+        });
+        return row;
+      }
+
+      async function openTagCloud() {
+        showScreen('screen-tagcloud');
+        const scroll = document.getElementById('tagCloudScroll');
+        scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+        const tags = await fetchAllTags();
+        scroll.innerHTML = '';
+        if (!tags.length) {
+          scroll.innerHTML = `<div class="tagcloud-empty"><div>还没有标签</div></div>`;
+          return;
         }
+        const maxCount = Math.max(...tags.map(t => t.count));
+        const wrap = document.createElement('div');
+        wrap.className = 'tagcloud-wrap';
+        tags.forEach(t => {
+          const ratio = maxCount > 1 ? t.count / maxCount : 1;
+          const fontSize = 14 + ratio * 14;
+          const el = document.createElement('span');
+          el.className = 'tagcloud-item';
+          el.style.fontSize = fontSize + 'px';
+          el.textContent = t.tag;
+          el.addEventListener('click', () => openTagTimeline(t.tag));
+          wrap.appendChild(el);
+        });
+        scroll.appendChild(wrap);
+      }
 
-        // 标签
+      async function openTagTimeline(tag) {
+        showScreen('screen-tagtimeline');
+        document.getElementById('tagTimelineTitle').textContent = `# ${tag}`;
+        const scroll = document.getElementById('tagTimelineScroll');
+        scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
+        const entries = await fetchEntriesByTag(tag);
+        document.getElementById('tagTimelineSub').textContent = `${entries.length} 条`;
+        scroll.innerHTML = '';
+        if (!entries.length) {
+          scroll.innerHTML =
+            `<div class="empty-state-enhanced"><div class="empty-icon">✦</div><h3>这个标签下还没有记录</h3></div>`;
+          return;
+        }
+        entries.forEach((entry, i) => {
+          const row = document.createElement('div');
+          row.className = 'timeline-entry';
+          row.style.animationDelay = (i * 0.08) + 's';
+          const parts = entry.date.split('-');
+          const dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+          const dateEl = document.createElement('div');
+          dateEl.className = 'entry-date-badge';
+          dateEl.innerHTML = `${dt.getMonth()+1}月${dt.getDate()}日<br>${fmtTime(entry.ts)}`;
+          const bubble = document.createElement('div');
+          bubble.className = 'entry-bubble';
+          if (entry.text) {
+            const textEl = document.createElement('div');
+            textEl.className = 'entry-text-preview';
+            textEl.innerHTML = highlightKeywords(entry.text);
+            bubble.appendChild(textEl);
+          }
+          if (entry.images && entry.images.length) {
+            const row2 = document.createElement('div');
+            row2.className = 'entry-images-row';
+            entry.images.slice(0, 3).forEach(url => {
+              const img = document.createElement('img');
+              img.className = 'entry-thumb';
+              img.src = url;
+              img.addEventListener('click', e => { e.stopPropagation();
+                openLightbox(url); });
+              row2.appendChild(img);
+            });
+            bubble.appendChild(row2);
+          }
+          if (entry.tags && entry.tags.length) {
+            bubble.appendChild(makeTagPillsRow(entry.tags));
+          }
+          bubble.addEventListener('click', () => openBottomSheet(entry, entry.date));
+          row.appendChild(dateEl);
+          row.appendChild(bubble);
+          scroll.appendChild(row);
+        });
+      }
+
+      // ===== Bottom Sheet =====
+      function openBottomSheet(entry, dateStr) {
+        openEntryId = { id: entry.id, date: dateStr };
+        document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
+        const textEl = document.getElementById('sheetText');
+        textEl.innerHTML = entry.text ? highlightKeywords(entry.text) : '';
+        const tagsRow = document.getElementById('sheetTagsRow');
+        tagsRow.innerHTML = '';
         if (entry.tags && entry.tags.length) {
-          const tagsDiv = document.createElement('div');
-          tagsDiv.className = 'entry-tags';
-          entry.tags.forEach(tag => {
-            const pill = document.createElement('button');
-            pill.className = 'entry-tag';
-            pill.textContent = tag;
-            pill.addEventListener('click', e => {
-              e.stopPropagation();
-              openTagTimeline(tag);
-            });
-            tagsDiv.appendChild(pill);
-          });
-          inner.appendChild(tagsDiv);
+          tagsRow.appendChild(makeTagPillsRow(entry.tags, tag => {
+            closeBottomSheet();
+            openTagTimeline(tag);
+          }));
         }
-
-        // 文字（带高亮）
-        if (entry.text) {
-          const textDiv = document.createElement('div');
-          textDiv.className = 'entry-text' + (isLong ? ' collapsed' : '');
-          textDiv.id = 'text_' + entry.id + '_' + globalIndex;
-          textDiv.innerHTML = highlightKeywords(entry.text);
-          inner.appendChild(textDiv);
-
-          if (isLong) {
-            const btn = document.createElement('button');
-            btn.className = 'expand-btn';
-            btn.textContent = '展开全文 ↓';
-            btn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              toggleText(textDiv.id, btn);
-            });
-            inner.appendChild(btn);
-          }
-        }
-
-        card.appendChild(inner);
-
-        // 图片
-        if (hasImage) {
-          const imgRow = document.createElement('div');
-          imgRow.className = 'entry-images';
-          entry.images.slice(0, 4).forEach(url => {
-            const img = document.createElement('img');
-            img.src = url;
-            img.addEventListener('click', e => {
-              e.stopPropagation();
-              openLightbox(url);
-            });
-            imgRow.appendChild(img);
-          });
-          if (entry.images.length > 4) {
-            const more = document.createElement('span');
-            more.style.cssText = 'font-size:11px;color:var(--text-muted);display:flex;align-items:center;';
-            more.textContent = `+${entry.images.length - 4}`;
-            imgRow.appendChild(more);
-          }
-          card.appendChild(imgRow);
-        }
-
-        card.addEventListener('click', () => openBottomSheet(entry, dateStr));
-
-        row.appendChild(left);
-        row.appendChild(card);
-        section.appendChild(row);
-      });
-
-      scroll.appendChild(section);
-    });
-
-    // 滚动到底部时自动展开长文本（用户交互）
-  }
-
-  // ===== TAG HELPERS =====
-  function makeTagPillsRow(tags, onClickOverride) {
-    const row = document.createElement('div');
-    row.className = 'sheet-tags-row';
-    tags.forEach(tag => {
-      const pill = document.createElement('button');
-      pill.className = 'sheet-tag';
-      pill.textContent = tag;
-      pill.addEventListener('click', e => {
-        e.stopPropagation();
-        if (onClickOverride) onClickOverride(tag);
-        else openTagTimeline(tag);
-      });
-      row.appendChild(pill);
-    });
-    return row;
-  }
-
-  // ===== TAG CLOUD =====
-  async function openTagCloud() {
-    showScreen('screen-tagcloud');
-    const scroll = document.getElementById('tagCloudScroll');
-    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
-    const tags = await fetchAllTags();
-    scroll.innerHTML = '';
-    if (!tags.length) {
-      scroll.innerHTML = `<div class="tagcloud-empty"><div>还没有标签</div></div>`;
-      return;
-    }
-    const maxCount = Math.max(...tags.map(t => t.count));
-    const wrap = document.createElement('div');
-    wrap.className = 'tagcloud-wrap';
-    tags.forEach(t => {
-      const ratio = maxCount > 1 ? t.count / maxCount : 1;
-      const fontSize = 14 + ratio * 14;
-      const el = document.createElement('span');
-      el.className = 'tagcloud-item';
-      el.style.fontSize = fontSize + 'px';
-      el.textContent = t.tag;
-      el.addEventListener('click', () => openTagTimeline(t.tag));
-      wrap.appendChild(el);
-    });
-    scroll.appendChild(wrap);
-  }
-
-  // ===== TAG TIMELINE =====
-  async function openTagTimeline(tag) {
-    showScreen('screen-tagtimeline');
-    document.getElementById('tagTimelineTitle').textContent = `# ${tag}`;
-    const scroll = document.getElementById('tagTimelineScroll');
-    scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
-    const entries = await fetchEntriesByTag(tag);
-    document.getElementById('tagTimelineSub').textContent = `${entries.length} 条`;
-    scroll.innerHTML = '';
-    if (!entries.length) {
-      scroll.innerHTML = `<div class="empty-state-enhanced"><div class="empty-icon">✦</div><h3>这个标签下还没有记录</h3></div>`;
-      return;
-    }
-    entries.forEach((entry, i) => {
-      const row = document.createElement('div');
-      row.className = 'timeline-entry';
-      row.style.animationDelay = (i * 0.08) + 's';
-      const parts = entry.date.split('-');
-      const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
-      const dateEl = document.createElement('div');
-      dateEl.className = 'entry-date-badge';
-      dateEl.innerHTML = `${dt.getMonth()+1}月${dt.getDate()}日<br>${fmtTime(entry.ts)}`;
-      const bubble = document.createElement('div');
-      bubble.className = 'entry-bubble';
-      if (entry.text) {
-        const textEl = document.createElement('div');
-        textEl.className = 'entry-text-preview';
-        textEl.innerHTML = highlightKeywords(entry.text);
-        bubble.appendChild(textEl);
-      }
-      if (entry.images && entry.images.length) {
-        const row2 = document.createElement('div');
-        row2.className = 'entry-images-row';
-        entry.images.slice(0,3).forEach(url => {
+        const imgs = document.getElementById('sheetImages');
+        imgs.innerHTML = '';
+        (entry.images || []).forEach(url => {
           const img = document.createElement('img');
-          img.className = 'entry-thumb';
           img.src = url;
-          img.addEventListener('click', e => { e.stopPropagation(); openLightbox(url); });
-          row2.appendChild(img);
+          img.className = 'sheet-image';
+          img.addEventListener('click', () => openLightbox(url));
+          imgs.appendChild(img);
         });
-        bubble.appendChild(row2);
+        document.getElementById('bottomSheetOverlay').classList.add('open');
       }
-      if (entry.tags && entry.tags.length) {
-        bubble.appendChild(makeTagPillsRow(entry.tags));
+
+      function closeBottomSheet() {
+        document.getElementById('bottomSheetOverlay').classList.remove('open');
       }
-      bubble.addEventListener('click', () => openBottomSheet(entry, entry.date));
-      row.appendChild(dateEl);
-      row.appendChild(bubble);
-      scroll.appendChild(row);
-    });
-  }
-
-  // ===== BOTTOM SHEET =====
-  function openBottomSheet(entry, dateStr) {
-    openEntryId = { id: entry.id, date: dateStr };
-    document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
-    const textEl = document.getElementById('sheetText');
-    textEl.innerHTML = entry.text ? highlightKeywords(entry.text) : '';
-    const tagsRow = document.getElementById('sheetTagsRow');
-    tagsRow.innerHTML = '';
-    if (entry.tags && entry.tags.length) {
-      tagsRow.appendChild(makeTagPillsRow(entry.tags, tag => {
-        closeBottomSheet();
-        openTagTimeline(tag);
-      }));
-    }
-    const imgs = document.getElementById('sheetImages');
-    imgs.innerHTML = '';
-    (entry.images || []).forEach(url => {
-      const img = document.createElement('img');
-      img.src = url; img.className = 'sheet-image';
-      img.addEventListener('click', () => openLightbox(url));
-      imgs.appendChild(img);
-    });
-    document.getElementById('bottomSheetOverlay').classList.add('open');
-  }
-
-  function closeBottomSheet() {
-    document.getElementById('bottomSheetOverlay').classList.remove('open');
-  }
-  document.getElementById('bottomSheetOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet();
-  });
-
-  document.getElementById('sheetDeleteBtn').addEventListener('click', async () => {
-    if (!openEntryId) return;
-    const { id, date } = openEntryId;
-    closeBottomSheet();
-    showLoading();
-    await deleteEntry(id, date);
-    hideLoading();
-    toast('已删除');
-    await renderTimeline(date);
-    allDateMeta = await fetchAllDates();
-    renderCalendarGrid();
-  });
-
-  // ===== LIGHTBOX =====
-  function openLightbox(url) {
-    document.getElementById('lightboxImg').src = url;
-    document.getElementById('lightbox').classList.add('open');
-  }
-  document.getElementById('lightbox').addEventListener('click', () => {
-    document.getElementById('lightbox').classList.remove('open');
-  });
-
-  // ===== ADD RECORD =====
-  async function openAdd(dateStr) {
-    addTargetDate = dateStr;
-    pendingImages = [];
-    pendingTags = [];
-    document.getElementById('addTextarea').value = '';
-    document.getElementById('charCount').textContent = '0 / 500';
-    document.getElementById('charCount').classList.remove('warn');
-    document.getElementById('tagInput').value = '';
-    rebuildImageArea();
-    rebuildTagArea();
-    const parts = dateStr.split('-');
-    const dt = new Date(+parts[0], +parts[1]-1, +parts[2]);
-    document.getElementById('addDateLabel').textContent =
-      dateStr === todayKey() ? '今天' : `${dt.getMonth()+1}月${dt.getDate()}日`;
-    showScreen('screen-add');
-    setTimeout(() => document.getElementById('addTextarea').focus(), 400);
-  }
-
-  document.getElementById('addTextarea').addEventListener('input', function() {
-    const len = this.value.length;
-    const countEl = document.getElementById('charCount');
-    countEl.textContent = len + ' / 500';
-    countEl.classList.toggle('warn', len > 400);
-  });
-
-  function rebuildImageArea() {
-    const area = document.getElementById('imgUploadArea');
-    area.innerHTML = '';
-    pendingImages.forEach((img, i) => {
-      const wrap = document.createElement('div');
-      wrap.className = 'img-preview-wrap';
-      const el = document.createElement('img');
-      el.className = 'img-preview'; el.src = img.dataUrl;
-      const rm = document.createElement('div');
-      rm.className = 'img-remove'; rm.textContent = '×';
-      rm.addEventListener('click', () => { pendingImages.splice(i,1); rebuildImageArea(); });
-      wrap.appendChild(el); wrap.appendChild(rm);
-      area.appendChild(wrap);
-    });
-    if (pendingImages.length < 6) {
-      const btn = document.createElement('button');
-      btn.className = 'img-add-btn'; btn.textContent = '＋';
-      btn.addEventListener('click', () => document.getElementById('imgFileInput').click());
-      area.appendChild(btn);
-    }
-    const input = document.createElement('input');
-    input.type='file'; input.accept='image/*'; input.multiple=true;
-    input.className='hidden-file'; input.id='imgFileInput';
-    input.addEventListener('change', handleImageSelect);
-    area.appendChild(input);
-  }
-
-  async function handleImageSelect(e) {
-    const files = Array.from(e.target.files);
-    const remaining = 6 - pendingImages.length;
-    for (const file of files.slice(0, remaining)) {
-      const dataUrl = await readFileAsDataUrl(file);
-      pendingImages.push({ file, dataUrl });
-    }
-    rebuildImageArea();
-  }
-
-  function readFileAsDataUrl(file) {
-    return new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.onerror = rej;
-      r.readAsDataURL(file);
-    });
-  }
-
-  function addPendingTag(raw) {
-    const tag = raw.trim().slice(0, 20);
-    if (!tag) return;
-    if (pendingTags.includes(tag)) return;
-    pendingTags.push(tag);
-    rebuildTagArea();
-  }
-
-  async function rebuildTagArea() {
-    const selectedRow = document.getElementById('tagSelectedRow');
-    selectedRow.innerHTML = '';
-    pendingTags.forEach(tag => {
-      const chip = document.createElement('span');
-      chip.className = 'tag-chip';
-      chip.innerHTML = `<span>${tag}</span><span class="tag-remove">✕</span>`;
-      chip.querySelector('.tag-remove').addEventListener('click', () => {
-        pendingTags = pendingTags.filter(t => t !== tag);
-        rebuildTagArea();
+      document.getElementById('bottomSheetOverlay').addEventListener('click', e => {
+        if (e.target === document.getElementById('bottomSheetOverlay')) closeBottomSheet();
       });
-      selectedRow.appendChild(chip);
-    });
 
-    const suggestRow = document.getElementById('tagSuggestRow');
-    const suggestLabel = document.getElementById('tagSuggestLabel');
-    suggestRow.innerHTML = '';
-    try {
-      const allTags = await fetchAllTags();
-      const suggestions = allTags.map(t => t.tag).filter(t => !pendingTags.includes(t)).slice(0, 8);
-      if (suggestions.length) {
-        suggestLabel.style.display = 'block';
-        suggestions.forEach(tag => {
-          const chip = document.createElement('button');
-          chip.className = 'tag-chip-muted';
-          chip.textContent = tag;
-          chip.addEventListener('click', () => addPendingTag(tag));
-          suggestRow.appendChild(chip);
+      document.getElementById('sheetDeleteBtn').addEventListener('click', async () => {
+        if (!openEntryId) return;
+        const { id, date } = openEntryId;
+        closeBottomSheet();
+        showLoading();
+        await deleteEntry(id, date);
+        hideLoading();
+        toast('已删除');
+        await renderTimeline(date);
+        allDateMeta = await fetchAllDates();
+        renderCalendarGrid();
+      });
+
+      // ===== Lightbox =====
+      function openLightbox(url) {
+        document.getElementById('lightboxImg').src = url;
+        document.getElementById('lightbox').classList.add('open');
+      }
+      document.getElementById('lightbox').addEventListener('click', () => {
+        document.getElementById('lightbox').classList.remove('open');
+      });
+
+      // ===== 添加记录 =====
+      async function openAdd(dateStr) {
+        addTargetDate = dateStr;
+        pendingImages = [];
+        pendingTags = [];
+        document.getElementById('addTextarea').value = '';
+        document.getElementById('charCount').textContent = '0 / 500';
+        document.getElementById('charCount').classList.remove('warn');
+        document.getElementById('tagInput').value = '';
+        rebuildImageArea();
+        rebuildTagArea();
+        const parts = dateStr.split('-');
+        const dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+        document.getElementById('addDateLabel').textContent =
+          dateStr === todayKey() ? '今天' : `${dt.getMonth()+1}月${dt.getDate()}日`;
+        showScreen('screen-add');
+        setTimeout(() => document.getElementById('addTextarea').focus(), 400);
+      }
+
+      document.getElementById('addTextarea').addEventListener('input', function() {
+        const len = this.value.length;
+        const countEl = document.getElementById('charCount');
+        countEl.textContent = len + ' / 500';
+        countEl.classList.toggle('warn', len > 400);
+      });
+
+      function rebuildImageArea() {
+        const area = document.getElementById('imgUploadArea');
+        area.innerHTML = '';
+        pendingImages.forEach((img, i) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'img-preview-wrap';
+          const el = document.createElement('img');
+          el.className = 'img-preview';
+          el.src = img.dataUrl;
+          const rm = document.createElement('div');
+          rm.className = 'img-remove';
+          rm.textContent = '×';
+          rm.addEventListener('click', () => { pendingImages.splice(i, 1);
+            rebuildImageArea(); });
+          wrap.appendChild(el);
+          wrap.appendChild(rm);
+          area.appendChild(wrap);
         });
-      } else {
-        suggestLabel.style.display = 'none';
+        if (pendingImages.length < 6) {
+          const btn = document.createElement('button');
+          btn.className = 'img-add-btn';
+          btn.textContent = '＋';
+          btn.addEventListener('click', () => document.getElementById('imgFileInput').click());
+          area.appendChild(btn);
+        }
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.multiple = true;
+        input.className = 'hidden-file';
+        input.id = 'imgFileInput';
+        input.addEventListener('change', handleImageSelect);
+        area.appendChild(input);
       }
-    } catch(e) {}
-  }
 
-  document.getElementById('tagInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ',' || e.key === '，') {
-      e.preventDefault();
-      addPendingTag(e.target.value);
-      e.target.value = '';
-    }
-  });
-
-  document.getElementById('submitBtn').addEventListener('click', async () => {
-    const text = document.getElementById('addTextarea').value.trim();
-    if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true; showLoading();
-    try {
-      await saveEntry(addTargetDate, text, pendingImages, pendingTags);
-      allDateMeta = await fetchAllDates();
-      renderCalendarGrid();
-      toast('记下来了 ✦');
-      if (selectedDate === addTargetDate) {
-        await renderTimeline(addTargetDate);
-        showScreen('screen-detail', 'left');
-      } else {
-        showScreen('screen-calendar', 'left');
+      async function handleImageSelect(e) {
+        const files = Array.from(e.target.files);
+        const remaining = 6 - pendingImages.length;
+        for (const file of files.slice(0, remaining)) {
+          const dataUrl = await readFileAsDataUrl(file);
+          pendingImages.push({ file, dataUrl });
+        }
+        rebuildImageArea();
       }
-    } catch(e) {
-      toast('保存失败，请重试');
-      console.error(e);
-    }
-    hideLoading();
-    btn.disabled = false;
-  });
 
-  // ===== NAVIGATION =====
-  function showScreen(id, direction='right') {
-    document.querySelectorAll('.screen').forEach(s => {
-      if (s.id === id) { s.classList.remove('hidden','slide-left'); }
-      else if (!s.classList.contains('hidden')) {
-        s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
+      function readFileAsDataUrl(file) {
+        return new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = () => res(r.result);
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
       }
-    });
-  }
 
-  async function openWeekView() {
-    weekOffset = 0;
-    showScreen('screen-week');
-    await renderWeekView();
-  }
+      function addPendingTag(raw) {
+        const tag = raw.trim().slice(0, 20);
+        if (!tag) return;
+        if (pendingTags.includes(tag)) return;
+        pendingTags.push(tag);
+        rebuildTagArea();
+      }
 
-  // ===== BUTTONS =====
-  document.getElementById('fabAdd').addEventListener('click', () => openAdd(todayKey()));
-  document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
-  document.getElementById('addBackBtn').addEventListener('click', () => {
-    if (selectedDate) showScreen('screen-detail', 'left');
-    else showScreen('screen-calendar', 'left');
-  });
-  document.getElementById('backBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
-  document.getElementById('weekBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
-  document.getElementById('tagCloudBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
-  document.getElementById('tagTimelineBackBtn').addEventListener('click', () => showScreen('screen-tagcloud', 'left'));
+      async function rebuildTagArea() {
+        const selectedRow = document.getElementById('tagSelectedRow');
+        selectedRow.innerHTML = '';
+        pendingTags.forEach(tag => {
+          const chip = document.createElement('span');
+          chip.className = 'tag-chip';
+          chip.innerHTML = `<span>${tag}</span><span class="tag-remove">✕</span>`;
+          chip.querySelector('.tag-remove').addEventListener('click', () => {
+            pendingTags = pendingTags.filter(t => t !== tag);
+            rebuildTagArea();
+          });
+          selectedRow.appendChild(chip);
+        });
 
-  document.getElementById('tagEntryBtn').addEventListener('click', () => openTagCloud());
-  document.getElementById('weekEntryBtn').addEventListener('click', () => openWeekView());
+        const suggestRow = document.getElementById('tagSuggestRow');
+        const suggestLabel = document.getElementById('tagSuggestLabel');
+        suggestRow.innerHTML = '';
+        try {
+          const allTags = await fetchAllTags();
+          const suggestions = allTags.map(t => t.tag).filter(t => !pendingTags.includes(t)).slice(0, 8);
+          if (suggestions.length) {
+            suggestLabel.style.display = 'block';
+            suggestions.forEach(tag => {
+              const chip = document.createElement('button');
+              chip.className = 'tag-chip-muted';
+              chip.textContent = tag;
+              chip.addEventListener('click', () => addPendingTag(tag));
+              suggestRow.appendChild(chip);
+            });
+          } else {
+            suggestLabel.style.display = 'none';
+          }
+        } catch (e) {}
+      }
 
-  document.getElementById('prevMonth').addEventListener('click', () => {
-    currentMonth--; if (currentMonth < 0) { currentMonth=11; currentYear--; }
-    renderCalendar();
-  });
-  document.getElementById('nextMonth').addEventListener('click', () => {
-    currentMonth++; if (currentMonth > 11) { currentMonth=0; currentYear++; }
-    renderCalendar();
-  });
+      document.getElementById('tagInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ',' || e.key === '，') {
+          e.preventDefault();
+          addPendingTag(e.target.value);
+          e.target.value = '';
+        }
+      });
 
-  document.getElementById('weekPrev').addEventListener('click', async () => { weekOffset--; await renderWeekView(); });
-  document.getElementById('weekNext').addEventListener('click', async () => { weekOffset++; await renderWeekView(); });
-  document.getElementById('weekToday').addEventListener('click', async () => { weekOffset = 0; await renderWeekView(); });
+      document.getElementById('submitBtn').addEventListener('click', async () => {
+        const text = document.getElementById('addTextarea').value.trim();
+        if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        showLoading();
+        try {
+          await saveEntry(addTargetDate, text, pendingImages, pendingTags);
+          allDateMeta = await fetchAllDates();
+          renderCalendarGrid();
+          toast('记下来了 ✦');
+          if (selectedDate === addTargetDate) {
+            await renderTimeline(addTargetDate);
+            showScreen('screen-detail', 'left');
+          } else {
+            showScreen('screen-calendar', 'left');
+          }
+        } catch (e) {
+          toast('保存失败，请重试');
+          console.error(e);
+        }
+        hideLoading();
+        btn.disabled = false;
+      });
 
-  // ===== INIT =====
-  await renderCalendar();
-</script>
+      // ===== 导航 =====
+      function showScreen(id, direction = 'right') {
+        document.querySelectorAll('.screen').forEach(s => {
+          if (s.id === id) { s.classList.remove('hidden', 'slide-left'); } else if (!s.classList.contains(
+              'hidden')) {
+            s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
+          }
+        });
+      }
+
+      async function openWeekView() {
+        weekOffset = 0;
+        showScreen('screen-week');
+        await renderWeekView();
+      }
+
+      // ===== 按钮绑定 =====
+      document.getElementById('fabAdd').addEventListener('click', () => openAdd(todayKey()));
+      document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
+      document.getElementById('addBackBtn').addEventListener('click', () => {
+        if (selectedDate) showScreen('screen-detail', 'left');
+        else showScreen('screen-calendar', 'left');
+      });
+      document.getElementById('backBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+      document.getElementById('weekBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+      document.getElementById('tagCloudBackBtn').addEventListener('click', () => showScreen('screen-calendar', 'left'));
+      document.getElementById('tagTimelineBackBtn').addEventListener('click', () => showScreen('screen-tagcloud', 'left'));
+
+      document.getElementById('tagEntryBtn').addEventListener('click', () => openTagCloud());
+      document.getElementById('weekEntryBtn').addEventListener('click', () => openWeekView());
+
+      document.getElementById('prevMonth').addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11;
+          currentYear--; }
+        renderCalendar();
+      });
+      document.getElementById('nextMonth').addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0;
+          currentYear++; }
+        renderCalendar();
+      });
+
+      document.getElementById('weekPrev').addEventListener('click', async () => { weekOffset--;
+        await renderWeekView(); });
+      document.getElementById('weekNext').addEventListener('click', async () => { weekOffset++;
+        await renderWeekView(); });
+      document.getElementById('weekToday').addEventListener('click', async () => { weekOffset = 0;
+        await renderWeekView(); });
+
+      // ===== 鼠标光晕脚本 =====
+      (function() {
+        const glow = document.getElementById('glow');
+        let isVisible = false;
+
+        document.addEventListener('mousemove', function(e) {
+          glow.style.left = e.clientX + 'px';
+          glow.style.top = e.clientY + 'px';
+          if (!isVisible) {
+            glow.style.opacity = '1';
+            isVisible = true;
+          }
+        });
+
+        document.addEventListener('mouseleave', function() {
+          glow.style.opacity = '0';
+          isVisible = false;
+        });
+
+        document.addEventListener('mouseenter', function(e) {
+          glow.style.opacity = '1';
+          isVisible = true;
+          glow.style.left = e.clientX + 'px';
+          glow.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('mousedown', function() {
+          glow.classList.add('active');
+        });
+        document.addEventListener('mouseup', function() {
+          glow.classList.remove('active');
+        });
+
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+          document.addEventListener('touchstart', function() {
+            glow.style.display = 'none';
+          });
+        }
+      })();
+
+      // ===== 初始化 =====
+      await renderCalendar();
+    })();
+  </script>
 </body>
 </html>
