@@ -712,7 +712,7 @@
         }
 
         /* ============================================================
-           打卡弹窗 (不变)
+           打卡弹窗
            ============================================================ */
         .modal-overlay {
             position: fixed;
@@ -1912,7 +1912,6 @@
             font-style: normal;
         }
 
-        /* 顶部四指标 */
         .checkin-metrics {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1949,8 +1948,6 @@
             font-family: var(--font-sans);
             margin-top: 2px;
         }
-
-        /* 进度条 */
         .progress-bar-wrap {
             background: rgba(0, 0, 0, 0.06);
             border-radius: 20px;
@@ -1969,7 +1966,6 @@
             width: 0%;
         }
 
-        /* 两列布局：本周趋势 + TOP3 */
         .checkin-charts-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1995,7 +1991,6 @@
             font-style: normal;
         }
 
-        /* 周趋势条形图 */
         .week-trend {
             display: flex;
             align-items: flex-end;
@@ -2031,7 +2026,6 @@
             font-family: var(--font-sans);
         }
 
-        /* TOP3 列表 */
         .top3-list {
             display: flex;
             flex-direction: column;
@@ -2068,7 +2062,6 @@
             color: var(--text-muted);
         }
 
-        /* 周对比 + 最佳打卡月 + 打卡惯性 */
         .checkin-stats-row-2 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -2111,7 +2104,6 @@
             color: var(--accent);
         }
 
-        /* 月度趋势 (6个月柱状图) */
         .month-trend {
             display: flex;
             align-items: flex-end;
@@ -2149,7 +2141,6 @@
             font-family: var(--font-sans);
         }
 
-        /* 时段分布 + 项目稳定性 */
         .checkin-stats-row-3 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -2224,7 +2215,6 @@
             font-weight: 500;
         }
 
-        /* 热力图 (迷你) */
         .stats-heatmap-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -2417,7 +2407,9 @@
             font-family: var(--font-sans);
         }
 
-        /* ===== 统计详情页 ===== */
+        /* ============================================================
+           统计详情页
+           ============================================================ */
         #screen-stats-detail .stats-detail-scroll {
             flex: 1;
             overflow-y: auto;
@@ -3110,12 +3102,11 @@
     </div>
 
     <!-- ================================================================
-    统计页 (完整打卡统计)
+    统计页
     ================================================================ -->
     <div class="screen hidden" id="screen-stats">
         <div class="nav-bar"><button class="nav-back" id="statsBackBtn">←</button><span class="nav-title">📊 统计</span><span></span></div>
         <div class="stats-scroll" id="statsScroll">
-            <!-- 三张汇总卡片 -->
             <div class="stats-summary-row">
                 <div class="stats-summary-card" id="statsCardToday" data-range="today">
                     <div class="summary-label">📅 今日</div>
@@ -3137,11 +3128,8 @@
                 </div>
             </div>
 
-            <!-- 打卡统计 (完整版) -->
             <div class="stats-checkin-card" id="statsCheckinCard">
                 <div class="card-title"><i>✅</i> 打卡统计</div>
-
-                <!-- 四指标 -->
                 <div class="checkin-metrics">
                     <div class="metric"><span class="num today-num" id="statsTodayCheckin">0</span><div class="label">今日完成</div></div>
                     <div class="metric"><span class="num month-num" id="statsMonthCheckin">0</span><div class="label">本月累计</div></div>
@@ -3152,8 +3140,6 @@
                         <div class="progress-bar-wrap"><div class="progress-fill" id="statsRateBar"></div></div>
                     </div>
                 </div>
-
-                <!-- 本周趋势 + TOP3 -->
                 <div class="checkin-charts-row">
                     <div class="checkin-chart-box">
                         <div class="chart-title">📈 本周趋势</div>
@@ -3164,8 +3150,6 @@
                         <div class="top3-list" id="top3List"></div>
                     </div>
                 </div>
-
-                <!-- 周对比 + 最佳打卡月 + 打卡惯性 -->
                 <div class="checkin-stats-row-2">
                     <div class="stat-box" id="weekCompareBox">
                         <div class="num" id="weekCompareNum">--</div>
@@ -3181,14 +3165,8 @@
                         <div class="sub">打卡惯性 (≥3天连续)</div>
                     </div>
                 </div>
-
-                <!-- 热力图 -->
                 <div class="stats-heatmap-grid" id="statsHeatmapGrid"></div>
-
-                <!-- 月度趋势 (6个月) -->
                 <div class="month-trend" id="monthTrendChart"></div>
-
-                <!-- 时段分布 + 项目稳定性 -->
                 <div class="checkin-stats-row-3">
                     <div class="stat-box">
                         <div class="sub-title">🕐 时段分布</div>
@@ -3201,7 +3179,6 @@
                 </div>
             </div>
 
-            <!-- 标签时长 -->
             <div class="stats-tag-card">
                 <div class="card-title"><i>🏷️</i> 标签时长</div>
                 <div id="tagStatsContainer"><div class="stats-empty">暂无数据</div></div>
@@ -3678,7 +3655,7 @@
         }
 
         // ================================================================
-        //  打卡核心
+        //  打卡核心 - 全部挂载到 window
         // ================================================================
         let checkinData = {};
 
@@ -3852,7 +3829,6 @@
         function getProjectStability() {
             const now = new Date();
             const stability = {};
-            // 收集所有项目
             const allItems = new Set();
             for (const dateStr in checkinData) {
                 const dayData = checkinData[dateStr];
@@ -3862,7 +3838,6 @@
             }
             if (allItems.size === 0) return {};
 
-            // 计算过去7天每个项目的完成率
             const days = [];
             for (let i = 0; i < 7; i++) {
                 const d = new Date(now);
@@ -4034,7 +4009,7 @@
         }
 
         // ================================================================
-        //  渲染统计页打卡 (完整版)
+        //  渲染统计页打卡
         // ================================================================
         function renderStatsCheckin() {
             const now = new Date();
@@ -4046,14 +4021,12 @@
             const completed = dayData.completed.length;
             const rate = Math.round((completed / totalItems) * 100);
 
-            // 四指标
             document.getElementById('statsTodayCheckin').textContent = completed;
             document.getElementById('statsMonthCheckin').textContent = monthCount;
             document.getElementById('statsStreak').textContent = streak;
             document.getElementById('statsRate').textContent = rate + '%';
             document.getElementById('statsRateBar').style.width = rate + '%';
 
-            // 本周趋势
             const weekCounts = getWeekCounts();
             const maxWeek = Math.max(...weekCounts, 1);
             const weekTrend = document.getElementById('weekTrendChart');
@@ -4071,7 +4044,6 @@
                 weekTrend.appendChild(wrap);
             });
 
-            // TOP3
             const itemCounts = {};
             for (const dateStr in checkinData) {
                 const data = checkinData[dateStr];
@@ -4101,7 +4073,6 @@
                 });
             }
 
-            // 周对比
             const thisWeek = getThisWeekCount();
             const lastWeek = getLastWeekCount();
             const diff = thisWeek - lastWeek;
@@ -4112,14 +4083,10 @@
                 (diff >= 0 ? '↑ +' : '↓ ') + Math.abs(diff) + ' (' + (diff >= 0 ? '+' : '') + diffPct + '%)';
             document.getElementById('weekCompareChange').className = 'change' + (diff >= 0 ? ' up' : ' down');
 
-            // 最佳打卡月
             const best = getBestMonth();
             document.getElementById('bestMonthNum').textContent = best.label + ' ' + best.count + '次';
-
-            // 打卡惯性
             document.getElementById('inertiaNum').textContent = getInertia();
 
-            // 热力图 (统计页)
             const heatmapGrid = document.getElementById('statsHeatmapGrid');
             heatmapGrid.innerHTML = '';
             const year = now.getFullYear();
@@ -4147,7 +4114,6 @@
                 heatmapGrid.appendChild(cell);
             }
 
-            // 月度趋势 (6个月)
             const monthTrend = document.getElementById('monthTrendChart');
             monthTrend.innerHTML = '';
             const months = getMonthTrend();
@@ -4164,7 +4130,6 @@
                 monthTrend.appendChild(wrap);
             });
 
-            // 时段分布
             const slots = getTimeSlotDistribution();
             const totalSlots = slots['早上'] + slots['下午'] + slots['晚上'];
             const slotPills = document.getElementById('timeSlotPills');
@@ -4183,7 +4148,6 @@
                 });
             }
 
-            // 项目稳定性 (7天)
             const stability = getProjectStability();
             const stabilityList = document.getElementById('stabilityList');
             stabilityList.innerHTML = '';
@@ -4203,6 +4167,23 @@
                 });
             }
         }
+
+        // ================================================================
+        //  挂载到 window (GitHub Pages 关键修复)
+        // ================================================================
+        window.openCheckinModal = function() {
+            loadCheckin();
+            renderCheckinModal();
+            document.getElementById('checkinModal').classList.add('open');
+        };
+
+        window.closeCheckinModal = function() {
+            document.getElementById('checkinModal').classList.remove('open');
+        };
+
+        window.toggleCheckin = toggleCheckin;
+        window.addCheckinItem = addCheckinItem;
+        window.deleteCheckinItem = deleteCheckinItem;
 
         // ================================================================
         //  日历
@@ -4753,10 +4734,7 @@
             document.getElementById('allTotal').textContent = prettyDuration(allMinutes);
             document.getElementById('allCount').textContent = allCount + ' 条记录';
 
-            // 渲染打卡统计
             renderStatsCheckin();
-
-            // 渲染标签统计
             renderTagStats(allEntries);
         }
 
@@ -5296,7 +5274,7 @@
                         showScreen('screen-stats');
                         renderStats();
                     } else if (page === 'checkin') {
-                        openCheckinModal();
+                        window.openCheckinModal();
                     } else if (page === 'export') {
                         exportData();
                     } else if (page === 'import') {
@@ -5363,10 +5341,10 @@
             });
 
             // 打卡弹窗
-            document.getElementById('checkinNavBtn').addEventListener('click', openCheckinModal);
-            document.getElementById('closeCheckinModal').addEventListener('click', closeCheckinModal);
+            document.getElementById('checkinNavBtn').addEventListener('click', window.openCheckinModal);
+            document.getElementById('closeCheckinModal').addEventListener('click', window.closeCheckinModal);
             document.getElementById('checkinModal').addEventListener('click', (e) => {
-                if (e.target === e.currentTarget) closeCheckinModal();
+                if (e.target === e.currentTarget) window.closeCheckinModal();
             });
 
             document.getElementById('addCheckinBtn').addEventListener('click', function() {
