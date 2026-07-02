@@ -29,6 +29,9 @@
             --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08), 0 6px 20px rgba(0, 0, 0, 0.04);
             --font-sans: 'Inter', -apple-system, sans-serif;
             --font-serif: 'LXGW WenKai Screen', 'Noto Serif SC', serif;
+            --checkin-green: #4A9E8E;
+            --checkin-green-light: rgba(74, 158, 142, 0.15);
+            --chart-blue: #5B7FBF;
         }
         html,
         body {
@@ -157,10 +160,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 44px 20px 12px;
+            padding: 32px 24px 12px;
             background: transparent;
             position: relative;
             z-index: 5;
+            flex-shrink: 0;
         }
         .nav-back {
             font-size: 20px;
@@ -205,192 +209,446 @@
         }
 
         /* ============================================================
-           主页: 左右分栏 (桌面) / 上下排列 (手机)
+           主页: 左侧边栏 + 主区域
            ============================================================ */
         #screen-home {
             display: flex;
-            flex-direction: column;
             overflow: hidden;
             background: transparent;
         }
 
-        .home-scroll {
-            flex: 1;
+        .sidebar {
+            width: 80px;
+            min-width: 80px;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.50);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 0 16px;
+            gap: 2px;
+            flex-shrink: 0;
+            z-index: 2;
+            height: 100vh;
             overflow-y: auto;
             overflow-x: hidden;
-            padding: 0 16px 100px;
-            -webkit-overflow-scrolling: touch;
+        }
+        .sidebar .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+            text-align: center;
+            line-height: 1.2;
+            font-family: var(--font-sans);
+        }
+        .sidebar .logo span {
+            display: block;
+            font-size: 9px;
+            font-weight: 400;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .sidebar .nav-item {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 500;
+            border: none;
+            background: transparent;
+            font-family: var(--font-sans);
             position: relative;
-            z-index: 1;
+        }
+        .sidebar .nav-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-primary);
+        }
+        .sidebar .nav-item.active {
+            background: rgba(232, 122, 93, 0.15);
+            color: var(--accent);
+        }
+        .sidebar .nav-item .icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+        .sidebar .nav-item .label {
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        .sidebar .spacer {
+            flex: 1;
         }
 
-        .home-grid {
+        .main-area {
+            flex: 1;
+            padding: 20px 28px 20px;
+            overflow-y: auto;
             display: flex;
-            gap: 20px;
-            align-items: stretch;
-            max-width: 1400px;
-            margin: 0 auto;
+            flex-direction: column;
+            gap: 14px;
+            height: 100vh;
         }
-        .home-col-left {
-            flex: 0 0 58%;
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.30);
+            flex-shrink: 0;
+        }
+        .main-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+            font-family: var(--font-sans);
+        }
+
+        /* ===== 省脑子 ===== */
+        .reminder-card {
+            background: rgba(255, 255, 255, 0.60);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 10px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .reminder-card .label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-primary);
+            white-space: nowrap;
+            font-family: var(--font-sans);
+        }
+        .reminder-card .label i {
+            color: var(--accent);
+            font-style: normal;
+            margin-right: 4px;
+        }
+        .reminder-textarea {
+            flex: 1;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-family: var(--font-serif);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            min-height: 34px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+            line-height: 1.5;
+        }
+        .reminder-textarea:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.50);
+        }
+        .reminder-textarea::placeholder {
+            color: var(--text-muted);
+        }
+        .reminder-card .hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            font-family: var(--font-sans);
+        }
+        .reminder-card .clear-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-family: var(--font-sans);
+            transition: background 0.2s;
+        }
+        .reminder-card .clear-btn:hover {
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .content-grid {
+            display: flex;
+            gap: 18px;
+            flex: 1;
+            min-height: 0;
+        }
+        .col-calendar {
+            flex: 0 0 55%;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        .home-col-right {
+        .calendar-card {
+            background: rgba(255, 255, 255, 0.60);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .cal-header .month {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+        }
+        .cal-header .year {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-left: 6px;
+            font-family: var(--font-sans);
+        }
+        .cal-header .nav {
+            display: flex;
+            gap: 4px;
+        }
+        .cal-header .nav button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.40);
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: all 0.2s;
+        }
+        .cal-header .nav button:hover {
+            background: rgba(255, 255, 255, 0.70);
+        }
+        .cal-header .nav button:active {
+            transform: scale(0.92);
+        }
+        .cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 4px 0 2px;
+            font-family: var(--font-sans);
+        }
+        .cal-weekdays .weekend {
+            color: var(--accent);
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px 0;
+            flex: 1;
+        }
+        .cal-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3px 0 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .cal-day:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .cal-day:active {
+            background: rgba(0, 0, 0, 0.06);
+        }
+        .cal-day .circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            transition: all 0.2s;
+        }
+        .cal-day.today .circle {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(232, 122, 93, 0.35);
+        }
+        .cal-day.has-record .circle {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .cal-day.weekend .circle {
+            color: var(--accent);
+        }
+        .cal-day.other-month .circle {
+            opacity: 0.25;
+        }
+        .cal-day.other-month {
+            pointer-events: none;
+        }
+        .cal-day .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin-top: 1px;
+            background: var(--accent);
+            opacity: 0.5;
+        }
+        .cal-day.today .dot {
+            background: #fff;
+            opacity: 0.8;
+        }
+        .cal-day.has-checkin .dot {
+            background: var(--checkin-green);
+            opacity: 0.8;
+        }
+
+        .col-side {
             flex: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
-
-        .card-glass {
-            background: rgba(255, 255, 255, 0.70);
+        .side-card {
+            background: rgba(255, 255, 255, 0.60);
             backdrop-filter: blur(12px);
-            border-radius: var(--radius);
-            padding: 18px 20px;
+            border-radius: 14px;
+            padding: 16px 18px;
             border: 1px solid rgba(255, 255, 255, 0.50);
-            box-shadow: var(--shadow-sm);
-            transition: box-shadow 0.2s;
         }
-        .card-glass:hover {
-            box-shadow: var(--shadow-md);
+        .side-card:last-child {
+            flex: 1;
         }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .side-card .card-title {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 13px;
             color: var(--text-primary);
-            margin-bottom: 12px;
-            letter-spacing: -0.2px;
-        }
-        .card-header i {
-            color: var(--accent);
-            font-style: normal;
-            font-size: 1.1rem;
-        }
-
-        /* ===== 省脑子 ===== */
-        .reminder-textarea {
-            width: 100%;
-            min-height: 64px;
-            padding: 10px 14px;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            resize: vertical;
-            outline: none;
-            background: rgba(255, 255, 255, 0.40);
-            font-family: var(--font-serif);
-            line-height: 1.6;
-            transition: border-color 0.2s;
-        }
-        .reminder-textarea:focus {
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.70);
-        }
-        .reminder-footer {
+            margin-bottom: 10px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-top: 8px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        .reminder-footer button {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 0.8rem;
-            padding: 2px 10px;
-            border-radius: 20px;
+            gap: 6px;
             font-family: var(--font-sans);
         }
-        .reminder-footer button:hover {
-            background: rgba(0, 0, 0, 0.04);
+        .side-card .card-title i {
+            color: var(--accent);
+            font-style: normal;
         }
 
         /* ===== 番茄钟 ===== */
         .pomo-display {
-            font-size: 2.8rem;
+            font-size: 32px;
             font-weight: 600;
-            letter-spacing: 2px;
             text-align: center;
             color: var(--text-primary);
+            letter-spacing: 2px;
             font-variant-numeric: tabular-nums;
             line-height: 1.2;
+            font-family: var(--font-sans);
         }
         .pomo-controls {
             display: flex;
             justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 6px;
             margin-top: 6px;
+            flex-wrap: wrap;
         }
         .pomo-controls button {
             background: rgba(0, 0, 0, 0.04);
             border: none;
-            padding: 6px 16px;
-            border-radius: 30px;
+            padding: 4px 14px;
+            border-radius: 20px;
             font-weight: 500;
             color: var(--text-secondary);
-            cursor: pointer;
-            transition: 0.15s;
-            font-size: 0.85rem;
+            font-size: 12px;
             font-family: var(--font-sans);
-        }
-        .pomo-controls button.primary {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 2px 12px rgba(232, 122, 93, 0.25);
-        }
-        .pomo-controls button.primary:hover {
-            background: #d46a4f;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         .pomo-controls button:hover {
             background: rgba(0, 0, 0, 0.08);
         }
+        .pomo-controls button.primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .pomo-controls button.primary:hover {
+            background: #d46a4f;
+        }
         .pomo-status {
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 11px;
             color: var(--text-muted);
             margin-top: 4px;
+            font-family: var(--font-sans);
         }
 
         /* ===== Todo ===== */
         .todo-input-group {
             display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 6px;
+            margin-top: 8px;
         }
         .todo-input-group input {
             flex: 1;
-            padding: 8px 12px;
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            border-radius: 30px;
-            font-size: 0.9rem;
-            outline: none;
-            background: rgba(255, 255, 255, 0.40);
-            transition: 0.15s;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-primary);
+            border: 1px solid rgba(0, 0, 0, 0.04);
             font-family: var(--font-sans);
+            outline: none;
+            transition: border-color 0.2s;
         }
         .todo-input-group input:focus {
             border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.70);
+            background: rgba(255, 255, 255, 0.50);
+        }
+        .todo-input-group input::placeholder {
+            color: var(--text-muted);
         }
         .todo-input-group button {
             background: var(--accent);
             color: #fff;
             border: none;
-            padding: 0 18px;
-            border-radius: 30px;
+            padding: 0 16px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
-            transition: 0.15s;
-            font-size: 0.85rem;
             font-family: var(--font-sans);
+            transition: background 0.2s;
             white-space: nowrap;
         }
         .todo-input-group button:hover {
@@ -398,7 +656,7 @@
         }
         .todo-list {
             list-style: none;
-            max-height: 200px;
+            max-height: 140px;
             overflow-y: auto;
             padding-right: 4px;
         }
@@ -406,15 +664,18 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 6px 0;
+            padding: 4px 0;
             border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            font-size: 13px;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
         }
         .todo-list li:last-child {
             border-bottom: none;
         }
         .todo-list li input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             accent-color: var(--accent);
             cursor: pointer;
             flex-shrink: 0;
@@ -422,8 +683,6 @@
         .todo-list li .todo-text {
             flex: 1;
             word-break: break-word;
-            font-size: 0.9rem;
-            font-family: var(--font-serif);
         }
         .todo-list li .todo-text.done {
             text-decoration: line-through;
@@ -434,179 +693,282 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.9rem;
-            padding: 2px 6px;
-            border-radius: 6px;
-            transition: 0.15s;
+            font-size: 12px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-family: var(--font-sans);
         }
         .todo-list li .delete-todo:hover {
             color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
         }
         .todo-empty {
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 12px;
             text-align: center;
             padding: 12px 0;
-        }
-
-        /* ===== 日历 ===== */
-        .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-        }
-        .cal-left {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-        }
-        .cal-month {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .cal-year {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 400;
-        }
-        .month-nav {
-            display: flex;
-            gap: 4px;
-        }
-        .month-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.50);
-            background: rgba(255, 255, 255, 0.40);
-            backdrop-filter: blur(8px);
-            color: var(--text-secondary);
-            font-size: 14px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-family: var(--font-sans);
-            transition: all 0.2s;
-        }
-        .month-btn:active {
-            transform: scale(0.92);
-        }
-        .cal-weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            padding: 6px 0 2px;
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-align: center;
-            letter-spacing: 0.3px;
-        }
-        .cal-weekday.weekend {
-            color: var(--accent);
-        }
-        .cal-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px 0;
-        }
-        .cal-day {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 4px 0 2px;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: background 0.15s;
-        }
-        .cal-day:active {
-            background: rgba(0, 0, 0, 0.03);
-        }
-        .day-circle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-family: var(--font-sans);
-            transition: transform 0.15s ease, box-shadow 0.2s ease;
-        }
-        @media (hover: hover) {
-            .cal-day:hover .day-circle {
-                transform: scale(1.08);
-                box-shadow: 0 0 20px rgba(232, 122, 93, 0.15);
-            }
-        }
-        .cal-day.has-record .day-circle {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .cal-day.today .day-circle {
-            background: var(--accent);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 4px 20px rgba(232, 122, 93, 0.40);
-        }
-        .cal-day.weekend .day-circle {
-            color: var(--accent);
-        }
-        .cal-day.other-month .day-circle {
-            opacity: 0.2;
-        }
-        .cal-day.other-month {
-            pointer-events: none;
-        }
-        .day-dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            margin-top: 1px;
-            background: var(--accent);
-            opacity: 0.5;
-        }
-        .cal-day.today .day-dot {
-            background: #fff;
-            opacity: 0.8;
-        }
-
-        .home-tools {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(0, 0, 0, 0.04);
-        }
-        .home-tools button {
-            background: rgba(255, 255, 255, 0.40);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.50);
-            border-radius: 20px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: var(--font-sans);
-        }
-        .home-tools button:active {
-            transform: scale(0.95);
-        }
-        .home-tools button.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: rgba(232, 122, 93, 0.12);
         }
 
         /* ============================================================
-           时间轴 (详情页)
+           打卡弹窗 (不变)
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.30);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            padding: 20px;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            max-width: 520px;
+            width: 100%;
+            max-height: 85vh;
+            padding: 28px 28px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+        }
+        .modal-header h2 i {
+            color: var(--accent);
+            font-style: normal;
+            margin-right: 8px;
+        }
+        .modal-header .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-header .close-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+        .modal-date {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-family: var(--font-sans);
+        }
+        .checkin-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .checkin-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.40);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            transition: all 0.2s;
+        }
+        .checkin-item:hover {
+            background: rgba(255, 255, 255, 0.60);
+        }
+        .checkin-item .check-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #D0D0D0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-size: 14px;
+            color: transparent;
+        }
+        .checkin-item .check-icon.done {
+            background: var(--checkin-green);
+            border-color: var(--checkin-green);
+            color: #fff;
+        }
+        .checkin-item .check-icon:hover {
+            border-color: var(--accent);
+        }
+        .checkin-item .check-icon.done:hover {
+            background: #3d8476;
+            border-color: #3d8476;
+        }
+        .checkin-item .checkin-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+        }
+        .checkin-item .checkin-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+        }
+        .checkin-item .checkin-delete {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-family: var(--font-sans);
+        }
+        .checkin-item .checkin-delete:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+        .checkin-add-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .checkin-add-row input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            font-size: 13px;
+            font-family: var(--font-sans);
+            outline: none;
+            background: rgba(255, 255, 255, 0.40);
+            transition: border-color 0.2s;
+        }
+        .checkin-add-row input:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.70);
+        }
+        .checkin-add-row input::placeholder {
+            color: var(--text-muted);
+        }
+        .checkin-add-row button {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 10px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: var(--font-sans);
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .checkin-add-row button:hover {
+            background: #d46a4f;
+        }
+        .checkin-heatmap {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+        }
+        .checkin-heatmap .heatmap-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-family: var(--font-sans);
+        }
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+        }
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            transition: all 0.2s;
+        }
+        .heatmap-cell.level-0 {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .heatmap-cell.level-1 {
+            background: rgba(74, 158, 142, 0.25);
+        }
+        .heatmap-cell.level-2 {
+            background: rgba(74, 158, 142, 0.50);
+        }
+        .heatmap-cell.level-3 {
+            background: rgba(74, 158, 142, 0.75);
+        }
+        .heatmap-cell.level-4 {
+            background: rgba(74, 158, 142, 0.95);
+        }
+        .heatmap-cell.today {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+        .heatmap-cell.weekend {
+            opacity: 0.6;
+        }
+        .heatmap-cell.other-month {
+            opacity: 0.2;
+        }
+        .checkin-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .checkin-summary strong {
+            color: var(--text-primary);
+        }
+
+        /* ============================================================
+           其他屏幕
            ============================================================ */
         #screen-detail {
             display: flex;
@@ -617,12 +979,53 @@
         #screen-detail .timeline-scroll {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 8px 16px 120px;
             position: relative;
             z-index: 1;
             -webkit-overflow-scrolling: touch;
         }
+        #screen-week {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: transparent;
+        }
+        #screen-week .week-scroll {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 8px 16px 120px;
+            position: relative;
+            z-index: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        #screen-tagcloud .tagcloud-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        #screen-tagtimeline .tagtimeline-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px 60px;
+            position: relative;
+            z-index: 1;
+        }
+        #screen-add .add-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
 
+        /* ===== 时间轴样式 ===== */
         .stats-bar {
             background: rgba(255, 255, 255, 0.70);
             backdrop-filter: blur(12px);
@@ -656,7 +1059,6 @@
             color: var(--accent);
             font-weight: 600;
         }
-
         .time-section {
             margin-bottom: 20px;
         }
@@ -674,7 +1076,6 @@
             text-shadow: 0 1px 4px rgba(255, 255, 255, 0.30);
             font-family: var(--font-sans);
         }
-
         .entry {
             display: flex;
             gap: 12px;
@@ -711,7 +1112,6 @@
             margin-top: 2px;
             font-family: var(--font-sans);
         }
-
         .entry-card {
             flex: 1;
             background: rgba(255, 255, 255, 0.75);
@@ -742,7 +1142,6 @@
             border-left: 4px solid var(--accent);
             border-radius: 14px 14px 14px 4px;
         }
-
         .entry-text {
             font-family: var(--font-serif);
             font-size: 15px;
@@ -768,7 +1167,6 @@
             padding: 4px 0 0;
             font-family: var(--font-sans);
         }
-
         .entry-tags {
             display: flex;
             gap: 5px;
@@ -789,7 +1187,6 @@
         .entry-tag:active {
             opacity: 0.6;
         }
-
         .entry-images {
             display: flex;
             gap: 5px;
@@ -803,7 +1200,6 @@
             border: 1px solid var(--border);
             cursor: pointer;
         }
-
         .first-badge {
             display: inline-block;
             font-size: 10px;
@@ -815,7 +1211,6 @@
             margin-bottom: 4px;
             font-family: var(--font-sans);
         }
-
         .empty-state-enhanced {
             text-align: center;
             padding: 60px 20px 40px;
@@ -855,25 +1250,7 @@
             font-family: var(--font-sans);
         }
 
-        /* ============================================================
-           周视图 (恢复原UI + 滚动修复)
-           ============================================================ */
-        #screen-week {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: transparent;
-        }
-        #screen-week .week-scroll {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 8px 16px 120px;
-            position: relative;
-            z-index: 1;
-            -webkit-overflow-scrolling: touch;
-        }
-
+        /* ===== 周视图样式 ===== */
         .week-range {
             font-size: 22px;
             font-weight: 700;
@@ -912,7 +1289,6 @@
             color: var(--accent);
             background: rgba(232, 122, 93, 0.12);
         }
-
         .day-card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(12px);
@@ -1086,16 +1462,7 @@
             font-family: var(--font-sans);
         }
 
-        /* ============================================================
-           标签云
-           ============================================================ */
-        #screen-tagcloud .tagcloud-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 20px 60px;
-            position: relative;
-            z-index: 1;
-        }
+        /* ===== 标签云 ===== */
         .tagcloud-wrap {
             display: flex;
             flex-wrap: wrap;
@@ -1119,17 +1486,6 @@
             padding-top: 80px;
             line-height: 2.5;
             font-family: var(--font-serif);
-        }
-
-        /* ============================================================
-           标签时间线
-           ============================================================ */
-        #screen-tagtimeline .tagtimeline-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 16px 60px;
-            position: relative;
-            z-index: 1;
         }
         .entry-date-badge {
             flex-shrink: 0;
@@ -1189,16 +1545,6 @@
         /* ============================================================
            添加页
            ============================================================ */
-        #screen-add .add-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px 16px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-            z-index: 1;
-        }
         .add-bubble {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(12px);
@@ -1354,7 +1700,6 @@
         .tag-input::placeholder {
             color: var(--text-muted);
         }
-
         .timer-row {
             display: flex;
             align-items: center;
@@ -1416,7 +1761,6 @@
             opacity: 0.4;
             pointer-events: none;
         }
-
         .add-footer {
             padding: 8px 16px 40px;
             background: transparent;
@@ -1448,7 +1792,7 @@
         }
 
         /* ============================================================
-           统计页 (新 UI)
+           统计页 (含完整打卡统计)
            ============================================================ */
         #screen-stats .stats-scroll {
             flex: 1;
@@ -1458,13 +1802,12 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
+            gap: 16px;
         }
-
         .stats-summary-row {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 14px;
-            margin-bottom: 18px;
             flex-shrink: 0;
         }
         .stats-summary-card {
@@ -1520,10 +1863,10 @@
             color: var(--accent);
         }
         .stats-summary-card:nth-child(2) .summary-value {
-            color: #4A9E8E;
+            color: var(--checkin-green);
         }
         .stats-summary-card:nth-child(3) .summary-value {
-            color: #5B7FBF;
+            color: var(--chart-blue);
         }
         .stats-summary-card::after {
             content: '';
@@ -1538,17 +1881,420 @@
             background: var(--accent);
         }
         .stats-summary-card:nth-child(2)::after {
-            background: #4A9E8E;
+            background: var(--checkin-green);
         }
         .stats-summary-card:nth-child(3)::after {
-            background: #5B7FBF;
+            background: var(--chart-blue);
         }
 
+        /* ===== 打卡统计卡片 (完整版) ===== */
+        .stats-checkin-card {
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+        }
+        .stats-checkin-card .card-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-sans);
+        }
+        .stats-checkin-card .card-title i {
+            color: var(--checkin-green);
+            font-style: normal;
+        }
+
+        /* 顶部四指标 */
+        .checkin-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .checkin-metrics .metric {
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 10px;
+            padding: 10px 6px;
+            text-align: center;
+        }
+        .checkin-metrics .metric .num {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-sans);
+            line-height: 1.2;
+        }
+        .checkin-metrics .metric .num.today-num {
+            color: var(--accent);
+        }
+        .checkin-metrics .metric .num.month-num {
+            color: var(--checkin-green);
+        }
+        .checkin-metrics .metric .num.streak-num {
+            color: var(--chart-blue);
+        }
+        .checkin-metrics .metric .num.rate-num {
+            color: #D4A373;
+        }
+        .checkin-metrics .metric .label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            margin-top: 2px;
+        }
+
+        /* 进度条 */
+        .progress-bar-wrap {
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+            margin-top: 4px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .progress-bar-wrap .progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            background: var(--accent);
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+
+        /* 两列布局：本周趋势 + TOP3 */
+        .checkin-charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+        .checkin-chart-box {
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+        .checkin-chart-box .chart-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-family: var(--font-sans);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .checkin-chart-box .chart-title i {
+            font-style: normal;
+        }
+
+        /* 周趋势条形图 */
+        .week-trend {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 56px;
+        }
+        .week-trend .bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+        .week-trend .bar-wrap .bar {
+            width: 100%;
+            max-width: 20px;
+            border-radius: 4px 4px 0 0;
+            background: var(--checkin-green);
+            min-height: 2px;
+            transition: height 0.4s ease;
+        }
+        .week-trend .bar-wrap .bar-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+        }
+        .week-trend .bar-wrap .bar-value {
+            font-size: 0.55rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+
+        /* TOP3 列表 */
+        .top3-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .top3-list .top-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-family: var(--font-sans);
+            color: var(--text-secondary);
+        }
+        .top3-list .top-item .rank {
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 18px;
+        }
+        .top3-list .top-item .rank.gold {
+            color: #F5A623;
+        }
+        .top3-list .top-item .rank.silver {
+            color: #B8B8B8;
+        }
+        .top3-list .top-item .rank.bronze {
+            color: #D4A373;
+        }
+        .top3-list .top-item .name {
+            flex: 1;
+            color: var(--text-primary);
+        }
+        .top3-list .top-item .count {
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* 周对比 + 最佳打卡月 + 打卡惯性 */
+        .checkin-stats-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .checkin-stats-row-2 .stat-box {
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+        .checkin-stats-row-2 .stat-box .num {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: var(--font-sans);
+            color: var(--text-primary);
+        }
+        .checkin-stats-row-2 .stat-box .num.up {
+            color: var(--checkin-green);
+        }
+        .checkin-stats-row-2 .stat-box .num.down {
+            color: var(--accent);
+        }
+        .checkin-stats-row-2 .stat-box .sub {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            margin-top: 2px;
+        }
+        .checkin-stats-row-2 .stat-box .change {
+            font-size: 0.7rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+        }
+        .checkin-stats-row-2 .stat-box .change.up {
+            color: var(--checkin-green);
+        }
+        .checkin-stats-row-2 .stat-box .change.down {
+            color: var(--accent);
+        }
+
+        /* 月度趋势 (6个月柱状图) */
+        .month-trend {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 60px;
+            margin-top: 4px;
+            margin-bottom: 12px;
+        }
+        .month-trend .bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+        .month-trend .bar-wrap .bar {
+            width: 100%;
+            max-width: 28px;
+            border-radius: 4px 4px 0 0;
+            background: var(--chart-blue);
+            min-height: 2px;
+            transition: height 0.4s ease;
+        }
+        .month-trend .bar-wrap .bar-label {
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+        }
+        .month-trend .bar-wrap .bar-value {
+            font-size: 0.55rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+
+        /* 时段分布 + 项目稳定性 */
+        .checkin-stats-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .checkin-stats-row-3 .stat-box {
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 10px;
+            padding: 10px 12px;
+        }
+        .checkin-stats-row-3 .stat-box .sub-title {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-family: var(--font-sans);
+        }
+        .checkin-stats-row-3 .stat-box .pill-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .checkin-stats-row-3 .stat-box .pill {
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 2px 10px;
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .checkin-stats-row-3 .stat-box .pill .pct {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .checkin-stats-row-3 .stat-box .pill.high {
+            background: var(--checkin-green-light);
+            color: var(--checkin-green);
+        }
+        .checkin-stats-row-3 .stat-box .pill.high .pct {
+            color: var(--checkin-green);
+        }
+        .checkin-stats-row-3 .stat-box .stability-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-family: var(--font-sans);
+            color: var(--text-secondary);
+            padding: 1px 0;
+        }
+        .checkin-stats-row-3 .stat-box .stability-item .name {
+            min-width: 28px;
+            color: var(--text-primary);
+        }
+        .checkin-stats-row-3 .stat-box .stability-item .track {
+            flex: 1;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .checkin-stats-row-3 .stat-box .stability-item .track .fill {
+            height: 100%;
+            border-radius: 10px;
+            background: var(--checkin-green);
+            transition: width 0.4s ease;
+        }
+        .checkin-stats-row-3 .stat-box .stability-item .pct {
+            min-width: 28px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* 热力图 (迷你) */
+        .stats-heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            max-width: 400px;
+            margin-bottom: 6px;
+        }
+        .stats-heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            transition: all 0.2s;
+        }
+        .stats-heatmap-cell.level-0 {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .stats-heatmap-cell.level-1 {
+            background: rgba(74, 158, 142, 0.25);
+        }
+        .stats-heatmap-cell.level-2 {
+            background: rgba(74, 158, 142, 0.50);
+        }
+        .stats-heatmap-cell.level-3 {
+            background: rgba(74, 158, 142, 0.75);
+        }
+        .stats-heatmap-cell.level-4 {
+            background: rgba(74, 158, 142, 0.95);
+        }
+        .stats-heatmap-cell.today {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+        .stats-heatmap-cell.weekend {
+            opacity: 0.6;
+        }
+
+        /* ===== 标签时长卡片 ===== */
+        .stats-tag-card {
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.50);
+            box-shadow: var(--shadow-sm);
+        }
+        .stats-tag-card .card-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-sans);
+        }
+        .stats-tag-card .card-title i {
+            color: var(--accent);
+            font-style: normal;
+        }
         .add-tag-row {
             display: flex;
             gap: 8px;
-            margin-top: auto;
-            padding-top: 16px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 1px solid rgba(0, 0, 0, 0.06);
         }
         .add-tag-row input {
@@ -1583,9 +2329,95 @@
             background: #d46a4f;
         }
 
-        /* ============================================================
-           统计详情页 (标签竖直条形图)
-           ============================================================ */
+        .tag-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+        .tag-bar-item:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .tag-bar-item:active {
+            background: rgba(0, 0, 0, 0.04);
+        }
+        .tag-bar-label {
+            min-width: 52px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+        }
+        .tag-bar-track {
+            flex: 1;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+        }
+        .tag-bar-fill {
+            width: 100%;
+            height: 0%;
+            background: var(--accent);
+            border-radius: 8px 8px 0 0;
+            transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            min-height: 2px;
+        }
+        .tag-bar-item:nth-child(2) .tag-bar-fill {
+            background: var(--checkin-green);
+        }
+        .tag-bar-item:nth-child(3) .tag-bar-fill {
+            background: var(--chart-blue);
+        }
+        .tag-bar-item:nth-child(4) .tag-bar-fill {
+            background: #D4A373;
+        }
+        .tag-bar-item:nth-child(5) .tag-bar-fill {
+            background: #B5838D;
+        }
+        .tag-bar-item:nth-child(6) .tag-bar-fill {
+            background: #6D597A;
+        }
+        .tag-bar-item:nth-child(7) .tag-bar-fill {
+            background: #B56576;
+        }
+        .tag-bar-item:nth-child(8) .tag-bar-fill {
+            background: #355070;
+        }
+        .tag-bar-value {
+            min-width: 52px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: left;
+            font-family: var(--font-sans);
+        }
+        .tag-bar-count {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            min-width: 36px;
+            text-align: left;
+            font-family: var(--font-sans);
+        }
+        .stats-empty {
+            color: var(--text-muted);
+            padding: 30px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            font-family: var(--font-sans);
+        }
+
+        /* ===== 统计详情页 ===== */
         #screen-stats-detail .stats-detail-scroll {
             flex: 1;
             overflow-y: auto;
@@ -1611,105 +2443,12 @@
             color: var(--text-muted);
             font-family: var(--font-sans);
         }
-
         .tag-bar-chart {
             display: flex;
             flex-direction: column;
             gap: 16px;
             padding: 4px 0 20px;
             min-height: 120px;
-        }
-
-        .tag-bar-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 8px;
-            transition: background 0.15s;
-        }
-        .tag-bar-item:hover {
-            background: rgba(0, 0, 0, 0.02);
-        }
-        .tag-bar-item:active {
-            background: rgba(0, 0, 0, 0.04);
-        }
-
-        .tag-bar-label {
-            min-width: 52px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-family: var(--font-sans);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: right;
-        }
-
-        .tag-bar-track {
-            flex: 1;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.04);
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-        }
-        .tag-bar-fill {
-            width: 100%;
-            height: 0%;
-            background: var(--accent);
-            border-radius: 8px 8px 0 0;
-            transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            min-height: 2px;
-        }
-        .tag-bar-item:nth-child(2) .tag-bar-fill {
-            background: #4A9E8E;
-        }
-        .tag-bar-item:nth-child(3) .tag-bar-fill {
-            background: #5B7FBF;
-        }
-        .tag-bar-item:nth-child(4) .tag-bar-fill {
-            background: #D4A373;
-        }
-        .tag-bar-item:nth-child(5) .tag-bar-fill {
-            background: #B5838D;
-        }
-        .tag-bar-item:nth-child(6) .tag-bar-fill {
-            background: #6D597A;
-        }
-        .tag-bar-item:nth-child(7) .tag-bar-fill {
-            background: #B56576;
-        }
-        .tag-bar-item:nth-child(8) .tag-bar-fill {
-            background: #355070;
-        }
-
-        .tag-bar-value {
-            min-width: 52px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            text-align: left;
-            font-family: var(--font-sans);
-        }
-        .tag-bar-count {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            min-width: 36px;
-            text-align: left;
-            font-family: var(--font-sans);
-        }
-
-        .stats-empty {
-            color: var(--text-muted);
-            padding: 30px 0;
-            text-align: center;
-            font-size: 0.9rem;
-            font-family: var(--font-sans);
         }
 
         /* ============================================================
@@ -1891,51 +2630,69 @@
 
         /* ===== 响应式 ===== */
         @media (max-width: 820px) {
-            .home-grid {
-                flex-direction: column;
-                gap: 14px;
+            .sidebar {
+                width: 60px;
+                min-width: 60px;
+                padding: 16px 0 10px;
             }
-            .home-col-left,
-            .home-col-right {
+            .sidebar .logo {
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+            .sidebar .logo span {
+                font-size: 7px;
+            }
+            .sidebar .nav-item {
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+            }
+            .sidebar .nav-item .icon {
+                font-size: 16px;
+            }
+            .sidebar .nav-item .label {
+                font-size: 7px;
+            }
+            .main-area {
+                padding: 16px 16px 12px;
+            }
+            .main-header h1 {
+                font-size: 17px;
+            }
+            .content-grid {
+                flex-direction: column;
+            }
+            .col-calendar {
                 flex: none;
-                width: 100%;
             }
-            .home-col-right {
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
+            .col-side {
+                flex: none;
+            }
+            .cal-day .circle {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
             }
             .pomo-display {
-                font-size: 2.2rem;
+                font-size: 26px;
             }
-            .cal-month {
-                font-size: 18px;
-            }
-            .day-circle {
-                width: 30px;
-                height: 30px;
-                font-size: 12px;
-            }
-            .cal-day.today .day-circle {
-                width: 32px;
-                height: 32px;
-                font-size: 13px;
-            }
-            .nav-bar {
-                padding: 36px 16px 10px;
-            }
-            .home-scroll {
-                padding: 0 12px 80px;
-            }
-            .card-glass {
-                padding: 14px 16px;
-            }
-            .todo-list {
-                max-height: 150px;
+            .reminder-card {
+                flex-wrap: wrap;
+                gap: 6px;
             }
             .reminder-textarea {
-                min-height: 48px;
-                font-size: 0.9rem;
+                min-height: 28px;
+                font-size: 12px;
+                flex-basis: 100%;
+            }
+            .reminder-card .hint {
+                font-size: 10px;
+            }
+            .modal {
+                max-width: 100%;
+                margin: 12px;
+                padding: 20px;
+                max-height: 90vh;
             }
             .stats-summary-row {
                 gap: 8px;
@@ -1946,86 +2703,112 @@
             .stats-summary-card .summary-value {
                 font-size: 1.5rem;
             }
-            .tag-bar-item {
+            .checkin-metrics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .checkin-metrics .metric {
+                padding: 8px 4px;
+            }
+            .checkin-metrics .metric .num {
+                font-size: 1.1rem;
+            }
+            .checkin-charts-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .checkin-stats-row-2 {
+                grid-template-columns: 1fr 1fr;
                 gap: 8px;
             }
-            .tag-bar-label {
-                min-width: 36px;
-                font-size: 0.7rem;
+            .checkin-stats-row-3 {
+                grid-template-columns: 1fr;
+                gap: 8px;
             }
-            .tag-bar-value {
-                min-width: 36px;
-                font-size: 0.7rem;
+            .stats-heatmap-grid {
+                max-width: 100%;
             }
-            .tag-bar-track {
-                height: 32px;
+            .week-trend {
+                height: 44px;
             }
-            .tag-bar-count {
-                min-width: 28px;
-                font-size: 0.6rem;
-            }
-            #screen-week .week-scroll {
-                padding: 8px 12px 100px;
+            .month-trend {
+                height: 48px;
             }
         }
-
-        @media (max-width: 420px) {
-            .nav-bar {
-                padding: 28px 12px 8px;
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 48px;
+                min-width: 48px;
+                padding: 12px 0 8px;
             }
-            .nav-title {
-                font-size: 16px;
-            }
-            .home-scroll {
-                padding: 0 8px 70px;
-            }
-            .card-glass {
-                padding: 12px 14px;
-                border-radius: 14px;
-            }
-            .pomo-display {
-                font-size: 1.8rem;
-            }
-            .pomo-controls button {
-                padding: 4px 12px;
-                font-size: 0.75rem;
-            }
-            .day-circle {
-                width: 28px;
-                height: 28px;
+            .sidebar .logo {
                 font-size: 11px;
+                margin-bottom: 8px;
             }
-            .cal-day.today .day-circle {
-                width: 30px;
-                height: 30px;
-                font-size: 12px;
+            .sidebar .logo span {
+                display: none;
             }
-            .cal-month {
-                font-size: 16px;
+            .sidebar .nav-item {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
             }
-            .cal-year {
-                font-size: 11px;
-            }
-            .todo-input-group input {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
-            .todo-input-group button {
-                font-size: 0.75rem;
-                padding: 0 14px;
-            }
-            .todo-list li .todo-text {
-                font-size: 0.8rem;
-            }
-            .add-textarea {
-                min-height: 100px;
+            .sidebar .nav-item .icon {
                 font-size: 14px;
             }
-            .lock-box {
-                padding: 24px 18px 20px;
+            .sidebar .nav-item .label {
+                display: none;
             }
-            .lock-box h2 {
-                font-size: 18px;
+            .main-area {
+                padding: 10px 10px 8px;
+            }
+            .main-header h1 {
+                font-size: 15px;
+            }
+            .main-header .nav-action {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+            .cal-day .circle {
+                width: 24px;
+                height: 24px;
+                font-size: 10px;
+            }
+            .cal-header .month {
+                font-size: 15px;
+            }
+            .calendar-card {
+                padding: 12px 12px;
+            }
+            .side-card {
+                padding: 12px 14px;
+            }
+            .pomo-display {
+                font-size: 22px;
+            }
+            .pomo-controls button {
+                font-size: 10px;
+                padding: 3px 10px;
+            }
+            .todo-list li {
+                font-size: 12px;
+            }
+            .todo-input-group input {
+                font-size: 11px;
+                padding: 4px 10px;
+            }
+            .todo-input-group button {
+                font-size: 11px;
+                padding: 0 12px;
+            }
+            .checkin-item {
+                padding: 6px 10px;
+            }
+            .checkin-item .checkin-name {
+                font-size: 13px;
+            }
+            .modal {
+                padding: 16px;
             }
             .stats-summary-card .summary-value {
                 font-size: 1.2rem;
@@ -2034,36 +2817,80 @@
                 padding: 10px 4px 10px;
             }
             .stats-summary-card .summary-label {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
             }
             .stats-summary-card .summary-sub {
-                font-size: 0.6rem;
+                font-size: 0.55rem;
             }
             .stats-summary-card .summary-hint {
                 display: none;
             }
-            .tag-bar-label {
-                min-width: 28px;
-                font-size: 0.6rem;
+            .stats-heatmap-cell {
+                font-size: 7px;
             }
-            .tag-bar-value {
-                min-width: 28px;
-                font-size: 0.6rem;
+            .checkin-metrics {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
             }
-            .tag-bar-track {
-                height: 24px;
+            .checkin-metrics .metric .num {
+                font-size: 0.95rem;
             }
-            .tag-bar-count {
-                min-width: 20px;
+            .checkin-metrics .metric .label {
                 font-size: 0.5rem;
             }
-            #screen-week .week-scroll {
-                padding: 8px 8px 80px;
+            .checkin-stats-row-2 {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .checkin-stats-row-2 .stat-box .num {
+                font-size: 1rem;
+            }
+            .checkin-stats-row-2 .stat-box .sub {
+                font-size: 0.5rem;
+            }
+            .checkin-stats-row-3 .stat-box .sub-title {
+                font-size: 0.6rem;
+            }
+            .checkin-stats-row-3 .stat-box .pill {
+                font-size: 0.6rem;
+                padding: 1px 8px;
+            }
+            .checkin-stats-row-3 .stat-box .stability-item {
+                font-size: 0.6rem;
+            }
+            .week-trend {
+                height: 36px;
+            }
+            .week-trend .bar-wrap .bar {
+                max-width: 14px;
+            }
+            .month-trend {
+                height: 40px;
+                gap: 4px;
+            }
+            .month-trend .bar-wrap .bar {
+                max-width: 20px;
+            }
+            .tag-bar-label {
+                min-width: 36px;
+                font-size: 0.7rem;
+            }
+            .tag-bar-value {
+                min-width: 36px;
+                font-size: 0.7rem;
+            }
+            .tag-bar-track {
+                height: 28px;
+            }
+            .tag-bar-count {
+                min-width: 28px;
+                font-size: 0.6rem;
             }
         }
 
         /* ===== 滚动条美化 ===== */
-        .home-scroll::-webkit-scrollbar,
+        .main-area::-webkit-scrollbar,
+        .sidebar::-webkit-scrollbar,
         .timeline-scroll::-webkit-scrollbar,
         .week-scroll::-webkit-scrollbar,
         .stats-scroll::-webkit-scrollbar,
@@ -2071,10 +2898,12 @@
         .tagcloud-scroll::-webkit-scrollbar,
         .tagtimeline-scroll::-webkit-scrollbar,
         .todo-list::-webkit-scrollbar,
-        .add-body::-webkit-scrollbar {
+        .add-body::-webkit-scrollbar,
+        .modal::-webkit-scrollbar {
             width: 4px;
         }
-        .home-scroll::-webkit-scrollbar-track,
+        .main-area::-webkit-scrollbar-track,
+        .sidebar::-webkit-scrollbar-track,
         .timeline-scroll::-webkit-scrollbar-track,
         .week-scroll::-webkit-scrollbar-track,
         .stats-scroll::-webkit-scrollbar-track,
@@ -2082,10 +2911,12 @@
         .tagcloud-scroll::-webkit-scrollbar-track,
         .tagtimeline-scroll::-webkit-scrollbar-track,
         .todo-list::-webkit-scrollbar-track,
-        .add-body::-webkit-scrollbar-track {
+        .add-body::-webkit-scrollbar-track,
+        .modal::-webkit-scrollbar-track {
             background: transparent;
         }
-        .home-scroll::-webkit-scrollbar-thumb,
+        .main-area::-webkit-scrollbar-thumb,
+        .sidebar::-webkit-scrollbar-thumb,
         .timeline-scroll::-webkit-scrollbar-thumb,
         .week-scroll::-webkit-scrollbar-thumb,
         .stats-scroll::-webkit-scrollbar-thumb,
@@ -2093,7 +2924,8 @@
         .tagcloud-scroll::-webkit-scrollbar-thumb,
         .tagtimeline-scroll::-webkit-scrollbar-thumb,
         .todo-list::-webkit-scrollbar-thumb,
-        .add-body::-webkit-scrollbar-thumb {
+        .add-body::-webkit-scrollbar-thumb,
+        .modal::-webkit-scrollbar-thumb {
             background: rgba(0, 0, 0, 0.10);
             border-radius: 10px;
         }
@@ -2117,32 +2949,36 @@
     主页
     ================================================================ -->
     <div class="screen hidden" id="screen-home">
-        <div class="nav-bar">
-            <span></span>
-            <span class="nav-title">📖 个人管理</span>
-            <button class="nav-action" id="homeAddBtn">+ 记录</button>
-        </div>
-        <div class="home-scroll">
-            <div class="home-grid">
-                <div class="home-col-left">
-                    <div class="card-glass" style="margin-bottom:14px;">
-                        <div class="card-header"><i>📌</i> 省脑子</div>
-                        <textarea class="reminder-textarea" id="reminderText" placeholder="写一句今天提醒自己的话…"></textarea>
-                        <div class="reminder-footer">
-                            <span>自动保存</span>
-                            <button id="clearReminderBtn">清空</button>
-                        </div>
-                    </div>
-                    <div class="card-glass">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">📖<span>个人管理</span></div>
+            <button class="nav-item active" data-page="home"><span class="icon">🏠</span><span class="label">主页</span></button>
+            <button class="nav-item" data-page="week"><span class="icon">📋</span><span class="label">周视图</span></button>
+            <button class="nav-item" data-page="tagcloud"><span class="icon">🏷️</span><span class="label">标签</span></button>
+            <button class="nav-item" data-page="stats"><span class="icon">📊</span><span class="label">统计</span></button>
+            <button class="nav-item" data-page="checkin" id="checkinNavBtn" style="color:var(--accent);"><span class="icon">✅</span><span class="label">打卡</span></button>
+            <div class="spacer"></div>
+            <button class="nav-item" data-page="export" id="exportNavBtn"><span class="icon">💾</span><span class="label">导出</span></button>
+            <button class="nav-item" data-page="import" id="importNavBtn"><span class="icon">📥</span><span class="label">导入</span></button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none;" />
+        </aside>
+
+        <main class="main-area" id="mainArea">
+            <div class="main-header">
+                <h1>📖 个人管理</h1>
+                <button class="nav-action" id="homeAddBtn">+ 记录</button>
+            </div>
+            <div class="reminder-card">
+                <span class="label"><i>📌</i> 省脑子</span>
+                <textarea class="reminder-textarea" id="reminderText" placeholder="写一句今天提醒自己的话…" rows="1"></textarea>
+                <span class="hint">自动保存</span>
+                <button class="clear-btn" id="clearReminderBtn">清空</button>
+            </div>
+            <div class="content-grid">
+                <div class="col-calendar">
+                    <div class="calendar-card">
                         <div class="cal-header">
-                            <div class="cal-left">
-                                <span class="cal-month" id="calMonthLabel">六月</span>
-                                <span class="cal-year" id="calYearLabel">2026</span>
-                            </div>
-                            <div class="month-nav">
-                                <button class="month-btn" id="prevMonth">‹</button>
-                                <button class="month-btn" id="nextMonth">›</button>
-                            </div>
+                            <div><span class="month" id="calMonthLabel">七月</span><span class="year" id="calYearLabel">2026</span></div>
+                            <div class="nav"><button id="prevMonth">‹</button><button id="nextMonth">›</button></div>
                         </div>
                         <div class="cal-weekdays">
                             <div class="cal-weekday weekend">日</div>
@@ -2154,19 +2990,11 @@
                             <div class="cal-weekday weekend">六</div>
                         </div>
                         <div class="cal-grid" id="calGrid"></div>
-                        <div class="home-tools">
-                            <button id="weekViewBtn">📋 周视图</button>
-                            <button id="tagCloudBtn">🏷️ 标签</button>
-                            <button id="statsBtn">📊 统计</button>
-                            <button id="exportBtn">💾 导出</button>
-                            <button id="importBtn" style="font-size:0.7rem;opacity:0.6;">导入</button>
-                            <input type="file" id="importFileInput" accept=".json" style="display:none;" />
-                        </div>
                     </div>
                 </div>
-                <div class="home-col-right">
-                    <div class="card-glass">
-                        <div class="card-header"><i>🍅</i> 番茄钟</div>
+                <div class="col-side">
+                    <div class="side-card">
+                        <div class="card-title"><i>🍅</i> 番茄钟</div>
                         <div class="pomo-display" id="pomoDisplay">25:00</div>
                         <div class="pomo-controls">
                             <button class="primary" id="pomoStartBtn">▶ 开始</button>
@@ -2175,23 +3003,44 @@
                         </div>
                         <div class="pomo-status" id="pomoStatus">⏳ 准备就绪</div>
                     </div>
-                    <div class="card-glass" style="flex:1;">
-                        <div class="card-header"><i>✅</i> Todo</div>
+                    <div class="side-card">
+                        <div class="card-title"><i>✅</i> Todo</div>
                         <div class="todo-input-group">
                             <input type="text" id="todoInput" placeholder="添加任务…" />
                             <button id="addTodoBtn">添加</button>
                         </div>
-                        <ul class="todo-list" id="todoList">
-                            <li class="todo-empty">✨ 还没有任务</li>
-                        </ul>
+                        <ul class="todo-list" id="todoList"><li class="todo-empty">✨ 还没有任务</li></ul>
                     </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ================================================================
+    打卡弹窗
+    ================================================================ -->
+    <div class="modal-overlay" id="checkinModal">
+        <div class="modal">
+            <div class="modal-header"><h2><i>✅</i> 打卡</h2><button class="close-btn" id="closeCheckinModal">✕</button></div>
+            <div class="modal-date" id="checkinDate"></div>
+            <div class="checkin-list" id="checkinList"></div>
+            <div class="checkin-add-row">
+                <input type="text" id="checkinInput" placeholder="添加新项目…" maxlength="20" />
+                <button id="addCheckinBtn">添加</button>
+            </div>
+            <div class="checkin-heatmap">
+                <div class="heatmap-title">📅 本月打卡热力图</div>
+                <div class="heatmap-grid" id="heatmapGrid"></div>
+                <div class="checkin-summary">
+                    <span>今日完成: <strong id="todayCheckinCount">0</strong> 项</span>
+                    <span>本月累计: <strong id="monthCheckinCount">0</strong> 次</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ================================================================
-    详情页 (时间轴)
+    其他屏幕
     ================================================================ -->
     <div class="screen hidden" id="screen-detail">
         <div class="nav-bar">
@@ -2202,9 +3051,6 @@
         <div class="timeline-scroll" id="timelineScroll"></div>
     </div>
 
-    <!-- ================================================================
-    添加页
-    ================================================================ -->
     <div class="screen hidden" id="screen-add">
         <div class="nav-bar">
             <button class="nav-back" id="addBackBtn">←</button>
@@ -2229,7 +3075,7 @@
                 <div class="tag-suggest-row" id="tagSuggestRow"></div>
             </div>
             <div class="add-bubble">
-                <div class="card-header"><i>⏱️</i> 计时</div>
+                <div class="card-title"><i>⏱️</i> 计时</div>
                 <div class="timer-row">
                     <input type="number" id="durationMinutes" placeholder="分钟" min="0" step="0.5" />
                     <span class="timer-label">分钟</span>
@@ -2238,70 +3084,38 @@
                     <button class="timer-btn" id="timerStopBtn" disabled>⏹ 停止</button>
                     <span class="timer-display" id="timerDisplay">00:00</span>
                 </div>
-                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:var(--font-sans);">
-                    💡 手动填写分钟，或点击「开始计时」走表，停止后自动填入
-                </div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:var(--font-sans);">💡 手动填写分钟，或点击「开始计时」走表，停止后自动填入</div>
             </div>
         </div>
-        <div class="add-footer">
-            <button class="submit-btn" id="submitBtn">记下来</button>
-        </div>
+        <div class="add-footer"><button class="submit-btn" id="submitBtn">记下来</button></div>
     </div>
 
-    <!-- ================================================================
-    周视图 (恢复原UI + 滚动修复)
-    ================================================================ -->
     <div class="screen hidden" id="screen-week">
-        <div class="nav-bar">
-            <button class="nav-back" id="weekBackBtn">←</button>
-            <span class="nav-title" id="weekTitle">本周</span>
-            <span></span>
-        </div>
+        <div class="nav-bar"><button class="nav-back" id="weekBackBtn">←</button><span class="nav-title" id="weekTitle">本周</span><span></span></div>
         <div style="padding:0 20px 12px;flex-shrink:0;">
             <div class="week-sub" id="weekSub">第 0 周</div>
-            <div class="week-nav">
-                <button id="weekPrev">← 上周</button>
-                <button class="active" id="weekToday">本周</button>
-                <button id="weekNext">下周 →</button>
-            </div>
+            <div class="week-nav"><button id="weekPrev">← 上周</button><button class="active" id="weekToday">本周</button><button id="weekNext">下周 →</button></div>
         </div>
         <div class="week-scroll" id="weekScroll"></div>
     </div>
 
-    <!-- ================================================================
-    标签云
-    ================================================================ -->
     <div class="screen hidden" id="screen-tagcloud">
-        <div class="nav-bar">
-            <button class="nav-back" id="tagCloudBackBtn">←</button>
-            <span class="nav-title">🏷️ 标签</span>
-            <span></span>
-        </div>
+        <div class="nav-bar"><button class="nav-back" id="tagCloudBackBtn">←</button><span class="nav-title">🏷️ 标签</span><span></span></div>
         <div class="tagcloud-scroll" id="tagCloudScroll"></div>
     </div>
 
-    <!-- ================================================================
-    标签时间线
-    ================================================================ -->
     <div class="screen hidden" id="screen-tagtimeline">
-        <div class="nav-bar">
-            <button class="nav-back" id="tagTimelineBackBtn">←</button>
-            <span class="nav-title" id="tagTimelineTitle"># 标签</span>
-            <span class="nav-action" id="tagTimelineSub" style="font-size:12px;font-weight:400;color:var(--text-muted);">0 条</span>
-        </div>
+        <div class="nav-bar"><button class="nav-back" id="tagTimelineBackBtn">←</button><span class="nav-title" id="tagTimelineTitle"># 标签</span><span class="nav-action" id="tagTimelineSub" style="font-size:12px;font-weight:400;color:var(--text-muted);">0 条</span></div>
         <div class="tagtimeline-scroll" id="tagTimelineScroll"></div>
     </div>
 
     <!-- ================================================================
-    统计页 (三卡片)
+    统计页 (完整打卡统计)
     ================================================================ -->
     <div class="screen hidden" id="screen-stats">
-        <div class="nav-bar">
-            <button class="nav-back" id="statsBackBtn">←</button>
-            <span class="nav-title">📊 统计</span>
-            <span></span>
-        </div>
+        <div class="nav-bar"><button class="nav-back" id="statsBackBtn">←</button><span class="nav-title">📊 统计</span><span></span></div>
         <div class="stats-scroll" id="statsScroll">
+            <!-- 三张汇总卡片 -->
             <div class="stats-summary-row">
                 <div class="stats-summary-card" id="statsCardToday" data-range="today">
                     <div class="summary-label">📅 今日</div>
@@ -2322,30 +3136,88 @@
                     <div class="summary-hint">点击查看详情 →</div>
                 </div>
             </div>
-            <div class="add-tag-row">
-                <input type="text" id="manualTagInput" placeholder="添加新标签…" maxlength="20" />
-                <button id="addManualTagBtn">添加</button>
+
+            <!-- 打卡统计 (完整版) -->
+            <div class="stats-checkin-card" id="statsCheckinCard">
+                <div class="card-title"><i>✅</i> 打卡统计</div>
+
+                <!-- 四指标 -->
+                <div class="checkin-metrics">
+                    <div class="metric"><span class="num today-num" id="statsTodayCheckin">0</span><div class="label">今日完成</div></div>
+                    <div class="metric"><span class="num month-num" id="statsMonthCheckin">0</span><div class="label">本月累计</div></div>
+                    <div class="metric"><span class="num streak-num" id="statsStreak">0</span><div class="label">连续打卡</div></div>
+                    <div class="metric">
+                        <span class="num rate-num" id="statsRate">0%</span>
+                        <div class="label">今日完成率</div>
+                        <div class="progress-bar-wrap"><div class="progress-fill" id="statsRateBar"></div></div>
+                    </div>
+                </div>
+
+                <!-- 本周趋势 + TOP3 -->
+                <div class="checkin-charts-row">
+                    <div class="checkin-chart-box">
+                        <div class="chart-title">📈 本周趋势</div>
+                        <div class="week-trend" id="weekTrendChart"></div>
+                    </div>
+                    <div class="checkin-chart-box">
+                        <div class="chart-title">🏆 最常打卡 TOP3</div>
+                        <div class="top3-list" id="top3List"></div>
+                    </div>
+                </div>
+
+                <!-- 周对比 + 最佳打卡月 + 打卡惯性 -->
+                <div class="checkin-stats-row-2">
+                    <div class="stat-box" id="weekCompareBox">
+                        <div class="num" id="weekCompareNum">--</div>
+                        <div class="change" id="weekCompareChange">--</div>
+                        <div class="sub">本周 vs 上周</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="num" id="bestMonthNum">--</div>
+                        <div class="sub">最佳打卡月</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="num" id="inertiaNum">0</div>
+                        <div class="sub">打卡惯性 (≥3天连续)</div>
+                    </div>
+                </div>
+
+                <!-- 热力图 -->
+                <div class="stats-heatmap-grid" id="statsHeatmapGrid"></div>
+
+                <!-- 月度趋势 (6个月) -->
+                <div class="month-trend" id="monthTrendChart"></div>
+
+                <!-- 时段分布 + 项目稳定性 -->
+                <div class="checkin-stats-row-3">
+                    <div class="stat-box">
+                        <div class="sub-title">🕐 时段分布</div>
+                        <div class="pill-group" id="timeSlotPills"></div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="sub-title">📊 项目稳定性 (7天)</div>
+                        <div id="stabilityList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签时长 -->
+            <div class="stats-tag-card">
+                <div class="card-title"><i>🏷️</i> 标签时长</div>
+                <div id="tagStatsContainer"><div class="stats-empty">暂无数据</div></div>
+                <div class="add-tag-row">
+                    <input type="text" id="manualTagInput" placeholder="添加新标签…" maxlength="20" />
+                    <button id="addManualTagBtn">添加</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ================================================================
-    统计详情页 (竖直条形图)
-    ================================================================ -->
     <div class="screen hidden" id="screen-stats-detail">
-        <div class="nav-bar">
-            <button class="nav-back" id="statsDetailBackBtn">←</button>
-            <span class="nav-title" id="statsDetailTitle">今日详情</span>
-            <span></span>
-        </div>
+        <div class="nav-bar"><button class="nav-back" id="statsDetailBackBtn">←</button><span class="nav-title" id="statsDetailTitle">今日详情</span><span></span></div>
         <div class="stats-detail-scroll" id="statsDetailScroll">
-            <div class="stats-detail-header">
-                <span class="title" id="detailRangeLabel">今日</span>
-                <span class="sub" id="detailSubLabel">0 条记录 · 总时长 0h</span>
-            </div>
-            <div class="tag-bar-chart" id="tagBarChart">
-                <div class="stats-empty">暂无数据</div>
-            </div>
+            <div class="stats-detail-header"><span class="title" id="detailRangeLabel">今日</span><span class="sub" id="detailSubLabel">0 条记录 · 总时长 0h</span></div>
+            <div class="tag-bar-chart" id="tagBarChart"><div class="stats-empty">暂无数据</div></div>
         </div>
     </div>
 
@@ -2363,14 +3235,9 @@
         </div>
     </div>
 
-    <div class="lightbox" id="lightbox">
-        <img id="lightboxImg" src="" alt="" />
-    </div>
-
+    <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="" /></div>
     <div class="toast" id="toast"></div>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-    </div>
+    <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
 
     <script>
         // ================================================================
@@ -2400,6 +3267,7 @@
         const TODO_KEY = 'todo_list_v1';
         const REMINDER_KEY = 'daily_reminder_v1';
         const MANUAL_TAGS_KEY = 'manual_tags_v1';
+        const CHECKIN_KEY = 'checkin_data_v1';
 
         let currentYear, currentMonth;
         let selectedDate = null;
@@ -2515,6 +3383,12 @@
         }
 
         function saveManualTags(tags) { localStorage.setItem(MANUAL_TAGS_KEY, JSON.stringify(tags)); }
+
+        function loadCheckinData() {
+            try { return JSON.parse(localStorage.getItem(CHECKIN_KEY) || '{}'); } catch { return {}; }
+        }
+
+        function saveCheckinData(data) { localStorage.setItem(CHECKIN_KEY, JSON.stringify(data)); }
 
         // ================================================================
         //  Firebase
@@ -2804,6 +3678,533 @@
         }
 
         // ================================================================
+        //  打卡核心
+        // ================================================================
+        let checkinData = {};
+
+        function loadCheckin() {
+            checkinData = loadCheckinData();
+        }
+
+        function saveCheckin() {
+            saveCheckinData(checkinData);
+        }
+
+        function getTodayCheckin() {
+            const today = todayKey();
+            if (!checkinData[today]) {
+                checkinData[today] = { items: {}, completed: [] };
+            }
+            return checkinData[today];
+        }
+
+        function getDayCheckinLevel(dateStr) {
+            const dayData = checkinData[dateStr];
+            if (!dayData) return 0;
+            return Math.min(dayData.completed.length, 4);
+        }
+
+        function getMonthCheckinCount(year, month) {
+            let count = 0;
+            const start = dateKey(year, month, 1);
+            const end = dateKey(year, month + 1, 0);
+            for (const dateStr in checkinData) {
+                if (dateStr >= start && dateStr <= end) {
+                    count += (checkinData[dateStr].completed || []).length;
+                }
+            }
+            return count;
+        }
+
+        function getStreak() {
+            let streak = 0;
+            const d = new Date();
+            for (let i = 0; i < 365; i++) {
+                const dateStr = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayData = checkinData[dateStr];
+                if (dayData && dayData.completed.length > 0) {
+                    streak++;
+                    d.setDate(d.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function getWeekCounts() {
+            const result = [];
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const startOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(now.getDate() - startOffset + i);
+                const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayData = checkinData[key];
+                result.push(dayData ? dayData.completed.length : 0);
+            }
+            return result;
+        }
+
+        function getLastWeekCount() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const startOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            let total = 0;
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(now.getDate() - startOffset + i - 7);
+                const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayData = checkinData[key];
+                total += dayData ? dayData.completed.length : 0;
+            }
+            return total;
+        }
+
+        function getThisWeekCount() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const startOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            let total = 0;
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(now.getDate() - startOffset + i);
+                const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                const dayData = checkinData[key];
+                total += dayData ? dayData.completed.length : 0;
+            }
+            return total;
+        }
+
+        function getMonthTrend() {
+            const now = new Date();
+            const months = [];
+            for (let i = 5; i >= 0; i--) {
+                const m = (now.getMonth() - i + 12) % 12;
+                const y = now.getFullYear() - (now.getMonth() - i < 0 ? 1 : 0);
+                const count = getMonthCheckinCount(y, m);
+                const label = (m + 1) + '月';
+                months.push({ label, count, year: y, month: m });
+            }
+            return months;
+        }
+
+        function getBestMonth() {
+            const now = new Date();
+            let best = { label: '--', count: 0 };
+            for (let i = 0; i < 12; i++) {
+                const m = (now.getMonth() - i + 12) % 12;
+                const y = now.getFullYear() - (now.getMonth() - i < 0 ? 1 : 0);
+                const count = getMonthCheckinCount(y, m);
+                if (count > best.count) {
+                    best = { label: (m + 1) + '月', count };
+                }
+            }
+            return best;
+        }
+
+        function getInertia() {
+            let count = 0;
+            let currentStreak = 0;
+            const d = new Date();
+            const sortedDates = Object.keys(checkinData).sort();
+            for (const dateStr of sortedDates) {
+                const dayData = checkinData[dateStr];
+                if (dayData && dayData.completed.length > 0) {
+                    currentStreak++;
+                } else {
+                    if (currentStreak >= 3) count++;
+                    currentStreak = 0;
+                }
+            }
+            if (currentStreak >= 3) count++;
+            return count;
+        }
+
+        function getTimeSlotDistribution() {
+            const slots = { 早上: 0, 下午: 0, 晚上: 0 };
+            for (const dateStr in checkinData) {
+                const dayData = checkinData[dateStr];
+                if (dayData.items) {
+                    for (const itemName in dayData.items) {
+                        const times = dayData.items[itemName];
+                        if (Array.isArray(times)) {
+                            times.forEach(ts => {
+                                const hour = new Date(ts).getHours();
+                                if (hour < 12) slots['早上']++;
+                                else if (hour < 18) slots['下午']++;
+                                else slots['晚上']++;
+                            });
+                        }
+                    }
+                }
+            }
+            const total = slots['早上'] + slots['下午'] + slots['晚上'];
+            if (total === 0) return { 早上: 0, 下午: 0, 晚上: 0 };
+            return {
+                早上: Math.round((slots['早上'] / total) * 100),
+                下午: Math.round((slots['下午'] / total) * 100),
+                晚上: Math.round((slots['晚上'] / total) * 100)
+            };
+        }
+
+        function getProjectStability() {
+            const now = new Date();
+            const stability = {};
+            // 收集所有项目
+            const allItems = new Set();
+            for (const dateStr in checkinData) {
+                const dayData = checkinData[dateStr];
+                if (dayData.items) {
+                    Object.keys(dayData.items).forEach(name => allItems.add(name));
+                }
+            }
+            if (allItems.size === 0) return {};
+
+            // 计算过去7天每个项目的完成率
+            const days = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(d.getDate() - i);
+                const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                days.push(key);
+            }
+
+            allItems.forEach(name => {
+                let completed = 0;
+                days.forEach(day => {
+                    const dayData = checkinData[day];
+                    if (dayData && dayData.completed.includes(name)) {
+                        completed++;
+                    }
+                });
+                stability[name] = Math.round((completed / 7) * 100);
+            });
+            return stability;
+        }
+
+        function toggleCheckin(itemName) {
+            const today = todayKey();
+            const dayData = getTodayCheckin();
+            const idx = dayData.completed.indexOf(itemName);
+            if (idx > -1) {
+                dayData.completed.splice(idx, 1);
+            } else {
+                dayData.completed.push(itemName);
+                if (!dayData.items[itemName]) {
+                    dayData.items[itemName] = [];
+                }
+                dayData.items[itemName].push(Date.now());
+            }
+            saveCheckin();
+            renderCheckinModal();
+            renderCalendar();
+            renderStatsCheckin();
+        }
+
+        function addCheckinItem(name) {
+            const today = todayKey();
+            const dayData = getTodayCheckin();
+            if (!dayData.items[name]) {
+                dayData.items[name] = [];
+            }
+            if (!dayData.completed.includes(name)) {
+                dayData.completed.push(name);
+                dayData.items[name].push(Date.now());
+            }
+            saveCheckin();
+            renderCheckinModal();
+            renderCalendar();
+            renderStatsCheckin();
+        }
+
+        function deleteCheckinItem(name) {
+            const today = todayKey();
+            const dayData = checkinData[today];
+            if (dayData) {
+                delete dayData.items[name];
+                dayData.completed = dayData.completed.filter(item => item !== name);
+                if (Object.keys(dayData.items).length === 0) {
+                    delete checkinData[today];
+                }
+                saveCheckin();
+                renderCheckinModal();
+                renderCalendar();
+                renderStatsCheckin();
+            }
+        }
+
+        // ================================================================
+        //  渲染打卡弹窗
+        // ================================================================
+        function renderCheckinModal() {
+            const today = todayKey();
+            const dayData = getTodayCheckin();
+            const dt = new Date();
+            document.getElementById('checkinDate').textContent =
+                `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日 ${WEEKDAYS_ZH[dt.getDay()]}`;
+
+            const list = document.getElementById('checkinList');
+            list.innerHTML = '';
+
+            const allItems = new Set();
+            for (const dateStr in checkinData) {
+                const data = checkinData[dateStr];
+                if (data.items) {
+                    Object.keys(data.items).forEach(name => allItems.add(name));
+                }
+            }
+            if (allItems.size === 0) {
+                allItems.add('阅读');
+                allItems.add('写作');
+            }
+
+            const sortedItems = Array.from(allItems).sort();
+
+            sortedItems.forEach(name => {
+                const isDone = dayData.completed.includes(name);
+                const times = dayData.items[name] || [];
+                const lastTime = times.length > 0 ? fmtTime(times[times.length - 1]) : '';
+
+                const item = document.createElement('div');
+                item.className = 'checkin-item';
+                item.innerHTML = `
+                    <div class="check-icon ${isDone ? 'done' : ''}" data-name="${escapeHtml(name)}">${isDone ? '✓' : ''}</div>
+                    <span class="checkin-name">${escapeHtml(name)}</span>
+                    <span class="checkin-time">${isDone && lastTime ? '🕐 ' + lastTime : ''}</span>
+                    <button class="checkin-delete" data-name="${escapeHtml(name)}">✕</button>
+                `;
+                list.appendChild(item);
+
+                item.querySelector('.check-icon').addEventListener('click', function() {
+                    toggleCheckin(name);
+                });
+
+                item.querySelector('.checkin-delete').addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm(`确定删除「${name}」吗？`)) {
+                        deleteCheckinItem(name);
+                    }
+                });
+            });
+
+            document.getElementById('todayCheckinCount').textContent = dayData.completed.length;
+
+            const now = new Date();
+            const monthCount = getMonthCheckinCount(now.getFullYear(), now.getMonth());
+            document.getElementById('monthCheckinCount').textContent = monthCount;
+
+            renderHeatmap();
+        }
+
+        function renderHeatmap() {
+            const grid = document.getElementById('heatmapGrid');
+            grid.innerHTML = '';
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = todayKey();
+
+            const prevDays = new Date(year, month, 0).getDate();
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell other-month';
+                cell.textContent = prevDays - i;
+                grid.appendChild(cell);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = dateKey(year, month, d);
+                const level = getDayCheckinLevel(dateStr);
+                const isToday = dateStr === today;
+                const isWeekend = [0, 6].includes(new Date(year, month, d).getDay());
+
+                const cell = document.createElement('div');
+                cell.className = `heatmap-cell level-${level}` +
+                    (isToday ? ' today' : '') +
+                    (isWeekend ? ' weekend' : '');
+                cell.textContent = d;
+                cell.title = `${dateStr}: ${level} 项打卡`;
+                grid.appendChild(cell);
+            }
+        }
+
+        // ================================================================
+        //  渲染统计页打卡 (完整版)
+        // ================================================================
+        function renderStatsCheckin() {
+            const now = new Date();
+            const today = todayKey();
+            const dayData = getTodayCheckin();
+            const monthCount = getMonthCheckinCount(now.getFullYear(), now.getMonth());
+            const streak = getStreak();
+            const totalItems = Object.keys(dayData.items).length || 1;
+            const completed = dayData.completed.length;
+            const rate = Math.round((completed / totalItems) * 100);
+
+            // 四指标
+            document.getElementById('statsTodayCheckin').textContent = completed;
+            document.getElementById('statsMonthCheckin').textContent = monthCount;
+            document.getElementById('statsStreak').textContent = streak;
+            document.getElementById('statsRate').textContent = rate + '%';
+            document.getElementById('statsRateBar').style.width = rate + '%';
+
+            // 本周趋势
+            const weekCounts = getWeekCounts();
+            const maxWeek = Math.max(...weekCounts, 1);
+            const weekTrend = document.getElementById('weekTrendChart');
+            weekTrend.innerHTML = '';
+            const dayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+            weekCounts.forEach((count, i) => {
+                const pct = Math.max((count / maxWeek) * 100, 2);
+                const wrap = document.createElement('div');
+                wrap.className = 'bar-wrap';
+                wrap.innerHTML = `
+                    <span class="bar-value">${count}</span>
+                    <div class="bar" style="height:${pct}%;"></div>
+                    <span class="bar-label">${dayLabels[i]}</span>
+                `;
+                weekTrend.appendChild(wrap);
+            });
+
+            // TOP3
+            const itemCounts = {};
+            for (const dateStr in checkinData) {
+                const data = checkinData[dateStr];
+                if (data.completed) {
+                    data.completed.forEach(name => {
+                        itemCounts[name] = (itemCounts[name] || 0) + 1;
+                    });
+                }
+            }
+            const sorted = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
+            const top3 = sorted.slice(0, 3);
+            const top3List = document.getElementById('top3List');
+            top3List.innerHTML = '';
+            if (top3.length === 0) {
+                top3List.innerHTML = '<div style="font-size:0.75rem;color:var(--text-muted);">暂无数据</div>';
+            } else {
+                const medals = ['🥇', '🥈', '🥉'];
+                top3.forEach(([name, count], i) => {
+                    const div = document.createElement('div');
+                    div.className = 'top-item';
+                    div.innerHTML = `
+                        <span class="rank ${i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze'}">${medals[i]}</span>
+                        <span class="name">${escapeHtml(name)}</span>
+                        <span class="count">${count}次</span>
+                    `;
+                    top3List.appendChild(div);
+                });
+            }
+
+            // 周对比
+            const thisWeek = getThisWeekCount();
+            const lastWeek = getLastWeekCount();
+            const diff = thisWeek - lastWeek;
+            const diffPct = lastWeek > 0 ? Math.round((diff / lastWeek) * 100) : (thisWeek > 0 ? 100 : 0);
+            document.getElementById('weekCompareNum').textContent = thisWeek;
+            document.getElementById('weekCompareNum').className = 'num' + (diff >= 0 ? ' up' : ' down');
+            document.getElementById('weekCompareChange').textContent =
+                (diff >= 0 ? '↑ +' : '↓ ') + Math.abs(diff) + ' (' + (diff >= 0 ? '+' : '') + diffPct + '%)';
+            document.getElementById('weekCompareChange').className = 'change' + (diff >= 0 ? ' up' : ' down');
+
+            // 最佳打卡月
+            const best = getBestMonth();
+            document.getElementById('bestMonthNum').textContent = best.label + ' ' + best.count + '次';
+
+            // 打卡惯性
+            document.getElementById('inertiaNum').textContent = getInertia();
+
+            // 热力图 (统计页)
+            const heatmapGrid = document.getElementById('statsHeatmapGrid');
+            heatmapGrid.innerHTML = '';
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const cell = document.createElement('div');
+                cell.className = 'stats-heatmap-cell other-month';
+                heatmapGrid.appendChild(cell);
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = dateKey(year, month, d);
+                const level = getDayCheckinLevel(dateStr);
+                const isToday = dateStr === today;
+                const isWeekend = [0, 6].includes(new Date(year, month, d).getDay());
+
+                const cell = document.createElement('div');
+                cell.className = `stats-heatmap-cell level-${level}` +
+                    (isToday ? ' today' : '') +
+                    (isWeekend ? ' weekend' : '');
+                cell.textContent = d;
+                heatmapGrid.appendChild(cell);
+            }
+
+            // 月度趋势 (6个月)
+            const monthTrend = document.getElementById('monthTrendChart');
+            monthTrend.innerHTML = '';
+            const months = getMonthTrend();
+            const maxMonth = Math.max(...months.map(m => m.count), 1);
+            months.forEach(m => {
+                const pct = Math.max((m.count / maxMonth) * 100, 2);
+                const wrap = document.createElement('div');
+                wrap.className = 'bar-wrap';
+                wrap.innerHTML = `
+                    <span class="bar-value">${m.count}</span>
+                    <div class="bar" style="height:${pct}%;"></div>
+                    <span class="bar-label">${m.label}</span>
+                `;
+                monthTrend.appendChild(wrap);
+            });
+
+            // 时段分布
+            const slots = getTimeSlotDistribution();
+            const totalSlots = slots['早上'] + slots['下午'] + slots['晚上'];
+            const slotPills = document.getElementById('timeSlotPills');
+            slotPills.innerHTML = '';
+            if (totalSlots === 0) {
+                slotPills.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);">暂无数据</span>';
+            } else {
+                const slotNames = ['早上', '下午', '晚上'];
+                slotNames.forEach(name => {
+                    const pill = document.createElement('span');
+                    const pct = slots[name];
+                    const isHigh = pct >= 35;
+                    pill.className = 'pill' + (isHigh ? ' high' : '');
+                    pill.innerHTML = `${name} <span class="pct">${pct}%</span>`;
+                    slotPills.appendChild(pill);
+                });
+            }
+
+            // 项目稳定性 (7天)
+            const stability = getProjectStability();
+            const stabilityList = document.getElementById('stabilityList');
+            stabilityList.innerHTML = '';
+            const sortedStability = Object.entries(stability).sort((a, b) => b[1] - a[1]);
+            if (sortedStability.length === 0) {
+                stabilityList.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);">暂无数据</span>';
+            } else {
+                sortedStability.slice(0, 5).forEach(([name, pct]) => {
+                    const div = document.createElement('div');
+                    div.className = 'stability-item';
+                    div.innerHTML = `
+                        <span class="name">${escapeHtml(name)}</span>
+                        <div class="track"><div class="fill" style="width:${pct}%;"></div></div>
+                        <span class="pct">${pct}%</span>
+                    `;
+                    stabilityList.appendChild(div);
+                });
+            }
+        }
+
+        // ================================================================
         //  日历
         // ================================================================
         let allDateMeta = {};
@@ -2843,6 +4244,7 @@
             const meta = allDateMeta[dKey] || {};
             const isWeekend = [0, 6].includes(new Date(year, month, day).getDay());
             const hasRecord = meta.hasText || meta.hasImg;
+            const hasCheckin = getDayCheckinLevel(dKey) > 0;
 
             const cell = document.createElement('div');
             cell.className = 'cal-day' +
@@ -2852,14 +4254,19 @@
                 (otherMonth ? ' other-month' : '');
 
             const circle = document.createElement('div');
-            circle.className = 'day-circle';
+            circle.className = 'circle';
             circle.textContent = day;
 
             const dot = document.createElement('div');
-            dot.className = 'day-dot';
+            dot.className = 'dot';
 
             cell.appendChild(circle);
-            if (hasRecord || isToday) cell.appendChild(dot);
+            if (hasRecord || isToday || hasCheckin) {
+                cell.appendChild(dot);
+                if (hasCheckin) {
+                    cell.classList.add('has-checkin');
+                }
+            }
 
             if (!otherMonth) {
                 cell.addEventListener('click', () => openDetail(dKey));
@@ -3306,7 +4713,7 @@
         }
 
         // ================================================================
-        //  统计
+        //  统计 (时长)
         // ================================================================
         async function renderStats() {
             const allEntries = await fetchAllEntries();
@@ -3345,6 +4752,75 @@
             document.getElementById('weekCount').textContent = weekCount + ' 条记录';
             document.getElementById('allTotal').textContent = prettyDuration(allMinutes);
             document.getElementById('allCount').textContent = allCount + ' 条记录';
+
+            // 渲染打卡统计
+            renderStatsCheckin();
+
+            // 渲染标签统计
+            renderTagStats(allEntries);
+        }
+
+        function renderTagStats(allEntries) {
+            const tagContainer = document.getElementById('tagStatsContainer');
+
+            const tagMap = {};
+            allEntries.forEach(r => {
+                const tags = r.tags || [];
+                const dur = r.duration || 0;
+                if (tags.length === 0) {
+                    if (!tagMap['未分类']) tagMap['未分类'] = { minutes: 0, count: 0 };
+                    tagMap['未分类'].minutes += dur;
+                    tagMap['未分类'].count++;
+                } else {
+                    tags.forEach(tag => {
+                        if (!tagMap[tag]) tagMap[tag] = { minutes: 0, count: 0 };
+                        tagMap[tag].minutes += dur;
+                        tagMap[tag].count++;
+                    });
+                }
+            });
+
+            const manualTags = loadManualTags();
+            manualTags.forEach(tag => {
+                if (!tagMap[tag]) tagMap[tag] = { minutes: 0, count: 0 };
+            });
+
+            const items = Object.entries(tagMap).map(([label, data]) => ({ label, ...data }));
+            items.sort((a, b) => b.minutes - a.minutes);
+            const maxMin = items.length > 0 ? Math.max(...items.map(i => i.minutes), 1) : 1;
+
+            if (items.length === 0) {
+                tagContainer.innerHTML = `<div class="stats-empty">暂无标签数据</div>`;
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                const pct = Math.max((item.minutes / maxMin) * 100, 2);
+                let display = prettyDuration(item.minutes);
+                html += `
+                    <div class="tag-bar-item" data-tag="${escapeHtml(item.label)}">
+                        <span class="tag-bar-label">${escapeHtml(item.label)}</span>
+                        <div class="tag-bar-track">
+                            <div class="tag-bar-fill" style="height:${pct}%;"></div>
+                        </div>
+                        <span class="tag-bar-value">${display}</span>
+                        <span class="tag-bar-count">📝${item.count}</span>
+                    </div>
+                `;
+            });
+            tagContainer.innerHTML = html;
+
+            tagContainer.querySelectorAll('.tag-bar-item').forEach(el => {
+                el.addEventListener('click', function() {
+                    const tag = this.dataset.tag;
+                    if (tag && tag !== '未分类') {
+                        openTagTimeline(tag);
+                    } else if (tag === '未分类') {
+                        toast('未分类的记录，可在添加时打上标签');
+                    }
+                });
+            });
         }
 
         async function openStatsDetail(range) {
@@ -3661,6 +5137,13 @@
                     s.classList.add(direction === 'right' ? 'slide-left' : 'hidden');
                 }
             });
+            document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === id);
+            });
+        }
+
+        function showHome() {
+            showScreen('screen-home');
         }
 
         // ================================================================
@@ -3676,6 +5159,16 @@
             toast('🔓 欢迎回来！');
             renderCalendar();
             renderTodos();
+            loadReminderText();
+            loadCheckin();
+            setTimeout(() => {
+                if (document.getElementById('screen-stats').classList.contains('hidden') === false) {
+                    renderStats();
+                }
+            }, 300);
+        }
+
+        function loadReminderText() {
             document.getElementById('reminderText').value = loadReminder();
         }
 
@@ -3688,6 +5181,7 @@
             const now = new Date();
             currentYear = now.getFullYear();
             currentMonth = now.getMonth();
+            loadCheckin();
 
             // 密码
             document.getElementById('unlockBtn').addEventListener('click', () => {
@@ -3772,7 +5266,7 @@
                 Notification.requestPermission();
             }
 
-            // 日历导航
+            // 日历
             document.getElementById('prevMonth').addEventListener('click', () => {
                 currentMonth--;
                 if (currentMonth < 0) { currentMonth = 11;
@@ -3786,28 +5280,48 @@
                 renderCalendar();
             });
 
+            // 侧边栏
+            document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    if (page === 'home') {
+                        showHome();
+                    } else if (page === 'week') {
+                        weekOffset = 0;
+                        showScreen('screen-week');
+                        renderWeekView();
+                    } else if (page === 'tagcloud') {
+                        openTagCloud();
+                    } else if (page === 'stats') {
+                        showScreen('screen-stats');
+                        renderStats();
+                    } else if (page === 'checkin') {
+                        openCheckinModal();
+                    } else if (page === 'export') {
+                        exportData();
+                    } else if (page === 'import') {
+                        document.getElementById('importFileInput').click();
+                    }
+                });
+            });
+
             // 导航
             document.getElementById('homeAddBtn').addEventListener('click', () => openAdd(todayKey()));
             document.getElementById('detailAddBtn').addEventListener('click', () => openAdd(selectedDate));
-            document.getElementById('detailBackBtn').addEventListener('click', () => showScreen('screen-home', 'left'));
+            document.getElementById('detailBackBtn').addEventListener('click', showHome);
             document.getElementById('addBackBtn').addEventListener('click', () => {
                 if (selectedDate) showScreen('screen-detail', 'left');
-                else showScreen('screen-home', 'left');
+                else showHome();
             });
-            document.getElementById('weekBackBtn').addEventListener('click', () => showScreen('screen-home', 'left'));
-            document.getElementById('tagCloudBackBtn').addEventListener('click', () => showScreen('screen-home', 'left'));
+            document.getElementById('weekBackBtn').addEventListener('click', showHome);
+            document.getElementById('tagCloudBackBtn').addEventListener('click', showHome);
             document.getElementById('tagTimelineBackBtn').addEventListener('click', () => showScreen('screen-tagcloud',
                 'left'));
-            document.getElementById('statsBackBtn').addEventListener('click', () => showScreen('screen-home', 'left'));
+            document.getElementById('statsBackBtn').addEventListener('click', showHome);
             document.getElementById('statsDetailBackBtn').addEventListener('click', () => showScreen('screen-stats',
                 'left'));
 
             // 周视图
-            document.getElementById('weekViewBtn').addEventListener('click', async () => {
-                weekOffset = 0;
-                showScreen('screen-week');
-                await renderWeekView();
-            });
             document.getElementById('weekPrev').addEventListener('click', async () => { weekOffset--;
                 await renderWeekView(); });
             document.getElementById('weekNext').addEventListener('click', async () => { weekOffset++;
@@ -3815,23 +5329,12 @@
             document.getElementById('weekToday').addEventListener('click', async () => { weekOffset = 0;
                 await renderWeekView(); });
 
-            // 标签
-            document.getElementById('tagCloudBtn').addEventListener('click', openTagCloud);
-
             // 统计
-            document.getElementById('statsBtn').addEventListener('click', async () => {
-                showScreen('screen-stats');
-                await renderStats();
-            });
             document.getElementById('statsCardToday').addEventListener('click', () => openStatsDetail('today'));
             document.getElementById('statsCardWeek').addEventListener('click', () => openStatsDetail('week'));
             document.getElementById('statsCardAll').addEventListener('click', () => openStatsDetail('all'));
 
-            // 导出 / 导入
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            document.getElementById('importBtn').addEventListener('click', () => {
-                document.getElementById('importFileInput').click();
-            });
+            // 导入导出
             document.getElementById('importFileInput').addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
                     importData(e.target.files[0]);
@@ -3839,7 +5342,7 @@
                 e.target.value = '';
             });
 
-            // 手动添加标签
+            // 手动标签
             document.getElementById('addManualTagBtn').addEventListener('click', function() {
                 const input = document.getElementById('manualTagInput');
                 const tag = input.value.trim();
@@ -3859,15 +5362,55 @@
                 if (e.key === 'Enter') document.getElementById('addManualTagBtn').click();
             });
 
-            // 添加页 - 文字计数
+            // 打卡弹窗
+            document.getElementById('checkinNavBtn').addEventListener('click', openCheckinModal);
+            document.getElementById('closeCheckinModal').addEventListener('click', closeCheckinModal);
+            document.getElementById('checkinModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) closeCheckinModal();
+            });
+
+            document.getElementById('addCheckinBtn').addEventListener('click', function() {
+                const input = document.getElementById('checkinInput');
+                const name = input.value.trim();
+                if (!name) return;
+                let exists = false;
+                for (const dateStr in checkinData) {
+                    if (checkinData[dateStr].items && checkinData[dateStr].items[name]) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) {
+                    toast('⚠️ 项目已存在');
+                    return;
+                }
+                const today = todayKey();
+                const dayData = getTodayCheckin();
+                if (!dayData.items[name]) {
+                    dayData.items[name] = [];
+                }
+                if (!dayData.completed.includes(name)) {
+                    dayData.completed.push(name);
+                    dayData.items[name].push(Date.now());
+                }
+                saveCheckin();
+                input.value = '';
+                renderCheckinModal();
+                renderCalendar();
+                renderStatsCheckin();
+                toast('✅ 已添加');
+            });
+            document.getElementById('checkinInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') document.getElementById('addCheckinBtn').click();
+            });
+
+            // 添加页
             document.getElementById('addTextarea').addEventListener('input', function() {
                 const len = this.value.length;
                 const countEl = document.getElementById('charCount');
                 countEl.textContent = len + ' / 500';
                 countEl.classList.toggle('warn', len > 400);
             });
-
-            // 添加页 - 标签
             document.getElementById('tagInput').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' || e.key === ',' || e.key === '，') {
                     e.preventDefault();
@@ -3875,20 +5418,18 @@
                     this.value = '';
                 }
             });
-
-            // 添加页 - 计时
             document.getElementById('timerStartBtn').addEventListener('click', startTimer);
             document.getElementById('timerStopBtn').addEventListener('click', stopTimer);
+            document.getElementById('imgAddBtn').addEventListener('click', () => {
+                document.getElementById('imgFileInput').click();
+            });
 
-            // 添加页 - 提交
             document.getElementById('submitBtn').addEventListener('click', async () => {
                 const text = document.getElementById('addTextarea').value.trim();
                 if (!text && !pendingImages.length) { toast('请写点什么或上传图片～'); return; }
-
                 const durationInput = document.getElementById('durationMinutes');
                 let duration = parseFloat(durationInput.value);
                 if (isNaN(duration) || duration < 0) duration = 0;
-
                 const btn = document.getElementById('submitBtn');
                 btn.disabled = true;
                 showLoading();
@@ -3901,7 +5442,7 @@
                         await renderTimeline(addTargetDate);
                         showScreen('screen-detail', 'left');
                     } else {
-                        showScreen('screen-home', 'left');
+                        showHome();
                     }
                 } catch (e) {
                     toast('保存失败，请重试');
@@ -3909,11 +5450,6 @@
                 }
                 hideLoading();
                 btn.disabled = false;
-            });
-
-            // 添加页 - 图片
-            document.getElementById('imgAddBtn').addEventListener('click', () => {
-                document.getElementById('imgFileInput').click();
             });
 
             // Bottom Sheet
