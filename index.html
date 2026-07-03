@@ -2684,51 +2684,58 @@
         }
         function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)); }
 
+        // ================================================================
+        //  统一的"全部记录"内存缓存
+        //  之前 fetchAllEntries / fetchAllDates / fetchAllTags 各自独立向
+        //  Firestore 发起"拉取全部记录"的请求 —— 同一份数据被重复下载三次，
+        //  而且每次切换页面（统计/日历/标签云）都会重新走一次网络请求，
+        //  这正是切页面卡顿几秒的原因。现在改成只拉一次、缓存在内存里，
+        //  统计/日历/标签云/周视图都从这份缓存里做本地筛选，只有真正新增/
+        //  删除/导入记录之后才会失效重新拉取。
+        // ================================================================
+        let allEntriesCache = null;
+
+        function invalidateEntriesCache() {
+            allEntriesCache = null;
+            cachedEntries = {};
+            allTagsCache = null;
+        }
+
         async function fetchAllEntries() {
+            if (allEntriesCache) return allEntriesCache;
+            var result;
             if (firebaseReady && firebaseHelpers) {
                 try {
                     const snap = await firebaseHelpers.getDocs(firebaseHelpers.collection(db, 'entries'));
-                    return snap.docs.map(function(d) { var data = d.data(); data.id = d.id; return data; });
-                } catch(e) { return localLoad(); }
+                    result = snap.docs.map(function(d) { var data = d.data(); data.id = d.id; return data; });
+                } catch(e) {
+                    console.warn('拉取失败，使用本地缓存:', e);
+                    result = localLoad();
+                }
+            } else {
+                result = localLoad();
             }
-            return localLoad();
+            allEntriesCache = result;
+            return result;
         }
 
         async function fetchEntriesForDate(dateStr) {
             if (cachedEntries[dateStr]) return cachedEntries[dateStr];
-            var entries = [];
-            if (firebaseReady && firebaseHelpers) {
-                try {
-                    var q = firebaseHelpers.query(firebaseHelpers.collection(db, 'entries'), firebaseHelpers.where('date', '==', dateStr));
-                    var snap = await firebaseHelpers.getDocs(q);
-                    entries = snap.docs.map(function(d) { var data = d.data(); data.id = d.id; return data; });
-                } catch(e) { console.warn(e); }
-            } else {
-                entries = localLoad().filter(function(e) { return e.date === dateStr; }).sort(function(a,b) { return a.ts - b.ts; });
-            }
+            var all = await fetchAllEntries();
+            var entries = all.filter(function(e) { return e.date === dateStr; })
+                              .sort(function(a,b) { return a.ts - b.ts; });
             cachedEntries[dateStr] = entries;
             return entries;
         }
 
         async function fetchAllDates() {
+            var all = await fetchAllEntries();
             var result = {};
-            if (firebaseReady && firebaseHelpers) {
-                try {
-                    var snap = await firebaseHelpers.getDocs(firebaseHelpers.collection(db, 'entries'));
-                    snap.docs.forEach(function(d) {
-                        var data = d.data();
-                        if (!result[data.date]) result[data.date] = { hasText: false, hasImg: false };
-                        if (data.text) result[data.date].hasText = true;
-                        if (data.images && data.images.length) result[data.date].hasImg = true;
-                    });
-                } catch(e) {}
-            } else {
-                localLoad().forEach(function(e) {
-                    if (!result[e.date]) result[e.date] = { hasText: false, hasImg: false };
-                    if (e.text) result[e.date].hasText = true;
-                    if (e.images && e.images.length) result[e.date].hasImg = true;
-                });
-            }
+            all.forEach(function(e) {
+                if (!result[e.date]) result[e.date] = { hasText: false, hasImg: false };
+                if (e.text) result[e.date].hasText = true;
+                if (e.images && e.images.length) result[e.date].hasImg = true;
+            });
             return result;
         }
 
@@ -2746,18 +2753,8 @@
                     byTag[tag].entries.push(copy);
                 });
             }
-            if (firebaseReady && firebaseHelpers) {
-                try {
-                    var snap = await firebaseHelpers.getDocs(firebaseHelpers.collection(db, 'entries'));
-                    snap.docs.forEach(function(d) {
-                        var data = d.data();
-                        data.id = d.id;
-                        add(data, data.date);
-                    });
-                } catch(e) { console.warn(e); }
-            } else {
-                localLoad().forEach(function(e) { add(e, e.date); });
-            }
+            var all = await fetchAllEntries();
+            all.forEach(function(e) { add(e, e.date); });
             Object.values(byTag).forEach(function(t) { t.entries.sort(function(a,b) { return b.ts - a.ts; }); });
             allTagsCache = Object.values(byTag).sort(function(a,b) { return b.count - a.count; });
             return allTagsCache;
@@ -2817,8 +2814,7 @@
                 all.push(entry);
                 localSave(all);
             }
-            delete cachedEntries[dateStr];
-            allTagsCache = null;
+            invalidateEntriesCache();
             return entry;
         }
 
@@ -2831,8 +2827,7 @@
                 var all = localLoad().filter(function(e) { return e.id !== entryId; });
                 localSave(all);
             }
-            delete cachedEntries[dateStr];
-            allTagsCache = null;
+            invalidateEntriesCache();
         }
 
         // ================================================================
@@ -2967,8 +2962,7 @@
                     localSave(existing.concat(newEntries));
                     toast('✅ 导入了 ' + newEntries.length + ' 条记录');
                 }
-                cachedEntries = {};
-                allTagsCache = null;
+                invalidateEntriesCache();
                 await renderCalendar();
                 if (selectedDate) await renderTimeline(selectedDate);
                 hideLoading();
