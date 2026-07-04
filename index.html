@@ -2711,6 +2711,19 @@
             const d = new Date(ts);
             return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
         }
+        // 如果这条记录填了"开始时间"（比如补记早上7点做的事），时间轴上就应该
+        // 显示这个真实发生的时间，而不是你实际打字记录下来的时间（比如下午2点）。
+        function displayTime(entry) {
+            return entry.startTime ? entry.startTime : fmtTime(entry.ts);
+        }
+        function effectiveMinutesOfDay(entry) {
+            if (entry.startTime) return timeStrToMinutes(entry.startTime);
+            var d = new Date(entry.ts);
+            return d.getHours() * 60 + d.getMinutes();
+        }
+        function effectiveHour(entry) {
+            return entry.startTime ? parseInt(entry.startTime.split(':')[0], 10) : new Date(entry.ts).getHours();
+        }
         function prettyDuration(minutes) {
             if (minutes < 1) return Math.round(minutes*60) + '秒';
             if (minutes < 60) return Math.round(minutes) + '分';
@@ -3044,7 +3057,7 @@
 
         function entryToMarkdown(entry) {
             var lines = [];
-            lines.push('## ' + fmtTime(entry.ts));
+            lines.push('## ' + displayTime(entry));
             lines.push('');
             if (entry.text) {
                 lines.push(entry.text);
@@ -3925,7 +3938,7 @@
                         meta.className = 'day-entry-meta';
                         var time = document.createElement('span');
                         time.className = 'day-entry-time';
-                        time.textContent = fmtTime(entry.ts);
+                        time.textContent = displayTime(entry);
                         meta.appendChild(time);
 
                         if (entry.tags && entry.tags.length) {
@@ -4080,9 +4093,11 @@
             var timeblockEl = renderDayTimeblock(entries);
             if (timeblockEl) scroll.appendChild(timeblockEl);
 
+            var sortedEntries = entries.slice().sort(function(a, b) { return effectiveMinutesOfDay(a) - effectiveMinutesOfDay(b); });
+
             var groups = { morning: [], afternoon: [], evening: [] };
-            entries.forEach(function(entry, idx) {
-                var hour = new Date(entry.ts).getHours();
+            sortedEntries.forEach(function(entry, idx) {
+                var hour = effectiveHour(entry);
                 if (hour < 12) groups.morning.push({ entry: entry, index: idx + 1 });
                 else if (hour < 18) groups.afternoon.push({ entry: entry, index: idx + 1 });
                 else groups.evening.push({ entry: entry, index: idx + 1 });
@@ -4117,7 +4132,7 @@
 
                     var left = document.createElement('div');
                     left.className = 'entry-left';
-                    left.innerHTML = '<span class="entry-time">' + fmtTime(entry.ts) + '</span><span class="entry-index">#' + globalIndex + '</span>';
+                    left.innerHTML = '<span class="entry-time">' + displayTime(entry) + '</span><span class="entry-index">#' + globalIndex + '</span>';
 
                     var card = document.createElement('div');
                     card.className = 'entry-card' + (hasImage ? ' has-image' : '') + (isFirstOfDay ? ' first-of-day' : '');
@@ -4256,7 +4271,7 @@
                 var dt = new Date(+parts[0], +parts[1] - 1, +parts[2]);
                 var dateEl = document.createElement('div');
                 dateEl.className = 'entry-date-badge';
-                dateEl.innerHTML = (dt.getMonth()+1) + '月' + dt.getDate() + '日<br>' + fmtTime(entry.ts);
+                dateEl.innerHTML = (dt.getMonth()+1) + '月' + dt.getDate() + '日<br>' + displayTime(entry);
                 var bubble = document.createElement('div');
                 bubble.className = 'entry-bubble';
                 if (entry.text) {
@@ -4727,7 +4742,7 @@
         // ================================================================
         function openBottomSheet(entry, dateStr) {
             openEntryId = { id: entry.id, date: dateStr };
-            document.getElementById('sheetTime').textContent = fmtTime(entry.ts);
+            document.getElementById('sheetTime').textContent = displayTime(entry);
             var textEl = document.getElementById('sheetText');
             textEl.innerHTML = entry.text ? highlightKeywords(entry.text) : '';
             var tagsRow = document.getElementById('sheetTagsRow');
