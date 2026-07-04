@@ -902,6 +902,45 @@
         .stats-bar .weekday { font-size: 13px; color: var(--text-secondary); }
         .stats-bar .right { font-size: 13px; color: var(--text-secondary); }
         .stats-bar .right strong { color: var(--accent); font-weight: 600; }
+
+        /* ===== 每日时间色块条 ===== */
+        .day-timeblock { margin: 0 0 18px; }
+        .timeblock-track {
+            position: relative;
+            height: 46px;
+            background: rgba(255,255,255,0.55);
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .timeblock-tick {
+            position: absolute;
+            top: 3px;
+            font-size: 9px;
+            color: var(--text-muted);
+            transform: translateX(-50%);
+            font-family: var(--font-sans);
+            pointer-events: none;
+        }
+        .timeblock-seg {
+            position: absolute;
+            top: 15px;
+            height: 27px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.10);
+        }
+        .timeblock-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .timeblock-legend-item { display: flex; align-items: center; gap: 4px; }
+        .timeblock-legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
         .time-section { margin-bottom: 20px; }
         .time-section-label {
             font-size: 12px;
@@ -1888,6 +1927,54 @@
         .tag-bar-item:nth-child(6) .tag-bar-fill { background: #6D597A; }
         .tag-bar-item:nth-child(7) .tag-bar-fill { background: #B56576; }
         .tag-bar-item:nth-child(8) .tag-bar-fill { background: #355070; }
+
+        /* ===== 当天 24 小时时间块 ===== */
+        .day-timeblock-wrap { margin: 4px 0 18px; }
+        .day-timeblock {
+            position: relative;
+            height: 30px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .day-timeblock-seg {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            cursor: pointer;
+            transition: opacity 0.15s, filter 0.15s;
+        }
+        .day-timeblock-seg:hover { filter: brightness(1.08); }
+        .day-timeblock-ticks {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 0 2px;
+            margin-top: 3px;
+            font-family: var(--font-sans);
+        }
+        .day-timeblock-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            margin-top: 8px;
+        }
+        .day-timeblock-legend-chip {
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: var(--font-sans);
+        }
+        .day-timeblock-legend-chip i {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
         .tag-bar-value {
             min-width: 52px;
             font-size: 0.8rem;
@@ -2388,6 +2475,12 @@
             </div>
             <div class="add-bubble">
                 <div class="card-title"><i>⏱️</i> 计时</div>
+                <div class="time-range-row" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <input type="time" id="startTimeInput" style="flex:1;padding:6px 10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-family:var(--font-sans);font-size:0.85rem;background:rgba(255,255,255,0.5);" />
+                    <span style="color:var(--text-muted);font-size:0.8rem;">至</span>
+                    <input type="time" id="endTimeInput" style="flex:1;padding:6px 10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);font-family:var(--font-sans);font-size:0.85rem;background:rgba(255,255,255,0.5);" />
+                    <span class="timer-label" id="timeRangeHint" style="white-space:nowrap;"></span>
+                </div>
                 <div class="timer-row">
                     <input type="number" id="durationMinutes" placeholder="分钟" min="0" step="0.5" />
                     <span class="timer-label">分钟</span>
@@ -2396,7 +2489,7 @@
                     <button class="timer-btn" id="timerStopBtn" disabled>⏹ 停止</button>
                     <span class="timer-display" id="timerDisplay">00:00</span>
                 </div>
-                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:var(--font-sans);">💡 手动填写分钟，或点击「开始计时」走表，停止后自动填入</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;font-family:var(--font-sans);">💡 填开始/结束时间会在时间轴上显示彩色时间块；也可以只填分钟数或走表计时</div>
             </div>
         </div>
         <div class="add-footer"><button class="submit-btn" id="submitBtn">记下来</button></div>
@@ -2631,6 +2724,31 @@
             div.textContent = str;
             return div.innerHTML;
         }
+
+        // ================================================================
+        //  时间块颜色 / 时长计算
+        //  颜色跟统计页标签条形图用的是同一套调色板，保证同一个标签在
+        //  "当天时间轴"和"统计页"里看到的颜色是一致的。
+        // ================================================================
+        const BLOCK_COLORS = ['#E87A5D', '#4A9E8E', '#5B7FBF', '#D4A373', '#B5838D', '#6D597A', '#B56576', '#355070'];
+        const UNTAGGED_BLOCK_COLOR = '#B8B0A8';
+        function colorForTag(tag) {
+            if (!tag) return UNTAGGED_BLOCK_COLOR;
+            var hash = 0;
+            for (var i = 0; i < tag.length; i++) { hash = (hash * 31 + tag.charCodeAt(i)) >>> 0; }
+            return BLOCK_COLORS[hash % BLOCK_COLORS.length];
+        }
+        function timeStrToMinutes(str) {
+            var parts = str.split(':');
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+        function computeBlockMinutes(startStr, endStr) {
+            var s = timeStrToMinutes(startStr);
+            var e = timeStrToMinutes(endStr);
+            if (e <= s) e += 24 * 60; // 跨过午夜的情况，按下一天处理
+            return e - s;
+        }
+
         function highlightKeywords(text) {
             const keywords = ['开心','高兴','兴奋','激动','幸福','温暖','感动','难过','失落','疲惫','累','重要','特别','第一次','终于','梦','梦境','美好','喜欢','爱'];
             let result = text;
@@ -2838,9 +2956,9 @@
             return data.secure_url;
         }
 
-        async function saveEntry(dateStr, text, images, tags, duration) {
+        async function saveEntry(dateStr, text, images, tags, duration, startTime, endTime) {
             var ts = Date.now();
-            var entry = { date: dateStr, ts: ts, text: text, images: [], tags: tags || [], duration: duration || 0 };
+            var entry = { date: dateStr, ts: ts, text: text, images: [], tags: tags || [], duration: duration || 0, startTime: startTime || null, endTime: endTime || null };
             if (firebaseReady && firebaseHelpers) {
                 try {
                     var urls = [];
@@ -2855,7 +2973,9 @@
                         text: text,
                         images: urls,
                         tags: tags || [],
-                        duration: duration || 0
+                        duration: duration || 0,
+                        startTime: startTime || null,
+                        endTime: endTime || null
                     });
                     entry.id = docRef.id;
                 } catch(e) {
@@ -2945,7 +3065,10 @@
                 lines.push(entry.tags.map(function(t) { return '#' + t; }).join(' '));
                 lines.push('');
             }
-            if (entry.duration) {
+            if (entry.startTime && entry.endTime) {
+                lines.push('⏱ ' + entry.startTime + '–' + entry.endTime + '（' + prettyDuration(entry.duration || computeBlockMinutes(entry.startTime, entry.endTime)) + '）');
+                lines.push('');
+            } else if (entry.duration) {
                 lines.push('⏱ 时长：' + prettyDuration(entry.duration));
                 lines.push('');
             }
@@ -3007,7 +3130,9 @@
                                 text: entries[i].text || '',
                                 images: entries[i].images || [],
                                 tags: entries[i].tags || [],
-                                duration: entries[i].duration || 0
+                                duration: entries[i].duration || 0,
+                                startTime: entries[i].startTime || null,
+                                endTime: entries[i].endTime || null
                             });
                             imported++;
                         } catch(e) { console.warn('导入单条失败:', e); }
@@ -3881,6 +4006,57 @@
             await renderTimeline(dateStr);
         }
 
+        function renderDayTimeblock(entries) {
+            var blocked = entries.filter(function(e) { return e.startTime && e.endTime; });
+            if (!blocked.length) return null;
+
+            var wrap = document.createElement('div');
+            wrap.className = 'day-timeblock-wrap';
+
+            var bar = document.createElement('div');
+            bar.className = 'day-timeblock';
+            blocked.forEach(function(entry) {
+                var startMin = timeStrToMinutes(entry.startTime);
+                var mins = computeBlockMinutes(entry.startTime, entry.endTime);
+                var widthPct = Math.max(Math.min(mins, 1440 - startMin) / 1440 * 100, 0.6);
+                var leftPct = startMin / 1440 * 100;
+                var tag = entry.tags && entry.tags.length ? entry.tags[0] : null;
+                var seg = document.createElement('div');
+                seg.className = 'day-timeblock-seg';
+                seg.style.left = leftPct + '%';
+                seg.style.width = widthPct + '%';
+                seg.style.background = colorForTag(tag);
+                seg.title = entry.startTime + '–' + entry.endTime +
+                    (tag ? ' · ' + tag : '') +
+                    (entry.text ? ' · ' + entry.text.slice(0, 24) : '');
+                seg.addEventListener('click', function() { openBottomSheet(entry, entry.date); });
+                bar.appendChild(seg);
+            });
+            wrap.appendChild(bar);
+
+            var ticks = document.createElement('div');
+            ticks.className = 'day-timeblock-ticks';
+            ticks.innerHTML = '<span>0</span><span>6</span><span>12</span><span>18</span><span>24</span>';
+            wrap.appendChild(ticks);
+
+            var legend = document.createElement('div');
+            legend.className = 'day-timeblock-legend';
+            var seen = {};
+            blocked.forEach(function(entry) {
+                var tag = (entry.tags && entry.tags[0]) || null;
+                var label = tag || '未分类';
+                if (seen[label]) return;
+                seen[label] = true;
+                var chip = document.createElement('span');
+                chip.className = 'day-timeblock-legend-chip';
+                chip.innerHTML = '<i style="background:' + colorForTag(tag) + '"></i>' + escapeHtml(label);
+                legend.appendChild(chip);
+            });
+            wrap.appendChild(legend);
+
+            return wrap;
+        }
+
         async function renderTimeline(dateStr) {
             var scroll = document.getElementById('timelineScroll');
             scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
@@ -3900,6 +4076,9 @@
             statsBar.className = 'stats-bar';
             statsBar.innerHTML = '<div class="left"><span class="date">' + (dt.getMonth()+1) + '月' + dt.getDate() + '日</span><span class="weekday">' + WEEKDAYS_ZH[dt.getDay()] + '</span></div><div class="right"><strong>' + entries.length + '</strong> 条 · <strong>' + imgCount + '</strong> 张图</div>';
             scroll.appendChild(statsBar);
+
+            var timeblockEl = renderDayTimeblock(entries);
+            if (timeblockEl) scroll.appendChild(timeblockEl);
 
             var groups = { morning: [], afternoon: [], evening: [] };
             entries.forEach(function(entry, idx) {
@@ -4200,9 +4379,10 @@
             items.forEach(function(item) {
                 var pct = Math.max((item.minutes / maxMin) * 100, 2);
                 var display = prettyDuration(item.minutes);
+                var barColor = colorForTag(item.label === '未分类' ? null : item.label);
                 html += '<div class="tag-bar-item" data-tag="' + escapeHtml(item.label) + '">' +
                     '<span class="tag-bar-label">' + escapeHtml(item.label) + '</span>' +
-                    '<div class="tag-bar-track"><div class="tag-bar-fill" style="height:' + pct + '%;"></div></div>' +
+                    '<div class="tag-bar-track"><div class="tag-bar-fill" style="height:' + pct + '%;background:' + barColor + ';"></div></div>' +
                     '<span class="tag-bar-value">' + display + '</span>' +
                     '<span class="tag-bar-count">📝' + item.count + '</span></div>';
             });
@@ -4284,9 +4464,10 @@
             var html = '';
             items.forEach(function(item) {
                 var pct = Math.max((item.minutes / maxMin) * 100, 2);
+                var barColor = colorForTag(item.label === '未分类' ? null : item.label);
                 html += '<div class="tag-bar-item" data-tag="' + escapeHtml(item.label) + '">' +
                     '<span class="tag-bar-label">' + escapeHtml(item.label) + '</span>' +
-                    '<div class="tag-bar-track"><div class="tag-bar-fill" style="height:' + pct + '%;"></div></div>' +
+                    '<div class="tag-bar-track"><div class="tag-bar-fill" style="height:' + pct + '%;background:' + barColor + ';"></div></div>' +
                     '<span class="tag-bar-value">' + prettyDuration(item.minutes) + '</span>' +
                     '<span class="tag-bar-count">📝' + item.count + '</span></div>';
             });
@@ -4319,6 +4500,9 @@
             document.getElementById('tagInput').value = '';
             resetTimer();
             document.getElementById('durationMinutes').value = '';
+            document.getElementById('startTimeInput').value = '';
+            document.getElementById('endTimeInput').value = '';
+            document.getElementById('timeRangeHint').textContent = '';
             rebuildImageArea();
             await rebuildTagArea();
             var parts = dateStr.split('-');
@@ -4370,6 +4554,21 @@
                 document.getElementById('durationMinutes').value = Math.round(minutes * 10) / 10;
             }
             toast('⏱️ 已停止，时长已填入');
+        }
+
+        function updateTimeRangeHint() {
+            var startVal = document.getElementById('startTimeInput').value;
+            var endVal = document.getElementById('endTimeInput').value;
+            var hint = document.getElementById('timeRangeHint');
+            if (startVal && endVal) {
+                var mins = computeBlockMinutes(startVal, endVal);
+                if (mins > 0) {
+                    hint.textContent = '共 ' + prettyDuration(mins);
+                    document.getElementById('durationMinutes').value = mins;
+                    return;
+                }
+            }
+            hint.textContent = '';
         }
 
         function rebuildImageArea() {
@@ -4863,6 +5062,8 @@
             });
             document.getElementById('timerStartBtn').addEventListener('click', startTimer);
             document.getElementById('timerStopBtn').addEventListener('click', stopTimer);
+            document.getElementById('startTimeInput').addEventListener('change', updateTimeRangeHint);
+            document.getElementById('endTimeInput').addEventListener('change', updateTimeRangeHint);
             document.getElementById('imgAddBtn').addEventListener('click', function() {
                 document.getElementById('imgFileInput').click();
             });
@@ -4873,11 +5074,13 @@
                 var durationInput = document.getElementById('durationMinutes');
                 var duration = parseFloat(durationInput.value);
                 if (isNaN(duration) || duration < 0) duration = 0;
+                var startTime = document.getElementById('startTimeInput').value || null;
+                var endTime = document.getElementById('endTimeInput').value || null;
                 var btn = document.getElementById('submitBtn');
                 btn.disabled = true;
                 showLoading();
                 try {
-                    await saveEntry(addTargetDate, text, pendingImages, pendingTags, duration);
+                    await saveEntry(addTargetDate, text, pendingImages, pendingTags, duration, startTime, endTime);
                     allDateMeta = await fetchAllDates();
                     renderCalendarGrid();
                     toast('记下来了 ✦');
