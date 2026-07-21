@@ -4027,7 +4027,6 @@
 
         function renderDayTimeblock(entries) {
             var blocked = entries.filter(function(e) { return e.startTime && e.endTime; });
-            console.log('[时间块] entries数量:', entries.length, '带时间:', blocked.length, blocked.map(function(e){return e.startTime+'-'+e.endTime}));
             if (!blocked.length) return null;
 
             var wrap = document.createElement('div');
