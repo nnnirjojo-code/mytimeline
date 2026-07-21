@@ -873,6 +873,12 @@
             position: relative;
             z-index: 1;
         }
+        #screen-add {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: transparent;
+        }
         #screen-add .add-body {
             flex: 1;
             overflow-y: auto;
@@ -5112,6 +5118,21 @@
                 hideLoading();
                 btn.disabled = false;
             });
+
+            // 移动端键盘打开时确保提交按钮可见
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', function() {
+                    var addScreen = document.getElementById('screen-add');
+                    if (addScreen && !addScreen.classList.contains('hidden')) {
+                        // 给键盘一点时间完全弹起后再滚动
+                        clearTimeout(window._kbScrollTimer);
+                        window._kbScrollTimer = setTimeout(function() {
+                            var footer = document.querySelector('#screen-add .add-footer');
+                            if (footer) footer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 400);
+                    }
+                });
+            }
 
             // Bottom Sheet
             document.getElementById('bottomSheetOverlay').addEventListener('click', function(e) {
