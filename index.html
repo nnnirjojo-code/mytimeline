@@ -525,47 +525,6 @@
         }
         .side-card .card-title i { color: var(--accent); font-style: normal; }
 
-        /* ===== 番茄钟 ===== */
-        .pomo-display {
-            font-size: 32px;
-            font-weight: 600;
-            text-align: center;
-            color: var(--text-primary);
-            letter-spacing: 2px;
-            font-variant-numeric: tabular-nums;
-            line-height: 1.2;
-            font-family: var(--font-sans);
-        }
-        .pomo-controls {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
-        .pomo-controls button {
-            background: rgba(0,0,0,0.04);
-            border: none;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-family: var(--font-sans);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .pomo-controls button:hover { background: rgba(0,0,0,0.08); }
-        .pomo-controls button.primary { background: var(--accent); color: #fff; }
-        .pomo-controls button.primary:hover { background: #d46a4f; }
-        .pomo-status {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            font-family: var(--font-sans);
-        }
-
         /* ===== Todo ===== */
         .todo-input-group {
             display: flex;
@@ -1981,6 +1940,215 @@
             display: inline-block;
             flex-shrink: 0;
         }
+
+        /* ===== 时间分配环形图 ===== */
+        .day-donut-wrap {
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin: 4px 0 14px;
+            border: 1px solid rgba(255,255,255,0.50);
+        }
+        .day-donut-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-family: var(--font-sans);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .day-donut-body {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .day-donut-svg { flex-shrink: 0; }
+        .day-donut-legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+        .day-donut-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .day-donut-item .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%; flex-shrink: 0;
+        }
+        .day-donut-item .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .day-donut-item .val { font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+        .day-donut-empty {
+            font-size: 12px;
+            color: var(--text-muted);
+            padding: 8px 0;
+            font-family: var(--font-sans);
+        }
+
+        /* ===== 年度热力图 ===== */
+        .year-heatmap-wrap {
+            margin-top: 6px;
+        }
+        .year-heatmap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .year-heatmap-header .title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .year-heatmap-header .nav {
+            display: flex;
+            gap: 4px;
+        }
+        .year-heatmap-header .nav button {
+            background: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 8px;
+            padding: 2px 10px;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            transition: 0.15s;
+        }
+        .year-heatmap-header .nav button:active { transform: scale(0.95); }
+        .year-heatmap-grid {
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .year-heatmap-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .year-heatmap-cell {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .year-heatmap-cell:hover { transform: scale(1.3); }
+        .year-heatmap-cell.l1 { background: rgba(232,122,93,0.20); }
+        .year-heatmap-cell.l2 { background: rgba(232,122,93,0.45); }
+        .year-heatmap-cell.l3 { background: rgba(232,122,93,0.70); }
+        .year-heatmap-cell.l4 { background: rgba(232,122,93,0.95); }
+        .year-heatmap-cell.today { outline: 1.5px solid var(--accent); outline-offset: -1px; }
+        .year-heatmap-labels {
+            display: flex;
+            gap: 2px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+        .year-heatmap-labels .mlabel {
+            font-size: 7px;
+            color: var(--text-muted);
+            text-align: center;
+            font-family: var(--font-sans);
+            width: 10px;
+        }
+        .year-heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 6px;
+            font-size: 9px;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+        }
+        .year-heatmap-legend .dot {
+            width: 10px; height: 10px;
+            border-radius: 2px;
+            background: rgba(0,0,0,0.04);
+        }
+        .year-heatmap-legend .dot.l1 { background: rgba(232,122,93,0.20); }
+        .year-heatmap-legend .dot.l2 { background: rgba(232,122,93,0.45); }
+        .year-heatmap-legend .dot.l3 { background: rgba(232,122,93,0.70); }
+        .year-heatmap-legend .dot.l4 { background: rgba(232,122,93,0.95); }
+
+        /* ===== 周报卡片 ===== */
+        .weekly-report-card {
+            background: rgba(255,255,255,0.70);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            border: 1px solid rgba(232,122,93,0.15);
+            box-shadow:
+                inset 0 0 0 1px rgba(255,255,255,0.60),
+                0 2px 10px rgba(232,122,93,0.06);
+            margin-bottom: 14px;
+        }
+        .weekly-report-card .rp-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-family: var(--font-sans);
+        }
+        .weekly-report-card .rp-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+        }
+        .weekly-report-card .rp-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+        .weekly-report-card .rp-item .rp-val {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 14px;
+            min-width: 28px;
+        }
+        .weekly-report-card .rp-tags {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .weekly-report-card .rp-tag {
+            font-size: 10px;
+            background: rgba(232,122,93,0.12);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-family: var(--font-sans);
+        }
+        .weekly-report-card .rp-bar-wrap {
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .weekly-report-card .rp-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(0,0,0,0.04);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .weekly-report-card .rp-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), #D4A373);
+            transition: width 0.6s ease;
+        }
         .tag-bar-value {
             min-width: 52px;
             font-size: 0.8rem;
@@ -2210,7 +2378,6 @@
             .col-calendar { flex: none; }
             .col-side { flex: none; }
             .cal-day .circle { width: 28px; height: 28px; font-size: 11px; }
-            .pomo-display { font-size: 26px; }
             .reminder-card { flex-wrap: wrap; gap: 6px; }
             .reminder-textarea { min-height: 28px; font-size: 12px; flex-basis: 100%; }
             .reminder-card .hint { font-size: 10px; }
@@ -2250,8 +2417,6 @@
             .cal-header .month { font-size: 15px; }
             .calendar-card { padding: 12px 12px; }
             .side-card { padding: 12px 14px; }
-            .pomo-display { font-size: 22px; }
-            .pomo-controls button { font-size: 10px; padding: 3px 10px; }
             .todo-list li { font-size: 12px; }
             .todo-list { max-height: 150px; }
             .todo-input-group input { font-size: 11px; padding: 4px 10px; }
@@ -2397,16 +2562,6 @@
                     </div>
                 </div>
                 <div class="col-side">
-                    <div class="side-card">
-                        <div class="card-title"><i>🍅</i> 番茄钟</div>
-                        <div class="pomo-display" id="pomoDisplay">25:00</div>
-                        <div class="pomo-controls">
-                            <button class="primary" id="pomoStartBtn">▶ 开始</button>
-                            <button id="pomoPauseBtn">⏸ 暂停</button>
-                            <button id="pomoResetBtn">↺ 重置</button>
-                        </div>
-                        <div class="pomo-status" id="pomoStatus">⏳ 准备就绪</div>
-                    </div>
                     <div class="side-card">
                         <div class="card-title"><i>✅</i> Todo</div>
                         <div class="todo-input-group">
@@ -2602,6 +2757,32 @@
                 </div>
             </div>
 
+            <!-- 每周报告 -->
+            <div class="weekly-report-card" id="weeklyReportCard" style="display:none;"></div>
+
+            <!-- 年度热力图 -->
+            <div style="margin-bottom:16px;">
+                <div class="year-heatmap-wrap" id="yearHeatmapWrap">
+                    <div class="year-heatmap-header">
+                        <span class="title" id="yearHeatmapTitle">📅 记录热力图</span>
+                        <div class="nav">
+                            <button id="yearPrevBtn">‹</button>
+                            <button id="yearNextBtn">›</button>
+                        </div>
+                    </div>
+                    <div id="yearHeatmapGrid" class="year-heatmap-grid"></div>
+                    <div class="year-heatmap-legend">
+                        <span>少</span>
+                        <span class="dot"></span>
+                        <span class="dot l1"></span>
+                        <span class="dot l2"></span>
+                        <span class="dot l3"></span>
+                        <span class="dot l4"></span>
+                        <span>多</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-tag-card">
                 <div class="card-title"><i>🏷️</i> 标签时长</div>
                 <div id="tagStatsContainer"><div class="stats-empty">暂无数据</div></div>
@@ -2678,14 +2859,10 @@
         let cachedEntries = {};
         let allTagsCache = null;
         let weekOffset = 0;
+        let yearHeatmapOffset = 0;
         let isUnlocked = false;
         let db = null;
         let firebaseReady = false;
-
-        const POMO_DURATION = 25 * 60;
-        let pomoRemaining = POMO_DURATION;
-        let pomoRunning = false;
-        let pomoInterval = null;
 
         let timerSeconds = 0;
         let timerInterval = null;
@@ -4076,6 +4253,116 @@
             return wrap;
         }
 
+        function renderDonutChart(entries) {
+            var tagMinutes = {};
+            var total = 0;
+            entries.forEach(function(e) {
+                var tag = (e.tags && e.tags[0]) || '未分类';
+                var mins = 0;
+                if (e.startTime && e.endTime) {
+                    mins = computeBlockMinutes(e.startTime, e.endTime);
+                } else if (e.duration) {
+                    mins = e.duration;
+                } else {
+                    mins = 60;
+                }
+                if (!tagMinutes[tag]) tagMinutes[tag] = 0;
+                tagMinutes[tag] += mins;
+                total += mins;
+            });
+            if (total <= 0) return null;
+
+            var sorted = Object.keys(tagMinutes).sort(function(a,b){return tagMinutes[b]-tagMinutes[a];});
+            var wrap = document.createElement('div');
+            wrap.className = 'day-donut-wrap';
+            var header = document.createElement('div');
+            header.className = 'day-donut-header';
+            header.innerHTML = '🎯 今日时间分配 · <strong>' + prettyDuration(total) + '</strong>';
+            wrap.appendChild(header);
+
+            var body = document.createElement('div');
+            body.className = 'day-donut-body';
+
+            var size = 90, cx = 45, cy = 45, r = 34, sw = 10;
+            var ns = 'http://www.w3.org/2000/svg';
+            var svg = document.createElementNS(ns, 'svg');
+            svg.setAttribute('width', size);
+            svg.setAttribute('height', size);
+            svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+            svg.classList.add('day-donut-svg');
+
+            var circum = 2 * Math.PI * r;
+            var curAngle = -Math.PI / 2;
+            var colors = ['#E87A5D','#4A9E8E','#5B7FBF','#D4A373','#B5838D','#6D597A','#B56576','#355070','#8EB8A8','#C9A87C'];
+            sorted.forEach(function(tag, i) {
+                var pct = tagMinutes[tag] / total;
+                var angle = pct * 2 * Math.PI;
+                var col = colors[i % colors.length];
+                var arcLen = pct * circum;
+                var offset = -((curAngle + Math.PI / 2) / (2 * Math.PI)) * circum;
+                var seg = document.createElementNS(ns, 'circle');
+                seg.setAttribute('cx', cx);
+                seg.setAttribute('cy', cy);
+                seg.setAttribute('r', r);
+                seg.setAttribute('fill', 'none');
+                seg.setAttribute('stroke', col);
+                seg.setAttribute('stroke-width', sw);
+                seg.setAttribute('stroke-dasharray', arcLen + ' ' + (circum - arcLen));
+                seg.setAttribute('stroke-dashoffset', -offset);
+                seg.setAttribute('stroke-linecap', 'butt');
+                seg.style.transform = 'rotate(-90deg)';
+                seg.style.transformOrigin = cx + 'px ' + cy + 'px';
+                svg.appendChild(seg);
+                curAngle += angle;
+            });
+
+            // center hole text
+            var txt = document.createElementNS(ns, 'text');
+            txt.setAttribute('x', cx);
+            txt.setAttribute('y', cy + 1);
+            txt.setAttribute('text-anchor', 'middle');
+            txt.setAttribute('dominant-baseline', 'middle');
+            txt.setAttribute('font-size', '14');
+            txt.setAttribute('font-weight', '700');
+            txt.setAttribute('fill', 'var(--text-primary)');
+            txt.setAttribute('font-family', 'var(--font-sans)');
+            txt.textContent = entries.length;
+            svg.appendChild(txt);
+            var txt2 = document.createElementNS(ns, 'text');
+            txt2.setAttribute('x', cx);
+            txt2.setAttribute('y', cy + 13);
+            txt2.setAttribute('text-anchor', 'middle');
+            txt2.setAttribute('dominant-baseline', 'middle');
+            txt2.setAttribute('font-size', '7');
+            txt2.setAttribute('fill', 'var(--text-muted)');
+            txt2.setAttribute('font-family', 'var(--font-sans)');
+            txt2.textContent = '条';
+            svg.appendChild(txt2);
+
+            body.appendChild(svg);
+
+            var legend = document.createElement('div');
+            legend.className = 'day-donut-legend';
+            sorted.slice(0, 6).forEach(function(tag, i) {
+                var item = document.createElement('div');
+                item.className = 'day-donut-item';
+                var pct = Math.round(tagMinutes[tag] / total * 100);
+                var col = colors[i % colors.length];
+                item.innerHTML = '<span class="dot" style="background:' + col + '"></span><span class="name">' + escapeHtml(tag) + '</span><span class="val">' + prettyDuration(tagMinutes[tag]) + '</span>';
+                legend.appendChild(item);
+            });
+            if (sorted.length > 6) {
+                var more = document.createElement('div');
+                more.className = 'day-donut-item';
+                more.style.cssText = 'font-size:10px;color:var(--text-muted);';
+                more.textContent = '+' + (sorted.length - 6) + ' 更多';
+                legend.appendChild(more);
+            }
+            body.appendChild(legend);
+            wrap.appendChild(body);
+            return wrap;
+        }
+
         async function renderTimeline(dateStr) {
             var scroll = document.getElementById('timelineScroll');
             scroll.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);">加载中…</div>';
@@ -4098,6 +4385,12 @@
 
             var timeblockEl = renderDayTimeblock(entries);
             if (timeblockEl) scroll.appendChild(timeblockEl);
+
+            // ===== 时间分配环形图 =====
+            try {
+                var donutEl = renderDonutChart(entries);
+                if (donutEl) scroll.appendChild(donutEl);
+            } catch(e) { console.warn('环形图渲染失败:', e); }
 
             var sortedEntries = entries.slice().sort(function(a, b) { return effectiveMinutesOfDay(a) - effectiveMinutesOfDay(b); });
 
@@ -4360,6 +4653,8 @@
 
             renderStatsCheckin();
             renderTagStats(allEntries);
+            renderWeeklyReport(allEntries);
+            renderYearHeatmap();
         }
 
         function renderTagStats(allEntries) {
@@ -4419,6 +4714,118 @@
                     }
                 });
             });
+        }
+
+        function renderWeeklyReport(allEntries) {
+            var card = document.getElementById('weeklyReportCard');
+            var now = new Date();
+            var ws = getWeekStart();
+            var weekStartStr = dateKey(ws.getFullYear(), ws.getMonth(), ws.getDate());
+            var weekEnd = new Date(ws);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            var weekEndStr = dateKey(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate());
+
+            var weekEntries = allEntries.filter(function(e) { return e.date >= weekStartStr && e.date <= weekEndStr; });
+            if (weekEntries.length === 0) { card.style.display = 'none'; return; }
+
+            var wCount = weekEntries.length;
+            var wMins = 0;
+            var tagCounts = {};
+            var dayCounts = {};
+            var dayLabels = ['周日','周一','周二','周三','周四','周五','周六'];
+            weekEntries.forEach(function(e) {
+                var dur = e.duration || (e.startTime && e.endTime ? computeBlockMinutes(e.startTime, e.endTime) : 0);
+                wMins += dur;
+                (e.tags || []).forEach(function(t) { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+                if (e.date) dayCounts[e.date] = (dayCounts[e.date] || 0) + 1;
+            });
+            var topTags = Object.keys(tagCounts).sort(function(a,b){return tagCounts[b]-tagCounts[a]}).slice(0, 7);
+            var busiestDay = '', busiestCount = 0;
+            Object.keys(dayCounts).forEach(function(d) {
+                if (dayCounts[d] > busiestCount) { busiestCount = dayCounts[d]; busiestDay = d; }
+            });
+            var bd = busiestDay ? new Date(busiestDay + 'T00:00:00') : null;
+            var busiestLabel = bd ? dayLabels[bd.getDay()] + ' (' + (bd.getMonth()+1) + '/' + bd.getDate() + ')' : '--';
+            var avgPerDay = Math.round(wCount / 7 * 10) / 10;
+
+            var pct = Math.min(wCount / 50 * 100, 100);
+            card.style.display = '';
+            card.innerHTML =
+                '<div class="rp-title">📋 本周报告</div>' +
+                '<div class="rp-grid">' +
+                    '<div class="rp-item"><span class="rp-val">' + wCount + '</span>条记录</div>' +
+                    '<div class="rp-item"><span class="rp-val">' + prettyDuration(wMins) + '</span>总时长</div>' +
+                    '<div class="rp-item"><span class="rp-val">' + avgPerDay + '</span>日均条数</div>' +
+                    '<div class="rp-item"><span class="rp-val">' + busiestLabel + '</span>最活跃日</div>' +
+                '</div>' +
+                '<div class="rp-bar-wrap"><span style="font-size:11px;color:var(--text-muted);font-family:var(--font-sans);">本周进度</span><div class="rp-bar"><div class="rp-bar-fill" style="width:' + pct + '%;"></div></div><span style="font-size:10px;color:var(--text-muted);font-family:var(--font-sans);">目标50条</span></div>' +
+                (topTags.length ? '<div class="rp-tags">' + topTags.map(function(t){return '<span class="rp-tag">#' + t + '</span>'}).join('') + '</div>' : '');
+        }
+
+        function renderYearHeatmap() {
+            var now = new Date();
+            var targetY = now.getFullYear() + yearHeatmapOffset;
+            document.getElementById('yearHeatmapTitle').textContent = '📅 ' + targetY + ' 记录热力图';
+
+            var entries = (allEntriesCache || []);
+            var dateCounts = {};
+            entries.forEach(function(e) { if (e.date) dateCounts[e.date] = (dateCounts[e.date] || 0) + 1; });
+
+            var firstDay = new Date(targetY, 0, 1);
+            var lastDay = new Date(targetY, 11, 31);
+            var startDow = firstDay.getDay();
+            var totalDays = Math.ceil((lastDay - firstDay) / 86400000) + 1;
+            var cols = Math.ceil((totalDays + startDow) / 7);
+
+            var grid = document.getElementById('yearHeatmapGrid');
+            grid.innerHTML = '';
+
+            // month labels
+            var monthLabelsEl = document.createElement('div');
+            monthLabelsEl.className = 'year-heatmap-labels';
+            var monthLabels = [];
+            for (var m = 0; m < 12; m++) {
+                var mid = new Date(targetY, m, 1);
+                var mCol = Math.floor((mid.getTime() - firstDay.getTime()) / 86400000 / 7) +
+                    Math.floor((startDow + (mid.getDay() - startDow + 7) % 7) / 7);
+                monthLabels.push({col: mCol, label: (m+1)+'月'});
+            }
+            monthLabels.forEach(function(ml) {
+                var el = document.createElement('span');
+                el.className = 'mlabel';
+                el.style.width = '12px';
+                el.textContent = ml.label;
+                monthLabelsEl.appendChild(el);
+            });
+            grid.appendChild(monthLabelsEl);
+
+            var todayStr = todayKey();
+            for (var c = 0; c < cols; c++) {
+                var col = document.createElement('div');
+                col.className = 'year-heatmap-col';
+                for (var r = 0; r < 7; r++) {
+                    var dayNum = c * 7 + r - startDow + 1;
+                    if (dayNum < 1 || dayNum > totalDays) {
+                        var empty = document.createElement('div');
+                        empty.style.width = '10px'; empty.style.height = '10px';
+                        col.appendChild(empty);
+                        continue;
+                    }
+                    var d = new Date(targetY, 0, dayNum);
+                    var dKey = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                    var cnt = dateCounts[dKey] || 0;
+                    var cell = document.createElement('div');
+                    cell.className = 'year-heatmap-cell';
+                    if (cnt > 0) {
+                        var level = Math.min(Math.ceil(cnt / 2), 4);
+                        cell.classList.add('l' + level);
+                    }
+                    if (dKey === todayStr) cell.classList.add('today');
+                    cell.title = dKey + ' · ' + cnt + ' 条';
+                    col.appendChild(cell);
+                }
+                grid.appendChild(col);
+            }
         }
 
         async function openStatsDetail(range) {
@@ -4889,51 +5296,6 @@
                 if (e.key === 'Enter') document.getElementById('addTodoBtn').click();
             });
 
-            // 番茄钟
-            document.getElementById('pomoStartBtn').addEventListener('click', function() {
-                if (pomoRunning) return;
-                if (pomoRemaining <= 0) pomoRemaining = POMO_DURATION;
-                pomoRunning = true;
-                this.innerHTML = '⏳ 运行中';
-                document.getElementById('pomoStatus').textContent = '⏳ 专注中...';
-                pomoInterval = setInterval(function() {
-                    pomoRemaining--;
-                    document.getElementById('pomoDisplay').textContent = formatTime(pomoRemaining);
-                    if (pomoRemaining <= 0) {
-                        pomoRemaining = 0;
-                        document.getElementById('pomoDisplay').textContent = '00:00';
-                        clearInterval(pomoInterval);
-                        pomoRunning = false;
-                        document.getElementById('pomoStartBtn').innerHTML = '▶ 开始';
-                        document.getElementById('pomoStatus').textContent = '✅ 时间到！';
-                        if (Notification.permission === 'granted') {
-                            new Notification('🍅 番茄钟结束', { body: '休息一下吧！' });
-                        } else {
-                            alert('🍅 番茄钟结束！休息一下吧。');
-                        }
-                    }
-                }, 1000);
-            });
-            document.getElementById('pomoPauseBtn').addEventListener('click', function() {
-                if (pomoRunning) {
-                    clearInterval(pomoInterval);
-                    pomoRunning = false;
-                    document.getElementById('pomoStartBtn').innerHTML = '▶ 继续';
-                    document.getElementById('pomoStatus').textContent = '⏸ 已暂停';
-                }
-            });
-            document.getElementById('pomoResetBtn').addEventListener('click', function() {
-                clearInterval(pomoInterval);
-                pomoRunning = false;
-                pomoRemaining = POMO_DURATION;
-                document.getElementById('pomoDisplay').textContent = '25:00';
-                document.getElementById('pomoStartBtn').innerHTML = '▶ 开始';
-                document.getElementById('pomoStatus').textContent = '↻ 已重置';
-            });
-            if ('Notification' in window && Notification.permission === 'default') {
-                Notification.requestPermission();
-            }
-
             // 日历
             document.getElementById('prevMonth').addEventListener('click', function() {
                 currentMonth--;
@@ -4996,6 +5358,14 @@
             document.getElementById('statsCardToday').addEventListener('click', function() { openStatsDetail('today'); });
             document.getElementById('statsCardWeek').addEventListener('click', function() { openStatsDetail('week'); });
             document.getElementById('statsCardAll').addEventListener('click', function() { openStatsDetail('all'); });
+            document.getElementById('yearPrevBtn').addEventListener('click', function() {
+                yearHeatmapOffset--;
+                renderYearHeatmap();
+            });
+            document.getElementById('yearNextBtn').addEventListener('click', function() {
+                yearHeatmapOffset++;
+                renderYearHeatmap();
+            });
 
             // 导入导出
             document.getElementById('importFileInput').addEventListener('change', function(e) {
