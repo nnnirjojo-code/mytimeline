@@ -114,7 +114,7 @@
             position: fixed;
             inset: 0;
             overflow: hidden;
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            transition: opacity 0.18s ease, transform 0.18s ease;
             will-change: transform, opacity;
             background: transparent;
             z-index: 1;
@@ -164,8 +164,7 @@
             border-radius: 20px;
             border: 1px solid rgba(232,122,93,0.15);
             background: rgba(255,255,255,0.50);
-            backdrop-filter: blur(8px);
-            font-family: var(--font-sans);
+font-family: var(--font-sans);
             box-shadow: 0 2px 8px rgba(232,122,93,0.06);
             transition: all 0.2s;
         }
@@ -184,8 +183,7 @@
         .sidebar {
             width: 100px;
             min-width: 100px;
-            background: rgba(255,255,255,0.50);
-            backdrop-filter: blur(16px);
+            background: rgba(255,255,255,0.75);
             border-right: 1px solid rgba(255,255,255,0.50);
             display: flex;
             flex-direction: column;
@@ -277,8 +275,7 @@
         /* ===== 省脑子 ===== */
         .reminder-card {
             background: rgba(255,255,255,0.60);
-            backdrop-filter: blur(12px);
-            border-radius: 14px;
+border-radius: 14px;
             padding: 10px 16px;
             border: 1px solid rgba(255,255,255,0.50);
             box-shadow:
@@ -331,8 +328,7 @@
         /* ===== 现在该做（焦点看板） ===== */
         .focus-card {
             background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(12px);
-            border-radius: 14px;
+border-radius: 14px;
             padding: 14px 16px;
             border: 1px solid rgba(232,122,93,0.18);
             box-shadow:
@@ -395,8 +391,7 @@
         }
 
         .calendar-card {
-            background: rgba(255,255,255,0.60);
-            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.75);
             border-radius: 14px;
             padding: 16px 18px;
             border: 1px solid rgba(255,255,255,0.50);
@@ -503,8 +498,7 @@
         }
 
         .side-card {
-            background: rgba(255,255,255,0.60);
-            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.75);
             border-radius: 14px;
             padding: 16px 18px;
             border: 1px solid rgba(255,255,255,0.50);
@@ -616,14 +610,13 @@
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.18s;
             padding: 20px;
         }
         .modal-overlay.open { opacity: 1; pointer-events: all; }
         .modal {
             background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+border-radius: 24px;
             max-width: 520px;
             width: 100%;
             max-height: 85vh;
@@ -632,7 +625,7 @@
             box-shadow: 0 24px 60px rgba(0,0,0,0.12);
             overflow-y: auto;
             transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+            transition: transform 0.18s cubic-bezier(0.22,1,0.36,1);
         }
         .modal-overlay.open .modal { transform: scale(1); }
         .modal-header {
@@ -943,8 +936,7 @@
         .entry-card {
             flex: 1;
             background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(12px);
-            border-radius: 14px;
+border-radius: 14px;
             padding: 13px 16px;
             box-shadow: var(--shadow-sm);
             border: 1px solid rgba(255,255,255,0.50);
@@ -1250,8 +1242,7 @@
            ============================================================ */
         .add-bubble {
             background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
+border-radius: var(--radius);
             padding: 16px;
             box-shadow: var(--shadow-sm);
             border: 1px solid rgba(255,255,255,0.50);
@@ -1463,8 +1454,7 @@
         }
         .stats-summary-card {
             background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
+border-radius: var(--radius);
             padding: 22px 14px 18px;
             border: 1px solid rgba(255,255,255,0.50);
             box-shadow:
@@ -1526,8 +1516,7 @@
         /* ===== 打卡统计卡片 (完整版) ===== */
         .stats-checkin-card {
             background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
+border-radius: var(--radius);
             padding: 18px 20px;
             border: 1px solid rgba(255,255,255,0.50);
             box-shadow:
@@ -1793,8 +1782,7 @@
         /* ===== 标签时长卡片 ===== */
         .stats-tag-card {
             background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
+border-radius: var(--radius);
             padding: 18px 20px;
             border: 1px solid rgba(255,255,255,0.50);
             box-shadow:
@@ -1945,8 +1933,7 @@
         /* ===== 时间分配环形图 ===== */
         .day-donut-wrap {
             background: rgba(255,255,255,0.65);
-            backdrop-filter: blur(12px);
-            border-radius: 14px;
+border-radius: 14px;
             padding: 14px 16px;
             margin: 4px 0 14px;
             border: 1px solid rgba(255,255,255,0.50);
@@ -2082,8 +2069,7 @@
         /* ===== 周报卡片 ===== */
         .weekly-report-card {
             background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
+border-radius: var(--radius);
             padding: 16px 18px;
             border: 1px solid rgba(232,122,93,0.15);
             box-shadow:
@@ -2221,7 +2207,7 @@
             align-items: flex-end;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.18s;
             backdrop-filter: blur(8px);
         }
         .bottom-sheet-overlay.open { opacity: 1; pointer-events: all; }
@@ -2465,6 +2451,8 @@
         .modal::-webkit-scrollbar {
             width: 4px;
         }
+        .main-area { content-visibility: auto; }
+        .stats-scroll { content-visibility: auto; }
         .main-area::-webkit-scrollbar-track,
         .sidebar::-webkit-scrollbar-track,
         .timeline-scroll::-webkit-scrollbar-track,
@@ -2861,6 +2849,7 @@
         let allTagsCache = null;
         let weekOffset = 0;
         let yearHeatmapOffset = 0;
+        let _yearHeatmapCache = { year: null, html: '' };
         let isUnlocked = false;
         let db = null;
         let firebaseReady = false;
@@ -4766,6 +4755,12 @@
         function renderYearHeatmap() {
             var now = new Date();
             var targetY = now.getFullYear() + yearHeatmapOffset;
+            var todayStr = todayKey();
+            var cacheKey = targetY + '_' + now.getDate() + '_' + (allEntriesCache ? allEntriesCache.length : 0);
+            if (_yearHeatmapCache.key === cacheKey) {
+                document.getElementById('yearHeatmapTitle').textContent = '📅 ' + targetY + ' 记录热力图';
+                return;
+            }
             document.getElementById('yearHeatmapTitle').textContent = '📅 ' + targetY + ' 记录热力图';
 
             var entries = (allEntriesCache || []);
@@ -4827,6 +4822,7 @@
                 }
                 grid.appendChild(col);
             }
+            _yearHeatmapCache.key = cacheKey;
         }
 
         async function openStatsDetail(range) {
@@ -4939,7 +4935,7 @@
             document.getElementById('addDateLabel').textContent =
                 dateStr === todayKey() ? '今天' : (dt.getMonth()+1) + '月' + dt.getDate() + '日';
             showScreen('screen-add');
-            setTimeout(function() { document.getElementById('addTextarea').focus(); }, 400);
+            setTimeout(function() { document.getElementById('addTextarea').focus(); }, 80);
         }
 
         function resetTimer() {
