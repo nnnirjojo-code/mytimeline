@@ -1214,21 +1214,23 @@ border-radius: 14px;
 .week-cal-header {
     display: grid;
     grid-template-columns: 44px repeat(7, 1fr);
+    gap: 4px;
     border-bottom: 1px solid rgba(0,0,0,0.06);
     flex-shrink: 0;
-    background: rgba(255,255,255,0.30);
+    background: transparent;
+    padding: 0 2px;
 }
 .week-cal-hcell {
     padding: 8px 2px;
     text-align: center;
     font-family: var(--font-sans);
-    border-right: 1px solid rgba(0,0,0,0.03);
+    background: rgba(255,255,255,0.60);
+    border-radius: 8px;
 }
 .week-cal-hcell:first-child {
-    background: rgba(255,255,255,0.40);
-    border-right: 1px solid rgba(0,0,0,0.06);
+    background: transparent;
 }
-.week-cal-hcell:last-child { border-right: none; }
+.week-cal-hcell:last-child { }
 .week-cal-hcell .dow {
     font-size: 10px;
     font-weight: 500;
@@ -1264,10 +1266,12 @@ border-radius: 14px;
 .week-cal-row {
     display: grid;
     grid-template-columns: 44px repeat(7, 1fr);
+    gap: 4px;
     height: 48px;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    padding: 0 2px;
+    margin-bottom: 0;
 }
-.week-cal-row:last-child { border-bottom: none; }
+.week-cal-row:last-child { margin-bottom: 0; }
 .week-cal-time {
     font-size: 11px;
     font-weight: 600;
@@ -1285,13 +1289,14 @@ border-radius: 14px;
     border-right: 1px solid rgba(0,0,0,0.04);
 }
 .week-cal-cell {
-    border-right: 1px solid rgba(0,0,0,0.03);
+    border-radius: 4px;
     position: relative;
     min-height: 48px;
+    background: rgba(255,255,255,0.35);
 }
-.week-cal-cell:last-child { border-right: none; }
-.week-cal-cell.today { background: rgba(232,122,93,0.03); }
-.week-cal-cell.weekend { background: rgba(0,0,0,0.01); }
+.week-cal-cell:last-child { }
+.week-cal-cell.today { background: rgba(232,122,93,0.08); }
+.week-cal-cell.weekend { background: rgba(0,0,0,0.02); }
 
 /* 时间块 overlay */
 .week-cal-blocks {
@@ -4405,8 +4410,8 @@ border-radius: var(--radius);
                     block.style.top = topPx + 'px';
                     block.style.height = heightPx + 'px';
                     block.style.background = colorForTag(tag);
-                    block.style.left = 'calc(44px + ' + dayIdx + ' * ((100% - 44px) / 7) + 2px)';
-                    block.style.width = 'calc((100% - 44px) / 7 - 4px)';
+                    block.style.left = 'calc(50px + ' + dayIdx + ' * ((100% - 76px) / 7 + 4px))';
+                    block.style.width = 'calc((100% - 76px) / 7 - 2px)';
                     var label = document.createElement('span');
                     label.className = 'b-label';
                     label.textContent = tag || entry.text.slice(0, 10) || entry.startTime.slice(0,5);
