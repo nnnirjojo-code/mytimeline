@@ -390,7 +390,7 @@ font-family: var(--font-sans);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 18px;
             height: 100vh;
         }
 
@@ -398,9 +398,10 @@ font-family: var(--font-sans);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(255,255,255,0.30);
+            padding-bottom: 10px;
+            border-bottom: 1.5px solid rgba(0,0,0,0.06);
             flex-shrink: 0;
+            margin-bottom: 2px;
         }
         .main-header h1 {
             font-size: 20px;
@@ -462,6 +463,14 @@ border-radius: 14px;
             transition: background 0.2s;
         }
         .reminder-card .clear-btn:hover { background: rgba(0,0,0,0.04); }
+
+        /* ===== 内容分隔线 ===== */
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+            flex-shrink: 0;
+            margin: 0;
+        }
 
         /* ===== 现在该做（焦点看板） ===== */
         .focus-card {
@@ -2769,12 +2778,14 @@ border-radius: var(--radius);
                 <span class="hint">自动保存</span>
                 <button class="clear-btn" id="clearReminderBtn">清空</button>
             </div>
+            <div class="section-divider"></div>
             <div class="focus-card" id="focusCard" style="display:none;">
                 <div class="focus-title"><i>🎯</i> 现在该做</div>
                 <ul class="focus-list" id="focusTodayList"></ul>
                 <div class="focus-soon-title" id="focusSoonTitle" style="display:none;">即将到来</div>
                 <ul class="focus-list" id="focusSoonList"></ul>
             </div>
+            <div class="section-divider"></div>
             <div class="content-grid">
                 <div class="col-calendar">
                     <div class="calendar-card">
