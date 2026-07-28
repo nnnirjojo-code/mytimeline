@@ -245,6 +245,144 @@ font-family: var(--font-sans);
         .sidebar .nav-item .label { font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
         .sidebar .spacer { flex: 1; }
 
+        /* ===== 侧边栏全局计时器 ===== */
+        .sidebar-timer {
+            width: 72px;
+            margin: 0 auto;
+            padding: 4px 0;
+            border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .st-start-btn {
+            width: 100%;
+            padding: 6px 0;
+            border-radius: 10px;
+            border: 1px dashed rgba(232,122,93,0.30);
+            background: rgba(232,122,93,0.06);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .st-start-btn:active { background: rgba(232,122,93,0.15); }
+        .st-running { text-align: center; }
+        .st-row { display: flex; align-items: center; justify-content: center; gap: 2px; }
+        .st-label {
+            font-size: 9px;
+            color: var(--accent);
+            font-weight: 600;
+            font-family: var(--font-sans);
+            max-width: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .st-display {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: var(--font-sans);
+            font-variant-numeric: tabular-nums;
+        }
+        .st-actions { display: flex; gap: 2px; margin-top: 3px; justify-content: center; }
+        .st-act-btn {
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: none;
+            background: rgba(0,0,0,0.04);
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .st-act-btn:active { background: rgba(0,0,0,0.10); }
+        .st-act-btn.primary { background: var(--accent); color: #fff; }
+        .st-popup {
+            position: fixed;
+            left: 110px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 200;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 16px 18px;
+            width: 220px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            border: 1px solid rgba(255,255,255,0.50);
+        }
+        .st-popup-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            font-family: var(--font-sans);
+        }
+        .st-popup-input-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .st-popup-input-row input {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.08);
+            font-size: 13px;
+            font-family: var(--font-sans);
+            outline: none;
+        }
+        .st-popup-input-row input:focus { border-color: var(--accent); }
+        .st-popup-input-row button {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+        }
+        .st-popup-recent {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .st-popup-recent button {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.06);
+            background: rgba(255,255,255,0.50);
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .st-popup-recent button:active { background: rgba(232,122,93,0.12); color: var(--accent); }
+
+        /* ===== 增强时间块 ===== */
+        .day-timeblock { height: 50px; }
+        .day-timeblock-seg { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 2px; }
+        .day-timeblock-seg .seg-label {
+            font-size: 8px;
+            color: rgba(255,255,255,0.85);
+            font-weight: 600;
+            font-family: var(--font-sans);
+            text-shadow: 0 1px 3px rgba(0,0,0,0.20);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            padding: 0 2px;
+            pointer-events: none;
+            line-height: 1;
+        }
+        .day-timeblock-seg:hover .seg-label { color: #fff; }
+
         /* ===== 主区域 ===== */
         .main-area {
             flex: 1;
@@ -2400,6 +2538,8 @@ border-radius: var(--radius);
             }
             .sidebar .nav-item .icon { font-size: 18px; }
             .sidebar .nav-item .label { font-size: 9px; }
+            .sidebar-timer { width: 56px; }
+            .st-popup { left: 80px; }
             .main-area { padding: 16px 16px 12px; }
             .main-header h1 { font-size: 17px; }
             .content-grid { flex-direction: column; }
@@ -2548,6 +2688,31 @@ border-radius: var(--radius);
             <button class="nav-item" data-page="tagcloud"><span class="icon">🏷️</span><span class="label">标签</span></button>
             <button class="nav-item" data-page="stats"><span class="icon">📊</span><span class="label">统计</span></button>
             <button class="nav-item" data-page="checkin" id="checkinNavBtn" style="color:var(--accent);"><span class="icon">✅</span><span class="label">打卡</span></button>
+            <!-- ===== 全局计时器（常驻侧边栏） ===== -->
+            <div class="sidebar-timer" id="sidebarTimer">
+                <div class="st-idle" id="stIdle">
+                    <button class="st-start-btn" id="stStartBtn">▶ 计时</button>
+                </div>
+                <div class="st-running" id="stRunning" style="display:none;">
+                    <div class="st-row">
+                        <span class="st-label" id="stLabel">活动</span>
+                        <span class="st-display" id="stDisplay">00:00</span>
+                    </div>
+                    <div class="st-actions">
+                        <button class="st-act-btn" id="stSwitchBtn">⇄ 切换</button>
+                        <button class="st-act-btn primary" id="stStopBtn">⏹ 完成</button>
+                    </div>
+                </div>
+            </div>
+            <!-- ===== 活动切换弹出框 ===== -->
+            <div class="st-popup" id="stPopup" style="display:none;">
+                <div class="st-popup-header">正在做什么？</div>
+                <div class="st-popup-input-row">
+                    <input type="text" id="stPopupInput" placeholder="输入活动名称…" maxlength="30" />
+                    <button id="stPopupAddBtn">开始</button>
+                </div>
+                <div class="st-popup-recent" id="stPopupRecent"></div>
+            </div>
             <div class="spacer"></div>
             <button class="nav-item" data-page="export" id="exportNavBtn"><span class="icon">💾</span><span class="label">导出</span></button>
             <button class="nav-item" data-page="exportmd" id="exportMdNavBtn"><span class="icon">📝</span><span class="label">导出MD</span></button>
@@ -2910,6 +3075,12 @@ border-radius: var(--radius);
         let timerSeconds = 0;
         let timerInterval = null;
         let timerRunning = false;
+
+        // 全局计时器状态
+        let globalTimerSeconds = 0;
+        let globalTimerInterval = null;
+        let globalTimerRunning = false;
+        let globalTimerLabel = '';
 
         // ================================================================
         //  工具
@@ -4265,6 +4436,10 @@ border-radius: var(--radius);
                 seg.style.left = leftPct + '%';
                 seg.style.width = widthPct + '%';
                 seg.style.background = colorForTag(tag);
+                var segLabel = document.createElement('span');
+                segLabel.className = 'seg-label';
+                segLabel.textContent = tag || entry.text.slice(0, 8) || '未分类';
+                seg.appendChild(segLabel);
                 seg.title = entry.startTime + '–' + entry.endTime +
                     (tag ? ' · ' + tag : '') +
                     (entry.text ? ' · ' + entry.text.slice(0, 24) : '');
@@ -4421,9 +4596,16 @@ border-radius: var(--radius);
             entries.forEach(function(e) { if (e.images) imgCount += e.images.length; });
 
             var dt = new Date(dateStr + 'T00:00:00');
+            var totalTrackedMins = 0;
+            entries.forEach(function(e) {
+                if (e.startTime && e.endTime) totalTrackedMins += computeBlockMinutes(e.startTime, e.endTime);
+                else if (e.duration) totalTrackedMins += e.duration;
+            });
             var statsBar = document.createElement('div');
             statsBar.className = 'stats-bar';
-            statsBar.innerHTML = '<div class="left"><span class="date">' + (dt.getMonth()+1) + '月' + dt.getDate() + '日</span><span class="weekday">' + WEEKDAYS_ZH[dt.getDay()] + '</span></div><div class="right"><strong>' + entries.length + '</strong> 条 · <strong>' + imgCount + '</strong> 张图</div>';
+            statsBar.innerHTML = '<div class="left"><span class="date">' + (dt.getMonth()+1) + '月' + dt.getDate() + '日</span><span class="weekday">' + WEEKDAYS_ZH[dt.getDay()] + '</span></div><div class="right"><strong>' + entries.length + '</strong> 条' +
+                (totalTrackedMins > 0 ? ' · <strong>' + prettyDuration(totalTrackedMins) + '</strong> 追踪' : '') +
+                ' · <strong>' + imgCount + '</strong> 张图</div>';
             scroll.appendChild(statsBar);
 
             var timeblockEl = renderDayTimeblock(entries);
@@ -5384,6 +5566,98 @@ border-radius: var(--radius);
                     }
                 });
             });
+
+            // ===== 全局计时器 =====
+            function startGlobalTimer(label) {
+                if (globalTimerRunning) return;
+                globalTimerRunning = true;
+                globalTimerSeconds = 0;
+                globalTimerLabel = label;
+                document.getElementById('stLabel').textContent = label;
+                document.getElementById('stIdle').style.display = 'none';
+                document.getElementById('stRunning').style.display = '';
+                document.getElementById('stDisplay').textContent = '00:00';
+                globalTimerInterval = setInterval(function() {
+                    globalTimerSeconds++;
+                    document.getElementById('stDisplay').textContent = formatTime(globalTimerSeconds);
+                }, 1000);
+            }
+            function stopGlobalTimer() {
+                if (!globalTimerRunning) return;
+                clearInterval(globalTimerInterval);
+                globalTimerInterval = null;
+                globalTimerRunning = false;
+                var secs = globalTimerSeconds;
+                var label = globalTimerLabel;
+                document.getElementById('stIdle').style.display = '';
+                document.getElementById('stRunning').style.display = 'none';
+                document.getElementById('stPopup').style.display = 'none';
+                if (secs >= 10) {
+                    var minutes = Math.round(secs / 60 * 10) / 10;
+                    var now = new Date();
+                    var h = String(now.getHours()).padStart(2,'0');
+                    var m = String(now.getMinutes()).padStart(2,'0');
+                    var startH = String(now.getHours()).padStart(2,'0');
+                    var startM = String(now.getMinutes() - Math.round(secs/60)).padStart(2,'0');
+                    if (startM < 0) { startH = String(now.getHours()-1).padStart(2,'0'); startM = String(60 + parseInt(startM)).padStart(2,'0'); }
+                    document.getElementById('addTextarea').value = label;
+                    document.getElementById('durationMinutes').value = minutes;
+                    document.getElementById('startTimeInput').value = startH + ':' + startM;
+                    document.getElementById('endTimeInput').value = h + ':' + m;
+                    document.getElementById('tagInput').value = label;
+                    addPendingTag(label);
+                    openAdd(todayKey());
+                    toast('⏱️ ' + label + ' · ' + prettyDuration(minutes) + '，已填入表单');
+                }
+            }
+            function showTimerPopup() {
+                var popup = document.getElementById('stPopup');
+                if (popup.style.display !== 'none') { popup.style.display = 'none'; return; }
+                popup.style.display = '';
+                document.getElementById('stPopupInput').value = '';
+                document.getElementById('stPopupInput').focus();
+                var recentTags = Object.keys(allTagsCache ? {} : {}).sort(function(a,b){return 0;});
+                try {
+                    var all = allEntriesCache || [];
+                    var tagFreq = {};
+                    all.forEach(function(e) { (e.tags||[]).forEach(function(t){tagFreq[t]=(tagFreq[t]||0)+1;}); });
+                    recentTags = Object.keys(tagFreq).sort(function(a,b){return tagFreq[b]-tagFreq[a]}).slice(0, 8);
+                } catch(e) { recentTags = []; }
+                var rc = document.getElementById('stPopupRecent');
+                rc.innerHTML = '';
+                recentTags.forEach(function(t) {
+                    var btn = document.createElement('button');
+                    btn.textContent = t;
+                    btn.addEventListener('click', function() {
+                        startGlobalTimer(t);
+                        document.getElementById('stPopup').style.display = 'none';
+                    });
+                    rc.appendChild(btn);
+                });
+            }
+            document.getElementById('stStartBtn').addEventListener('click', showTimerPopup);
+            document.getElementById('stSwitchBtn').addEventListener('click', showTimerPopup);
+            document.getElementById('stStopBtn').addEventListener('click', stopGlobalTimer);
+            document.getElementById('stPopupAddBtn').addEventListener('click', function() {
+                var val = document.getElementById('stPopupInput').value.trim();
+                if (val) { startGlobalTimer(val); document.getElementById('stPopup').style.display = 'none'; }
+            });
+            document.getElementById('stPopupInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') document.getElementById('stPopupAddBtn').click();
+            });
+            // 点击外部关闭弹出框
+            document.addEventListener('click', function(e) {
+                var popup = document.getElementById('stPopup');
+                if (popup.style.display !== 'none' &&
+                    !e.target.closest('#stPopup') &&
+                    !e.target.closest('#stStartBtn') &&
+                    !e.target.closest('#stSwitchBtn')) {
+                    popup.style.display = 'none';
+                }
+            });
+
+            // ===== 时间轴今日追踪汇总 =====
+            // (在 renderTimeline 中已添加)
 
             // 导航
             document.getElementById('homeAddBtn').addEventListener('click', function() { openAdd(todayKey()); });
