@@ -1179,136 +1179,162 @@ border-radius: 14px;
         /* ===== 周视图样式 ===== */
         .week-range { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
         .week-sub { font-size: 14px; color: var(--text-secondary); font-family: var(--font-sans); }
-        .week-nav {
-            display: flex;
-            gap: 6px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        .week-nav button {
-            background: rgba(255,255,255,0.50);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.50);
-            border-radius: var(--radius-xs);
-            padding: 5px 14px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: var(--font-sans);
-            box-shadow: var(--shadow-sm);
-        }
-        .week-nav button:active { transform: scale(0.95); }
-        .week-nav button.active { border-color: var(--accent); color: var(--accent); background: rgba(232,122,93,0.12); }
-        .day-card {
-            background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-md);
-            border: 1px solid rgba(255,255,255,0.50);
-            overflow: hidden;
-            margin-bottom: 20px;
-            animation: cardIn 0.4s ease both;
-        }
-        .day-card:active { transform: scale(0.98); box-shadow: var(--shadow-sm); }
-        @keyframes cardIn {
-            from { opacity: 0; transform: translateY(16px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .day-card.today { border-color: var(--accent); box-shadow: 0 4px 24px rgba(232,122,93,0.14), var(--shadow-md); }
-        .day-card.weekend .day-card-header { background: rgba(232,122,93,0.03); }
-        .day-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.30);
-            transition: background 0.2s;
-        }
-        .day-card-date { display: flex; align-items: baseline; gap: 10px; }
-        .day-card-name { font-size: 14px; font-weight: 600; color: var(--text-secondary); font-family: var(--font-sans); }
-        .day-card-name.today { color: var(--accent); }
-        .day-card-name.weekend { color: var(--accent); }
-        .day-card-number { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; font-family: var(--font-sans); }
-        .day-card-number.today { color: var(--accent); }
-        .day-card-badge {
-            font-size: 11px;
-            font-weight: 500;
-            color: var(--text-muted);
-            background: rgba(0,0,0,0.04);
-            padding: 2px 12px;
-            border-radius: 999px;
-            font-family: var(--font-sans);
-        }
-        .day-card-badge.has-record { background: rgba(232,122,93,0.12); color: var(--accent); }
-        .day-card-body { padding: 12px 16px 14px; }
-        .day-card-empty { font-size: 13px; color: var(--text-muted); font-style: italic; padding: 4px 0; font-family: var(--font-serif); }
-        .day-entry {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-        }
-        .day-entry:last-child { border-bottom: none; padding-bottom: 0; }
-        .day-entry:first-child { padding-top: 0; }
-        .day-entry-meta {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 4px;
-        }
-        .day-entry-time { font-size: 12px; font-weight: 500; color: var(--text-muted); font-family: var(--font-sans); }
-        .day-entry-tags { display: flex; gap: 5px; flex-wrap: wrap; }
-        .day-entry-tag {
-            font-size: 10px;
-            font-weight: 500;
-            color: var(--accent);
-            background: rgba(232,122,93,0.12);
-            padding: 1px 10px;
-            border-radius: 999px;
-            cursor: pointer;
-            border: none;
-            font-family: var(--font-sans);
-        }
-        .day-entry-tag:active { opacity: 0.6; }
-        .day-entry-text {
-            font-family: var(--font-serif);
-            font-size: 14px;
-            line-height: 1.7;
-            color: var(--text-primary);
-        }
-        .day-entry-text .hl { color: var(--accent); font-weight: 500; }
-        .day-entry-images {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-        .day-entry-images img {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-sm);
-            object-fit: cover;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .day-entry-images img:hover { transform: scale(1.05); }
-        .day-entry-images .more-badge {
-            width: 56px;
-            height: 56px;
-            border-radius: var(--radius-sm);
-            background: var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-family: var(--font-sans);
-        }
+.week-nav {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.week-nav button {
+    background: rgba(255,255,255,0.40);
+    border: 1px solid rgba(255,255,255,0.50);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.week-nav button:active { transform: scale(0.95); }
+.week-nav button.active { border-color: var(--accent); color: var(--accent); background: rgba(232,122,93,0.12); }
 
-        /* ===== 标签云 ===== */
+/* ===== 周视图时间块日历 ===== */
+.week-cal-wrap {
+    background: rgba(255,255,255,0.60);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.50);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.week-cal-header {
+    display: grid;
+    grid-template-columns: 44px repeat(7, 1fr);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.30);
+}
+.week-cal-hcell {
+    padding: 8px 2px;
+    text-align: center;
+    font-family: var(--font-sans);
+    border-right: 1px solid rgba(0,0,0,0.03);
+}
+.week-cal-hcell:last-child { border-right: none; }
+.week-cal-hcell .dow {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.week-cal-hcell .dom {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 1px;
+}
+.week-cal-hcell.today .dow { color: var(--accent); }
+.week-cal-hcell.today .dom {
+    color: #fff;
+    background: var(--accent);
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(232,122,93,0.30);
+}
+.week-cal-hcell.weekend .dow { color: var(--accent); opacity: 0.6; }
+.week-cal-body {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    min-height: 0;
+}
+.week-cal-bg {
+    pointer-events: none;
+}
+.week-cal-row {
+    display: grid;
+    grid-template-columns: 44px repeat(7, 1fr);
+    height: 48px;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+.week-cal-row:last-child { border-bottom: none; }
+.week-cal-time {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    text-align: right;
+    padding-right: 6px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 0;
+    position: relative;
+    top: -5px;
+}
+.week-cal-cell {
+    border-right: 1px solid rgba(0,0,0,0.03);
+    position: relative;
+    min-height: 48px;
+}
+.week-cal-cell:last-child { border-right: none; }
+.week-cal-cell.today { background: rgba(232,122,93,0.03); }
+.week-cal-cell.weekend { background: rgba(0,0,0,0.01); }
+
+/* 时间块 overlay */
+.week-cal-blocks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.week-cal-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 6px;
+    padding: 2px 4px;
+    overflow: hidden;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: opacity 0.15s, filter 0.15s;
+    min-height: 18px;
+    display: flex;
+    align-items: flex-start;
+}
+.week-cal-block:hover { filter: brightness(1.08); }
+.week-cal-block .b-label {
+    font-size: 8px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.90);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    font-family: var(--font-sans);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    pointer-events: none;
+}
+/* 周统计摘要 */
+.week-stats-row {
+    display: flex;
+    gap: 10px;
+    padding: 6px 14px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.20);
+    border-top: 1px solid rgba(0,0,0,0.04);
+}
+.week-stats-item {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+}
+.week-stats-item strong { color: var(--text-secondary); }
+/* ===== 标签云 ===== */
         .tagcloud-wrap {
             display: flex;
             flex-wrap: wrap;
@@ -2865,11 +2891,11 @@ border-radius: var(--radius);
 
     <div class="screen hidden" id="screen-week">
         <div class="nav-bar"><button class="nav-back" id="weekBackBtn">←</button><span class="nav-title" id="weekTitle">本周</span><span></span></div>
-        <div style="padding:0 20px 12px;flex-shrink:0;">
+        <div style="padding:0 20px 0;flex-shrink:0;">
             <div class="week-sub" id="weekSub">第 0 周</div>
             <div class="week-nav"><button id="weekPrev">← 上周</button><button class="active" id="weekToday">本周</button><button id="weekNext">下周 →</button></div>
         </div>
-        <div class="week-scroll" id="weekScroll"></div>
+        <div class="week-scroll" id="weekScroll" style="padding:8px 16px 120px;flex:1;overflow-y:auto;"></div>
     </div>
 
     <div class="screen hidden" id="screen-tagcloud">
@@ -4272,135 +4298,131 @@ border-radius: var(--radius);
             document.getElementById('weekSub').textContent = '第 ' + getWeekNumber(first) + ' 周';
 
             var dayEntries = {};
-            var hasAny = false;
+            var totalWeekMins = 0, totalWeekCount = 0;
             for (var i = 0; i < dates.length; i++) {
                 var d = dates[i];
                 var key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
                 var entries = await fetchEntriesForDate(key);
                 dayEntries[key] = entries;
-                if (entries.length) hasAny = true;
+                totalWeekCount += entries.length;
+                entries.forEach(function(e) {
+                    if (e.startTime && e.endTime) totalWeekMins += computeBlockMinutes(e.startTime, e.endTime);
+                    else if (e.duration) totalWeekMins += e.duration;
+                });
             }
 
             scroll.innerHTML = '';
-            if (!hasAny) {
-                scroll.innerHTML = '<div class="empty-state-enhanced"><div class="empty-icon">📋</div><h3>这周还没有记录</h3><p>开始记录你的每一天吧 ✦</p></div>';
-                return;
-            }
 
-            for (var i = 0; i < dates.length; i++) {
-                var d = dates[i];
+            // Wrap container
+            var wrap = document.createElement('div');
+            wrap.className = 'week-cal-wrap';
+
+            // Header row: empty cell + day names
+            var header = document.createElement('div');
+            header.className = 'week-cal-header';
+            var emptyH = document.createElement('div');
+            emptyH.className = 'week-cal-hcell';
+            header.appendChild(emptyH);
+
+            var todayStr = todayKey();
+            dates.forEach(function(d) {
+                var key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+                var isToday = key === todayStr;
+                var isWeekend = [0,6].includes(d.getDay());
+                var cell = document.createElement('div');
+                cell.className = 'week-cal-hcell' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+                cell.innerHTML = '<div class="dow">' + WEEKDAYS_ZH[d.getDay()] + '</div><div class="dom">' + d.getDate() + '</div>';
+                header.appendChild(cell);
+            });
+            wrap.appendChild(header);
+
+            // Body with time grid
+            var body = document.createElement('div');
+            body.className = 'week-cal-body';
+
+            // Background grid (hour rows)
+            var bg = document.createElement('div');
+            bg.className = 'week-cal-bg';
+            for (var h = 0; h < 24; h++) {
+                var row = document.createElement('div');
+                row.className = 'week-cal-row';
+                var timeLabel = document.createElement('div');
+                timeLabel.className = 'week-cal-time';
+                timeLabel.textContent = h + ':00';
+                row.appendChild(timeLabel);
+                for (var d = 0; d < 7; d++) {
+                    var day = dates[d];
+                    var key = dateKey(day.getFullYear(), day.getMonth(), day.getDate());
+                    var isToday = key === todayStr;
+                    var isWeekend = [0,6].includes(day.getDay());
+                    var cell = document.createElement('div');
+                    cell.className = 'week-cal-cell' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
+                    cell.dataset.day = d;
+                    cell.dataset.hour = h;
+                    cell.addEventListener('click', function() {
+                        var hour = parseInt(this.dataset.hour);
+                        var dayIdx = parseInt(this.dataset.day);
+                        var targetDate = dates[dayIdx];
+                        var key = dateKey(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+                        var hh = String(hour).padStart(2,'0');
+                        var nextH = String(hour+1).padStart(2,'0');
+                        openAdd(key);
+                        setTimeout(function() {
+                            document.getElementById('startTimeInput').value = hh + ':00';
+                            document.getElementById('endTimeInput').value = nextH + ':00';
+                            updateTimeRangeHint();
+                        }, 100);
+                    });
+                    row.appendChild(cell);
+                }
+                bg.appendChild(row);
+            }
+            body.appendChild(bg);
+
+            // Overlay time blocks
+            var blocksLayer = document.createElement('div');
+            blocksLayer.className = 'week-cal-blocks';
+
+            dates.forEach(function(d, dayIdx) {
                 var key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
                 var entries = dayEntries[key] || [];
-                var isToday = key === todayKey();
-                var isWeekend = [0,6].includes(d.getDay());
-
-                var card = document.createElement('div');
-                card.className = 'day-card' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
-
-                var header = document.createElement('div');
-                header.className = 'day-card-header';
-                var dateDiv = document.createElement('div');
-                dateDiv.className = 'day-card-date';
-                var nameSpan = document.createElement('span');
-                nameSpan.className = 'day-card-name' + (isToday ? ' today' : '') + (isWeekend ? ' weekend' : '');
-                nameSpan.textContent = WEEKDAYS_ZH[d.getDay()] + (isToday ? ' · 今天' : '');
-                var numSpan = document.createElement('span');
-                numSpan.className = 'day-card-number' + (isToday ? ' today' : '');
-                numSpan.textContent = d.getDate();
-                dateDiv.appendChild(nameSpan);
-                dateDiv.appendChild(numSpan);
-
-                var badge = document.createElement('span');
-                badge.className = 'day-card-badge' + (entries.length > 0 ? ' has-record' : '');
-                badge.textContent = entries.length > 0 ? entries.length + ' 条' : '0 条';
-
-                header.appendChild(dateDiv);
-                header.appendChild(badge);
-                card.appendChild(header);
-
-                var body = document.createElement('div');
-                body.className = 'day-card-body';
-
-                if (entries.length === 0) {
-                    var empty = document.createElement('div');
-                    empty.className = 'day-card-empty';
-                    empty.textContent = '— 今天没有记录 —';
-                    body.appendChild(empty);
-                } else {
-                    entries.forEach(function(entry) {
-                        var entryDiv = document.createElement('div');
-                        entryDiv.className = 'day-entry' + (entry.images && entry.images.length > 0 ? ' has-image' : '');
-
-                        var meta = document.createElement('div');
-                        meta.className = 'day-entry-meta';
-                        var time = document.createElement('span');
-                        time.className = 'day-entry-time';
-                        time.textContent = displayTime(entry);
-                        meta.appendChild(time);
-
-                        if (entry.tags && entry.tags.length) {
-                            var tagsDiv = document.createElement('div');
-                            tagsDiv.className = 'day-entry-tags';
-                            entry.tags.slice(0, 3).forEach(function(tag) {
-                                var pill = document.createElement('button');
-                                pill.className = 'day-entry-tag';
-                                pill.textContent = tag;
-                                pill.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    openTagTimeline(tag);
-                                });
-                                tagsDiv.appendChild(pill);
-                            });
-                            if (entry.tags.length > 3) {
-                                var more = document.createElement('button');
-                                more.className = 'day-entry-tag';
-                                more.textContent = '+' + (entry.tags.length - 3);
-                                more.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    openTagTimeline(entry.tags[0]);
-                                });
-                                tagsDiv.appendChild(more);
-                            }
-                            meta.appendChild(tagsDiv);
-                        }
-                        entryDiv.appendChild(meta);
-
-                        if (entry.text) {
-                            var textDiv = document.createElement('div');
-                            textDiv.className = 'day-entry-text';
-                            textDiv.innerHTML = highlightKeywords(entry.text);
-                            entryDiv.appendChild(textDiv);
-                        }
-
-                        if (entry.images && entry.images.length > 0) {
-                            var imgRow = document.createElement('div');
-                            imgRow.className = 'day-entry-images';
-                            entry.images.slice(0, 4).forEach(function(url) {
-                                var img = document.createElement('img');
-                                img.src = url;
-                                img.addEventListener('click', function(e) {
-                                    e.stopPropagation();
-                                    openLightbox(url);
-                                });
-                                imgRow.appendChild(img);
-                            });
-                            if (entry.images.length > 4) {
-                                var more = document.createElement('div');
-                                more.className = 'more-badge';
-                                more.textContent = '+' + (entry.images.length - 4);
-                                imgRow.appendChild(more);
-                            }
-                            entryDiv.appendChild(imgRow);
-                        }
-
-                        entryDiv.addEventListener('click', function() { openBottomSheet(entry, key); });
-                        body.appendChild(entryDiv);
+                var blocked = entries.filter(function(e) { return e.startTime && e.endTime; });
+                blocked.forEach(function(entry) {
+                    var startMin = timeStrToMinutes(entry.startTime);
+                    var mins = computeBlockMinutes(entry.startTime, entry.endTime);
+                    var topPx = (startMin / 60) * 48;
+                    var heightPx = Math.max((mins / 60) * 48, 18);
+                    var tag = entry.tags && entry.tags.length ? entry.tags[0] : null;
+                    var block = document.createElement('div');
+                    block.className = 'week-cal-block';
+                    block.style.top = topPx + 'px';
+                    block.style.height = heightPx + 'px';
+                    block.style.background = colorForTag(tag);
+                    block.style.left = 'calc(' + (dayIdx) + ' * (100% / 7) + 2px)';
+                    block.style.width = 'calc(100% / 7 - 4px)';
+                    var label = document.createElement('span');
+                    label.className = 'b-label';
+                    label.textContent = tag || entry.text.slice(0, 10) || entry.startTime.slice(0,5);
+                    block.appendChild(label);
+                    block.title = entry.startTime + '-' + entry.endTime + (tag ? ' ' + tag : '') + (entry.text ? ' ' + entry.text.slice(0,30) : '');
+                    block.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openDetail(key);
                     });
-                }
+                    blocksLayer.appendChild(block);
+                });
+            });
+            body.appendChild(blocksLayer);
+            wrap.appendChild(body);
 
-                card.appendChild(body);
-                scroll.appendChild(card);
-            }
+            // Footer stats
+            var statsRow = document.createElement('div');
+            statsRow.className = 'week-stats-row';
+            statsRow.innerHTML = '<span class="week-stats-item">📝 <strong>' + totalWeekCount + '</strong> 条</span>' +
+                (totalWeekMins > 0 ? '<span class="week-stats-item">⏱️ <strong>' + prettyDuration(totalWeekMins) + '</strong></span>' : '');
+            wrap.appendChild(statsRow);
+
+            scroll.appendChild(wrap);
         }
 
         // ================================================================
