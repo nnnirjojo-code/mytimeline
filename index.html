@@ -1224,6 +1224,10 @@ border-radius: 14px;
     font-family: var(--font-sans);
     border-right: 1px solid rgba(0,0,0,0.03);
 }
+.week-cal-hcell:first-child {
+    background: rgba(255,255,255,0.40);
+    border-right: 1px solid rgba(0,0,0,0.06);
+}
 .week-cal-hcell:last-child { border-right: none; }
 .week-cal-hcell .dow {
     font-size: 10px;
@@ -1265,17 +1269,20 @@ border-radius: 14px;
 }
 .week-cal-row:last-child { border-bottom: none; }
 .week-cal-time {
-    font-size: 9px;
-    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
     font-family: var(--font-sans);
     text-align: right;
-    padding-right: 6px;
+    padding-right: 8px;
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
     padding-top: 0;
     position: relative;
-    top: -5px;
+    top: -6px;
+    background: rgba(255,255,255,0.40);
+    border-right: 1px solid rgba(0,0,0,0.04);
 }
 .week-cal-cell {
     border-right: 1px solid rgba(0,0,0,0.03);
@@ -4398,8 +4405,8 @@ border-radius: var(--radius);
                     block.style.top = topPx + 'px';
                     block.style.height = heightPx + 'px';
                     block.style.background = colorForTag(tag);
-                    block.style.left = 'calc(' + (dayIdx) + ' * (100% / 7) + 2px)';
-                    block.style.width = 'calc(100% / 7 - 4px)';
+                    block.style.left = 'calc(44px + ' + dayIdx + ' * ((100% - 44px) / 7) + 2px)';
+                    block.style.width = 'calc((100% - 44px) / 7 - 4px)';
                     var label = document.createElement('span');
                     label.className = 'b-label';
                     label.textContent = tag || entry.text.slice(0, 10) || entry.startTime.slice(0,5);
