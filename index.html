@@ -42668,7 +42668,7 @@ border-radius: var(--radius);
             return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
         }
 
-                function renderTodayplan() {
+window.renderTodayplan = function() {
             var all = loadTodayPlan();
             var today = getTodayKey();
             var items = all.filter(function(x) { return x.date === today; });
@@ -42816,7 +42816,7 @@ border-radius: var(--radius);
             toast('🗑 计划已删除');
         }
 
-        function renderTodayplanWidget() {
+window.renderTodayplanWidget = function() {
             var w = document.getElementById('todayplanWidget');
             if (!w) return;
             var all = loadTodayPlan();
