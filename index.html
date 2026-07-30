@@ -266,21 +266,6 @@
 
             --chart-blue: #5B7FBF;
 
-            /* 夜间模式 - 通过 .dark-mode 覆盖 */
-            --dm-bg: #1a1a1e;
-            --dm-card: #2a2a2e;
-            --dm-text: #f0f0f0;
-            --dm-text-secondary: #e0e0e0;
-            --dm-text-muted: #c8c8c8;
-            --dm-accent: #e88a6a;
-            --dm-border: #3a3a3e;
-            --dm-input: #35353a;
-            --dm-glass: rgba(42,42,46,0.9);
-            --dm-glass-alt: rgba(42,42,46,0.85);
-            --dm-sidebar: rgba(30,30,36,0.8);
-            --dm-accent-soft: #3d2e28;
-            --dm-accent-current: #4a3530;
-
 
 
 
@@ -343,98 +328,7 @@
             color: var(--text-primary);
             cursor: auto;
         }
-
-        /* ===== 夜间模式 ===== */
-        .dark-mode,
-        .dark-mode html,
-        .dark-mode body {
-            background: linear-gradient(145deg, #1a1a1e 0%, #1e1e24 15%, #22222a 30%, #26262e 45%, #2a2a32 60%, #2e2e36 75%, #32323a 88%, #1c1c20 100%);
-            background-attachment: fixed;
-            color: var(--dm-text);
-        }
-        .dark-mode .sidebar { background: var(--dm-sidebar); }
-        .dark-mode .sidebar .nav-item { color: var(--dm-text); }
-        .dark-mode .sidebar .nav-item.active { background: var(--dm-accent); color: #fff; }
-        .dark-mode .sidebar .logo { color: #fff; }
-        .dark-mode .sidebar-timer { background: rgba(255,255,255,0.04); }
-        .dark-mode .sidebar-timer .st-label { color: var(--dm-text-secondary); }
-        .dark-mode .sidebar-timer .st-value { color: #fff; }
-        .dark-mode .st-start-btn { background: var(--dm-accent-soft); color: #fff; }
-        .dark-mode .main-header h1 { color: #fff; }
-        .dark-mode .reminder-card { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .reminder-card .label { color: var(--dm-accent); }
-        .dark-mode .reminder-textarea { color: var(--dm-text); }
-        .dark-mode .focus-card { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .todayplan-widget { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .todayplan-widget-title a { color: var(--dm-text); }
-        .dark-mode .todayplan-widget-time { color: var(--dm-accent); }
-        .dark-mode .todayplan-widget-text { color: var(--dm-text); }
-        .dark-mode .note-card { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .note-card-title { color: #fff; }
-        .dark-mode .note-card-content { color: var(--dm-text); }
-        .dark-mode .note-card-time { color: var(--dm-text-secondary); }
-        .dark-mode .agenda-row.current { background: rgba(232,138,106,0.06); }
-        .dark-mode .agenda-row.current .agenda-time .h { color: var(--dm-accent); }
-        .dark-mode .agenda-row.current .agenda-time { background: var(--dm-accent); }
-        .dark-mode .agenda-row.current .agenda-time .h { color: #fff; }
-        .dark-mode .agenda-row.current .agenda-time .m { color: rgba(255,255,255,0.7); }
-        .dark-mode .agenda-row.current .agenda-time::after { border-left-color: var(--dm-accent); }
-        .dark-mode .agenda-block { background: var(--dm-accent-soft); }
-        .dark-mode .agenda-block .time { color: var(--dm-accent); }
-        .dark-mode .agenda-block .text { color: var(--dm-text); }
-        .dark-mode .agenda-row.current .agenda-block { background: var(--dm-accent-current); }
-        .dark-mode .agenda-row.current .agenda-block .time { color: var(--dm-accent); }
-        .dark-mode .agenda-row.past .agenda-time .h { color: var(--dm-text-muted); }
-        .dark-mode .agenda-now-empty { background: var(--dm-accent-soft); color: var(--dm-text-muted); border-left-color: var(--dm-accent); }
-        .dark-mode .agenda-check { border-color: var(--dm-accent); background: var(--dm-input); }
-        .dark-mode .agenda-check.checked { background: var(--dm-accent); border-color: var(--dm-accent); color: #fff; }
-        .dark-mode .note-modal-overlay { background: rgba(0,0,0,0.55); }
-        .dark-mode .note-modal { background: var(--dm-card); border-color: var(--dm-border); }
-        .dark-mode .note-modal-title { color: var(--dm-text); }
-        .dark-mode .note-modal input,
-        .dark-mode .note-modal textarea { background: var(--dm-input); color: var(--dm-text); border-color: var(--dm-border); }
-        .dark-mode .note-modal input:focus,
-        .dark-mode .note-modal textarea:focus { border-color: var(--dm-accent); background: var(--dm-input); }
-        .dark-mode .note-modal-cancel { background: var(--dm-border); color: var(--dm-text-secondary); }
-        .dark-mode .nav-bar { background: rgba(0,0,0,0.15); }
-        .dark-mode .nav-title { color: var(--dm-text); }
-        .dark-mode .nav-back { color: var(--dm-text-secondary); }
-        .dark-mode .content-grid .stat-item { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .content-grid .stat-item .stat-value { color: var(--dm-text); }
-        .dark-mode .content-grid .stat-item .stat-label { color: var(--dm-text-muted); }
-        .dark-mode .main-area { background: transparent; }
-        .dark-mode .note-card-empty { color: var(--dm-text-muted); }
-        .dark-mode .todayplan-empty { color: var(--dm-text-muted); }
-        .dark-mode .week-cal-body { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .week-cal-cell { color: var(--dm-text); }
-        .dark-mode .week-cal-hcell { color: var(--dm-text-muted); }
-        .dark-mode .checkin-item { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .checkin-name { color: var(--dm-text); }
-        .dark-mode .checkin-add-row input { background: var(--dm-input); color: var(--dm-text); border-color: var(--dm-border); }
-        .dark-mode .todayplan-timeline::before { background: rgba(255,255,255,0.08); }
-        .dark-mode .tl-hour-label { color: var(--dm-text-muted); }
-        .dark-mode .tl-dot { background: rgba(255,255,255,0.08); }
-        .dark-mode .tl-block { background: var(--dm-accent-soft); }
-        .dark-mode .tl-block .tl-block-time { color: var(--dm-accent); }
-        .dark-mode .tl-block .tl-block-text { color: var(--dm-text); }
-        .dark-mode .tl-block.current { background: var(--dm-accent-current); }
-        .dark-mode #darkModeToggle { color: var(--dm-text-secondary); }
-        .dark-mode #darkModeToggle:hover { background: rgba(255,255,255,0.06); }
-
-        /* 星空 canvas */
-        #starCanvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-        .dark-mode #starCanvas {
-            opacity: 1;
-        }
+        
         #lockScreen {
 
 
@@ -20605,7 +20499,6 @@ border-radius: var(--radius);
 
 
 <body>
-<canvas id="starCanvas"></canvas>
 
 
 
@@ -20799,7 +20692,6 @@ border-radius: var(--radius);
 
 
             <div class="spacer"></div>
-            <span style="font-size:16px;margin-top:auto;display:flex;align-items:center;gap:8px;width:100%;padding:12px 16px;border:none;background:transparent;cursor:pointer;border-radius:12px;color:var(--text-secondary);font-family:var(--font-sans);transition:background 0.15s;white-space:nowrap;overflow:hidden;" onclick="toggleDarkMode()"><span id="darkModeIcon">🌙</span><span class="label" id="darkModeLabel" style="font-size:13px;font-weight:500;letter-spacing:0.2px;">夜间</span></span>
 
             <!-- ===== 全局计时器（常驻侧边栏） ===== -->
 
@@ -42908,89 +42800,7 @@ window.renderNotes = function() {
 
             })();
 
-        /* ===== 星空动画 + 夜间模式 ===== */
-        // Star canvas
-        var canvas = document.getElementById('starCanvas');
-        if (canvas) startStars(canvas);
 
-        // Apply saved preference
-        if (localStorage.getItem('jojos_dark_mode') === '1') {
-            applyDarkMode(true);
-        }
-
-        // Global toggle function for inline onclick
-        window.toggleDarkMode = function() {
-            var isDark = !document.documentElement.classList.contains('dark-mode');
-            applyDarkMode(isDark);
-        };
-
-        function applyDarkMode(isDark) {
-            var root = document.documentElement;
-            if (isDark) {
-                root.classList.add('dark-mode');
-                document.getElementById('darkModeIcon').textContent = '☀️';
-                document.getElementById('darkModeLabel').textContent = '日间';
-            } else {
-                root.classList.remove('dark-mode');
-                document.getElementById('darkModeIcon').textContent = '🌙';
-                document.getElementById('darkModeLabel').textContent = '夜间';
-            }
-            localStorage.setItem('jojos_dark_mode', isDark ? '1' : '0');
-        }
-
-        function startStars(canvas) {
-            var ctx = canvas.getContext('2d');
-            var stars = [];
-            var W, H;
-
-            function resize() {
-                W = canvas.width = window.innerWidth;
-                H = canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            var count = 100;
-            for (var i = 0; i < count; i++) {
-                stars.push({
-                    x: Math.random() * W,
-                    y: Math.random() * H,
-                    r: Math.random() * 1.8 + 0.3,
-                    speedX: (Math.random() - 0.5) * 0.15,
-                    speedY: (Math.random() - 0.5) * 0.12,
-                    alpha: Math.random() * 0.6 + 0.2,
-                    alphaSpeed: Math.random() * 0.008 + 0.003,
-                    alphaDir: 1
-                });
-            }
-
-            function drawStars() {
-                ctx.clearRect(0, 0, W, H);
-                for (var i = 0; i < stars.length; i++) {
-                    var s = stars[i];
-                    s.x += s.speedX;
-                    s.y += s.speedY;
-                    if (s.x < -10) s.x = W + 10;
-                    if (s.x > W + 10) s.x = -10;
-                    if (s.y < -10) s.y = H + 10;
-                    if (s.y > H + 10) s.y = -10;
-                    s.alpha += s.alphaSpeed * s.alphaDir;
-                    if (s.alpha > 0.9 || s.alpha < 0.1) s.alphaDir *= -1;
-                    ctx.beginPath();
-                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(255,255,255,' + s.alpha + ')';
-                    ctx.fill();
-                    if (s.r > 1.2) {
-                        ctx.beginPath();
-                        ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,' + (s.alpha * 0.08) + ')';
-                        ctx.fill();
-                    }
-                }
-                requestAnimationFrame(drawStars);
-            }
-            drawStars();
-        }
 </script>
 
 </body>
