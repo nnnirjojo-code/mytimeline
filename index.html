@@ -340,6 +340,9 @@
 
 
             background-attachment: fixed;
+            color: var(--text-primary);
+            cursor: auto;
+        }
 
         /* ===== 夜间模式 ===== */
         .dark-mode,
@@ -432,45 +435,6 @@
         .dark-mode #starCanvas {
             opacity: 1;
         }
-
-
-
-
-
-
-
-            color: var(--text-primary);
-
-
-
-
-
-
-
-            cursor: auto;
-
-
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-        /* ===== 密码锁屏 ===== */
-
-
-
-
-
-
-
         #lockScreen {
 
 
@@ -42956,25 +42920,18 @@ window.renderNotes = function() {
 
         // Global toggle function for inline onclick
         window.toggleDarkMode = function() {
-            console.log('🔄 toggleDarkMode called');
             var isDark = !document.documentElement.classList.contains('dark-mode');
-            console.log('isDark:', isDark);
-            console.log('has dark-mode class before:', document.documentElement.classList.contains('dark-mode'));
             applyDarkMode(isDark);
-            console.log('has dark-mode class after:', document.documentElement.classList.contains('dark-mode'));
         };
 
         function applyDarkMode(isDark) {
-            console.log('applyDarkMode:', isDark);
             var root = document.documentElement;
             if (isDark) {
                 root.classList.add('dark-mode');
-                console.log('added dark-mode class');
                 document.getElementById('darkModeIcon').textContent = '☀️';
                 document.getElementById('darkModeLabel').textContent = '日间';
             } else {
                 root.classList.remove('dark-mode');
-                console.log('removed dark-mode class');
                 document.getElementById('darkModeIcon').textContent = '🌙';
                 document.getElementById('darkModeLabel').textContent = '夜间';
             }
