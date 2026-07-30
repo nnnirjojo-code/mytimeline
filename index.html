@@ -415,6 +415,8 @@
         .dark-mode .tl-block .tl-block-time { color: var(--dm-accent); }
         .dark-mode .tl-block .tl-block-text { color: var(--dm-text); }
         .dark-mode .tl-block.current { background: var(--dm-accent-current); }
+        .dark-mode #darkModeToggle { color: var(--dm-text-secondary); }
+        .dark-mode #darkModeToggle:hover { background: rgba(255,255,255,0.06); }
 
         /* 星空 canvas */
         #starCanvas {
@@ -20833,7 +20835,7 @@ border-radius: var(--radius);
 
 
             <div class="spacer"></div>
-            <button class="nav-item" id="darkModeToggle" style="font-size:16px;margin-top:auto;"><span class="icon" id="darkModeIcon">🌙</span><span class="label" id="darkModeLabel">夜间</span></button>
+            <button id="darkModeToggle" style="font-size:16px;margin-top:auto;display:flex;align-items:center;gap:8px;width:100%;padding:12px 16px;border:none;background:transparent;cursor:pointer;border-radius:12px;color:var(--text-secondary);font-family:var(--font-sans);transition:background 0.15s;white-space:nowrap;overflow:hidden;"><span id="darkModeIcon">🌙</span><span class="label" id="darkModeLabel" style="font-size:13px;font-weight:500;letter-spacing:0.2px;">夜间</span></button>
 
             <!-- ===== 全局计时器（常驻侧边栏） ===== -->
 
