@@ -269,9 +269,9 @@
             /* 夜间模式 - 通过 .dark-mode 覆盖 */
             --dm-bg: #1a1a1e;
             --dm-card: #2a2a2e;
-            --dm-text: #e8e8e8;
-            --dm-text-secondary: #b0b0b0;
-            --dm-text-muted: #808080;
+            --dm-text: #f0f0f0;
+            --dm-text-secondary: #cccccc;
+            --dm-text-muted: #aaaaaa;
             --dm-accent: #e88a6a;
             --dm-border: #3a3a3e;
             --dm-input: #35353a;
@@ -353,26 +353,26 @@
             color: var(--dm-text);
         }
         .dark-mode .sidebar { background: var(--dm-sidebar); }
-        .dark-mode .sidebar .nav-item { color: var(--dm-text-secondary); }
+        .dark-mode .sidebar .nav-item { color: var(--dm-text); }
         .dark-mode .sidebar .nav-item.active { background: var(--dm-accent); color: #fff; }
-        .dark-mode .sidebar .logo { color: var(--dm-text); }
+        .dark-mode .sidebar .logo { color: #fff; }
         .dark-mode .sidebar-timer { background: rgba(255,255,255,0.04); }
         .dark-mode .sidebar-timer .st-label { color: var(--dm-text-secondary); }
-        .dark-mode .sidebar-timer .st-value { color: var(--dm-text); }
-        .dark-mode .st-start-btn { background: var(--dm-accent-soft); color: var(--dm-accent); }
-        .dark-mode .main-header h1 { color: var(--dm-text); }
+        .dark-mode .sidebar-timer .st-value { color: #fff; }
+        .dark-mode .st-start-btn { background: var(--dm-accent-soft); color: #fff; }
+        .dark-mode .main-header h1 { color: #fff; }
         .dark-mode .reminder-card { background: var(--dm-glass); border-color: var(--dm-border); }
         .dark-mode .reminder-card .label { color: var(--dm-accent); }
         .dark-mode .reminder-textarea { color: var(--dm-text); }
         .dark-mode .focus-card { background: var(--dm-glass); border-color: var(--dm-border); }
         .dark-mode .todayplan-widget { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .todayplan-widget-title a { color: var(--dm-text-muted); }
+        .dark-mode .todayplan-widget-title a { color: var(--dm-text); }
         .dark-mode .todayplan-widget-time { color: var(--dm-accent); }
         .dark-mode .todayplan-widget-text { color: var(--dm-text); }
         .dark-mode .note-card { background: var(--dm-glass); border-color: var(--dm-border); }
-        .dark-mode .note-card-title { color: var(--dm-text); }
-        .dark-mode .note-card-content { color: var(--dm-text-secondary); }
-        .dark-mode .note-card-time { color: var(--dm-text-muted); }
+        .dark-mode .note-card-title { color: #fff; }
+        .dark-mode .note-card-content { color: var(--dm-text); }
+        .dark-mode .note-card-time { color: var(--dm-text-secondary); }
         .dark-mode .agenda-row.current { background: rgba(232,138,106,0.06); }
         .dark-mode .agenda-row.current .agenda-time .h { color: var(--dm-accent); }
         .dark-mode .agenda-row.current .agenda-time { background: var(--dm-accent); }
