@@ -10413,110 +10413,23 @@ border-radius: 14px;
 
 
         .tagcloud-wrap {
-
-
-
-            display: flex;
-
-
-
-
-
-
-
-            flex-wrap: wrap;
-
-
-
-
-
-
-
-            gap: 14px 20px;
-
-
-
-
-
-
-
-            align-items: center;
-
-
-
-
-
-
-
-            padding-top: 16px;
-
-
-
-
-
-
+            position: relative;
+            width: 100%;
+            min-height: 70vh;
 
         }
-
-
-
-
-
-
 
         .tagcloud-item {
-
-
-
+            position: absolute;
             color: var(--accent);
-
-
-
-
-
-
-
             cursor: pointer;
-
-
-
-
-
-
-
             font-weight: 500;
-
-
-
-
-
-
-
             transition: opacity 0.2s;
-
-
-
-
-
-
-
             font-family: var(--font-sans);
-
-
-
-
-
-
-
         }
 
-
-
-
-
-
-
         .tagcloud-item:active { opacity: 0.5; }
+
 
 
 
@@ -34993,6 +34906,8 @@ border-radius: var(--radius);
 
 
                 el.style.fontSize = fontSize + 'px';
+                el.style.left = (5 + Math.random() * 80) + '%';
+                el.style.top = (3 + Math.random() * 85) + '%';
 
 
 
