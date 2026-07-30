@@ -42932,135 +42932,116 @@ window.renderNotes = function() {
                 if (e.target === document.getElementById('noteModalOverlay')) closeNoteEditor();
             });
 
+            document.getElementById('lightbox').addEventListener('click', function() {
+                document.getElementById('lightbox').classList.remove('open');
+            });
+
 
             // Lightbox
 
 
 
 
+            })();
 
+        /* ===== 星空动画 + 夜间模式 ===== */
+        // Star canvas
+        var canvas = document.getElementById('starCanvas');
+        if (canvas) startStars(canvas);
 
+        // Apply saved preference
+        if (localStorage.getItem('jojos_dark_mode') === '1') {
+            applyDarkMode(true);
+        }
 
-            document.getElementById('lightbox').addEventListener('click', function() {
+        // Global toggle function for inline onclick
+        window.toggleDarkMode = function() {
+            console.log('🔄 toggleDarkMode called');
+            var isDark = !document.documentElement.classList.contains('dark-mode');
+            console.log('isDark:', isDark);
+            console.log('has dark-mode class before:', document.documentElement.classList.contains('dark-mode'));
+            applyDarkMode(isDark);
+            console.log('has dark-mode class after:', document.documentElement.classList.contains('dark-mode'));
+        };
 
+        function applyDarkMode(isDark) {
+            console.log('applyDarkMode:', isDark);
+            var root = document.documentElement;
+            if (isDark) {
+                root.classList.add('dark-mode');
+                console.log('added dark-mode class');
+                document.getElementById('darkModeIcon').textContent = '☀️';
+                document.getElementById('darkModeLabel').textContent = '日间';
+            } else {
+                root.classList.remove('dark-mode');
+                console.log('removed dark-mode class');
+                document.getElementById('darkModeIcon').textContent = '🌙';
+                document.getElementById('darkModeLabel').textContent = '夜间';
+            }
+            localStorage.setItem('jojos_dark_mode', isDark ? '1' : '0');
+        }
 
+        function startStars(canvas) {
+            var ctx = canvas.getContext('2d');
+            var stars = [];
+            var W, H;
 
-                document.getElementById('lightbox').classList.remove('open');
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
 
-
-
-
-
-
-
-            });
-
-
-
-
-
-
-
-            console.log('✅ Jojo\'s 已加载，请输入密码');
-
-
-
-
-
-
-
-        
-            /* ===== 星空动画 + 夜间模式 ===== */
-            // Star canvas
-            var canvas = document.getElementById('starCanvas');
-            if (canvas) startStars(canvas);
-
-            // Apply saved preference
-            if (localStorage.getItem('jojos_dark_mode') === '1') {
-                applyDarkMode(true);
+            var count = 100;
+            for (var i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 1.8 + 0.3,
+                    speedX: (Math.random() - 0.5) * 0.15,
+                    speedY: (Math.random() - 0.5) * 0.12,
+                    alpha: Math.random() * 0.6 + 0.2,
+                    alphaSpeed: Math.random() * 0.008 + 0.003,
+                    alphaDir: 1
+                });
             }
 
-            // Global toggle function for inline onclick
-            window.toggleDarkMode = function() {
-                var isDark = !document.documentElement.classList.contains('dark-mode');
-                applyDarkMode(isDark);
-            };
-
-            function applyDarkMode(isDark) {
-                var root = document.documentElement;
-                if (isDark) {
-                    root.classList.add('dark-mode');
-                    document.getElementById('darkModeIcon').textContent = '☀️';
-                    document.getElementById('darkModeLabel').textContent = '日间';
-                } else {
-                    root.classList.remove('dark-mode');
-                    document.getElementById('darkModeIcon').textContent = '🌙';
-                    document.getElementById('darkModeLabel').textContent = '夜间';
-                }
-                localStorage.setItem('jojos_dark_mode', isDark ? '1' : '0');
-            }
-
-            function startStars(canvas) {
-                var ctx = canvas.getContext('2d');
-                var stars = [];
-                var W, H;
-
-                function resize() {
-                    W = canvas.width = window.innerWidth;
-                    H = canvas.height = window.innerHeight;
-                }
-                window.addEventListener('resize', resize);
-                resize();
-
-                var count = 100;
-                for (var i = 0; i < count; i++) {
-                    stars.push({
-                        x: Math.random() * W,
-                        y: Math.random() * H,
-                        r: Math.random() * 1.8 + 0.3,
-                        speedX: (Math.random() - 0.5) * 0.15,
-                        speedY: (Math.random() - 0.5) * 0.12,
-                        alpha: Math.random() * 0.6 + 0.2,
-                        alphaSpeed: Math.random() * 0.008 + 0.003,
-                        alphaDir: 1
-                    });
-                }
-
-                function drawStars() {
-                    ctx.clearRect(0, 0, W, H);
-                    for (var i = 0; i < stars.length; i++) {
-                        var s = stars[i];
-                        s.x += s.speedX;
-                        s.y += s.speedY;
-                        if (s.x < -10) s.x = W + 10;
-                        if (s.x > W + 10) s.x = -10;
-                        if (s.y < -10) s.y = H + 10;
-                        if (s.y > H + 10) s.y = -10;
-                        s.alpha += s.alphaSpeed * s.alphaDir;
-                        if (s.alpha > 0.9 || s.alpha < 0.1) s.alphaDir *= -1;
+            function drawStars() {
+                ctx.clearRect(0, 0, W, H);
+                for (var i = 0; i < stars.length; i++) {
+                    var s = stars[i];
+                    s.x += s.speedX;
+                    s.y += s.speedY;
+                    if (s.x < -10) s.x = W + 10;
+                    if (s.x > W + 10) s.x = -10;
+                    if (s.y < -10) s.y = H + 10;
+                    if (s.y > H + 10) s.y = -10;
+                    s.alpha += s.alphaSpeed * s.alphaDir;
+                    if (s.alpha > 0.9 || s.alpha < 0.1) s.alphaDir *= -1;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,255,255,' + s.alpha + ')';
+                    ctx.fill();
+                    if (s.r > 1.2) {
                         ctx.beginPath();
-                        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                        ctx.fillStyle = 'rgba(255,255,255,' + s.alpha + ')';
+                        ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(255,255,255,' + (s.alpha * 0.08) + ')';
                         ctx.fill();
-                        if (s.r > 1.2) {
-                            ctx.beginPath();
-                            ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
-                            ctx.fillStyle = 'rgba(255,255,255,' + (s.alpha * 0.08) + ')';
-                            ctx.fill();
-                        }
                     }
-                    requestAnimationFrame(drawStars);
                 }
-                drawStars();
-            }})();</script>
-
-
-
-
-
-
+                requestAnimationFrame(drawStars);
+            }
+            drawStars();
+        }
+</script>
 
 </body>
+
+
+
+
+
 
 
 
