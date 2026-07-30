@@ -24525,6 +24525,16 @@ border-radius: var(--radius);
             syncStateToFirestore('notesData', notes);
         }
 
+        /* ---- 今日计划 ---- */
+        function loadTodayPlan() {
+            try { return JSON.parse(localStorage.getItem(PLAN_KEY) || '[]'); } catch(e) { return []; }
+        }
+        function saveTodayPlan(items) {
+            localStorage.setItem(PLAN_KEY, JSON.stringify(items));
+            syncStateToFirestore('planData', items);
+        }
+
+
 
 
 
