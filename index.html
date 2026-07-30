@@ -42831,7 +42831,7 @@ border-radius: var(--radius);
             }
             w.innerHTML = html;
         }
-function renderNotes() {
+window.renderNotes = function() {
             var notes = loadNotes();
             var container = document.getElementById('notesScroll');
             if (!container) return;
