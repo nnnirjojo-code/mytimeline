@@ -8206,7 +8206,7 @@ border-radius: 14px;
 
 
 
-            display: -webkit-box;
+            
 
 
 
@@ -8214,7 +8214,7 @@ border-radius: 14px;
 
 
 
-            -webkit-line-clamp: 2;
+            
 
 
 
@@ -8222,7 +8222,7 @@ border-radius: 14px;
 
 
 
-            -webkit-box-orient: vertical;
+            
 
 
 
@@ -39548,7 +39548,7 @@ border-radius: var(--radius);
             for (var i = 0; i < rev.length; i++) {
                 var origIdx = notes.length - 1 - i;
                 var n = rev[i];
-                var preview = (n.content || '').replace(/<[^>]+>/g, '').substring(0, 120);
+                var preview = (n.content || '').replace(/<[^>]+>/g, '').;
                 var d = new Date(n.ts || Date.now());
                 html += '<div class="note-card" data-idx="' + origIdx + '">';
                 html += '  <div class="note-title"><span>' + (n.title || '无标题') + '</span><span class="note-icon">📄</span></div>';
