@@ -11384,7 +11384,10 @@ border-radius: var(--radius);
 
                         exportMarkdown();
 
-                    } else if (page === 'import') {
+                    
+                    } else if (page === 'notes') {
+                        showScreen('screen-notes');
+                        setTimeout(function() { renderNotes(); }, 50);} else if (page === 'import') {
 
                         document.getElementById('importFileInput').click();
 
