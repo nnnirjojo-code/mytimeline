@@ -6595,6 +6595,116 @@ border-radius: 24px;
             opacity: 0.6;
         }
 
+
+        /* ===== 今日计划 ===== */
+        .todayplan-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 16px 120px;
+        }
+        .todayplan-section-title {
+            font-family: var(--font-sans);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            padding: 0 2px;
+        }
+        .todayplan-empty {
+            font-family: 'Ma Shan Zheng', serif;
+            font-size: 22px;
+            color: var(--text-muted);
+            opacity: 0.6;
+            text-align: center;
+            padding: 60px 0;
+        }
+        .todayplan-block {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            cursor: pointer;
+            transition: background 0.12s ease;
+            border-radius: 8px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .todayplan-block:active { background: rgba(255,255,255,0.5); }
+        .todayplan-time {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 16px;
+            color: var(--accent);
+            white-space: nowrap;
+            min-width: 82px;
+            padding-top: 2px;
+        }
+        .todayplan-text {
+            font-family: 'Ma Shan Zheng', serif;
+            font-size: 20px;
+            color: var(--text-primary);
+            line-height: 1.4;
+            flex: 1;
+            word-break: break-word;
+        }
+        .todayplan-done .todayplan-text { text-decoration: line-through; opacity: 0.5; }
+        .todayplan-block.current .todayplan-time { color: #e05a3a; font-size: 18px; }
+        .todayplan-block.current .todayplan-text { color: #e05a3a; }
+        .todayplan-block.current::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 10px;
+            bottom: 10px;
+            width: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        .todayplan-block { position: relative; }
+
+        /* 首页widget */
+        .todayplan-widget {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            margin: 0 16px 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+        .todayplan-widget-title {
+            font-family: var(--font-sans);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .todayplan-widget-title a {
+            margin-left: auto;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .todayplan-widget-item {
+            display: flex;
+            gap: 10px;
+            padding: 4px 0;
+            font-size: 15px;
+            font-family: 'Ma Shan Zheng', serif;
+        }
+        .todayplan-widget-time {
+            font-family: 'Archivo Black', sans-serif;
+            color: var(--accent);
+            white-space: nowrap;
+            min-width: 70px;
+            font-size: 13px;
+            padding-top: 1px;
+        }
+        .todayplan-widget-text { color: var(--text-primary); line-height: 1.3; }
         /* ===== 笔记编辑弹窗 ===== */
         .note-modal-overlay {
             position: fixed;
@@ -20514,6 +20624,7 @@ border-radius: var(--radius);
 
 
             <button class="nav-item" data-page="notes"><span class="icon">📝</span><span class="label">笔记</span></button>
+            <button class="nav-item" data-page="todayplan"><span class="icon">📋</span><span class="label">今日计划</span></button>
 
 
 
@@ -20898,6 +21009,8 @@ border-radius: var(--radius);
 
 
             </div>
+
+            <div class="todayplan-widget" id="todayplanWidget" style="display:none;"></div>
 
 
 
@@ -21935,6 +22048,26 @@ border-radius: var(--radius);
 
 
 
+    <div class="screen hidden" id="screen-todayplan">
+        <div class="nav-bar"><button class="nav-back" id="tpBackBtn">←</button><span class="nav-title">📋 今日计划</span><button class="nav-action" id="tpAddBtn" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;">+ 添加</button></div>
+        <div class="todayplan-scroll" id="tpScroll"></div>
+        <!-- 计划编辑弹窗 -->
+        <div class="note-modal-overlay" id="tpModalOverlay">
+            <div class="note-modal">
+                <div class="note-modal-title" id="tpModalTitle">⏰ 添加计划</div>
+                <div style="display:flex;gap:10px;">
+                    <input type="time" id="tpStartInput" value="09:00" style="flex:1;" />
+                    <input type="time" id="tpEndInput" value="10:00" style="flex:1;" />
+                </div>
+                <textarea id="tpTextInput" placeholder="要做什么？" maxlength="500" style="min-height:80px;"></textarea>
+                <div class="note-modal-btns">
+                    <button class="note-modal-delete" id="tpDeleteBtn" style="display:none;">🗑 删除</button>
+                    <button class="note-modal-cancel" id="tpCancelBtn">取消</button>
+                    <button class="note-modal-save" id="tpSaveBtn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="screen hidden" id="screen-week">
 
 
@@ -23309,6 +23442,7 @@ border-radius: var(--radius);
 
         const CHECKIN_KEY = 'checkin_data_v1';
         const NOTES_KEY = 'notes_data_v1';
+        const PLAN_KEY = 'todayplan_v1';
 
 
 
@@ -24731,6 +24865,7 @@ border-radius: var(--radius);
 
                     if (data.checkinData !== undefined) localStorage.setItem(CHECKIN_KEY, JSON.stringify(data.checkinData));
                     if (data.notesData !== undefined) localStorage.setItem(NOTES_KEY, JSON.stringify(data.notesData));
+                    if (data.planData !== undefined) localStorage.setItem(PLAN_KEY, JSON.stringify(data.planData));
 
 
 
@@ -39508,6 +39643,8 @@ border-radius: var(--radius);
 
             loadCheckin();
             renderNotes();
+            renderTodayplan();
+            renderTodayplanWidget();
 
 
 
@@ -40104,6 +40241,12 @@ border-radius: var(--radius);
                         showScreen('screen-notes');
 
                         renderNotes();
+
+                    } else if (page === 'todayplan') {
+
+                        showScreen('screen-todayplan');
+
+                        renderTodayplan();
 
                     } else if (page === 'export') {
 
@@ -42303,7 +42446,117 @@ border-radius: var(--radius);
 
 
         /* ===== 笔记功能 ===== */
-        function renderNotes() {
+        
+        /* ===== 今日计划功能 ===== */
+        function getTodayKey() {
+            var d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+        function renderTodayplan() {
+            var all = loadTodayPlan();
+            var today = getTodayKey();
+            var items = all.filter(function(x) { return x.date === today; });
+            items.sort(function(a,b) { return (a.start||'00:00').localeCompare(b.start||'00:00'); });
+            var container = document.getElementById('tpScroll');
+            if (!container) return;
+            if (items.length === 0) {
+                container.innerHTML = '<div class="todayplan-empty">📋 今天还没有计划，点 + 添加</div>';
+                return;
+            }
+            var now = new Date();
+            var nowStr = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            var html = '';
+            for (var i = 0; i < items.length; i++) {
+                var it = items[i];
+                var cls = 'todayplan-block';
+                if (it.start <= nowStr && (!it.end || it.end > nowStr)) cls += ' current';
+                html += '<div class="' + cls + '" data-idx="' + i + '" data-today="' + today + '">';
+                html += '<div class="todayplan-time">' + (it.start||'') + ' - ' + (it.end||'') + '</div>';
+                html += '<div class="todayplan-text">' + (it.text||'').replace(/</g,'&lt;') + '</div>';
+                html += '</div>';
+            }
+            container.innerHTML = html;
+            container.querySelectorAll('.todayplan-block').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var idx = parseInt(this.dataset.idx);
+                    var today = this.dataset.today;
+                    var all = loadTodayPlan();
+                    var dayItems = all.filter(function(x) { return x.date === today; }).sort(function(a,b) { return (a.start||'00:00').localeCompare(b.start||'00:00'); });
+                    var item = dayItems[idx];
+                    if (!item) return;
+                    openPlanEditor(item, all.indexOf(item));
+                });
+            });
+            renderTodayplanWidget();
+        }
+
+        var editingPlanIdx = -1;
+
+        function openPlanEditor(item, idx) {
+            editingPlanIdx = idx !== undefined ? idx : -1;
+            document.getElementById('tpModalTitle').textContent = editingPlanIdx >= 0 ? '✏️ 编辑计划' : '⏰ 添加计划';
+            document.getElementById('tpStartInput').value = item ? (item.start || '09:00') : '09:00';
+            document.getElementById('tpEndInput').value = item ? (item.end || '10:00') : '10:00';
+            document.getElementById('tpTextInput').value = item ? (item.text || '') : '';
+            document.getElementById('tpDeleteBtn').style.display = editingPlanIdx >= 0 ? '' : 'none';
+            document.getElementById('tpModalOverlay').classList.add('open');
+            setTimeout(function() { document.getElementById('tpTextInput').focus(); }, 100);
+        }
+
+        function closePlanEditor() {
+            document.getElementById('tpModalOverlay').classList.remove('open');
+            editingPlanIdx = -1;
+        }
+
+        function savePlanFromEditor() {
+            var start = document.getElementById('tpStartInput').value;
+            var end = document.getElementById('tpEndInput').value;
+            var text = document.getElementById('tpTextInput').value.trim();
+            if (!text) { toast('请填写要做什么'); return; }
+            var all = loadTodayPlan();
+            var today = getTodayKey();
+            if (editingPlanIdx >= 0 && editingPlanIdx < all.length) {
+                all[editingPlanIdx].start = start;
+                all[editingPlanIdx].end = end;
+                all[editingPlanIdx].text = text;
+                all[editingPlanIdx].updatedAt = Date.now();
+            } else {
+                all.push({ start: start, end: end, text: text, date: today, createdAt: Date.now(), updatedAt: Date.now() });
+            }
+            saveTodayPlan(all);
+            closePlanEditor();
+            renderTodayplan();
+            toast('✅ 计划已保存');
+        }
+
+        function deleteCurrentPlan() {
+            if (editingPlanIdx < 0) return;
+            if (!confirm('确定删除这条计划吗？')) return;
+            var all = loadTodayPlan();
+            if (editingPlanIdx < all.length) all.splice(editingPlanIdx, 1);
+            saveTodayPlan(all);
+            closePlanEditor();
+            renderTodayplan();
+            toast('🗑 计划已删除');
+        }
+
+        function renderTodayplanWidget() {
+            var w = document.getElementById('todayplanWidget');
+            if (!w) return;
+            var all = loadTodayPlan();
+            var today = getTodayKey();
+            var items = all.filter(function(x) { return x.date === today; });
+            items.sort(function(a,b) { return (a.start||'00:00').localeCompare(b.start||'00:00'); });
+            if (items.length === 0) { w.style.display = 'none'; return; }
+            w.style.display = '';
+            var html = '<div class="todayplan-widget-title">📋 今日计划<a onclick="showScreen(''screen-todayplan'');renderTodayplan();">查看全部 →</a></div>';
+            for (var i = 0; i < Math.min(items.length, 4); i++) {
+                html += '<div class="todayplan-widget-item"><span class="todayplan-widget-time">' + (items[i].start||'') + '</span><span class="todayplan-widget-text">' + (items[i].text||'').replace(/</g,'&lt;') + '</span></div>';
+            }
+            w.innerHTML = html;
+        }
+function renderNotes() {
             var notes = loadNotes();
             var container = document.getElementById('notesScroll');
             if (!container) return;
@@ -42387,6 +42640,14 @@ border-radius: var(--radius);
 
 
             /* ---- 笔记事件 ---- */
+            document.getElementById('tpBackBtn').addEventListener('click', function() { showScreen('screen-home'); });
+            document.getElementById('tpAddBtn').addEventListener('click', function() { openPlanEditor(null, -1); });
+            document.getElementById('tpSaveBtn').addEventListener('click', savePlanFromEditor);
+            document.getElementById('tpCancelBtn').addEventListener('click', closePlanEditor);
+            document.getElementById('tpDeleteBtn').addEventListener('click', deleteCurrentPlan);
+            document.getElementById('tpModalOverlay').addEventListener('click', function(e) {
+                if (e.target === document.getElementById('tpModalOverlay')) closePlanEditor();
+            });
             document.getElementById('notesBackBtn').addEventListener('click', function() { showScreen('screen-home'); });
             document.getElementById('notesAddBtn').addEventListener('click', function() { openNoteEditor(null, -1); });
             document.getElementById('noteSaveBtn').addEventListener('click', saveNoteFromEditor);
