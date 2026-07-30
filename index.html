@@ -42550,7 +42550,7 @@ border-radius: var(--radius);
             items.sort(function(a,b) { return (a.start||'00:00').localeCompare(b.start||'00:00'); });
             if (items.length === 0) { w.style.display = 'none'; return; }
             w.style.display = '';
-            var html = '<div class="todayplan-widget-title">📋 今日计划<a onclick="showScreen(''screen-todayplan'');renderTodayplan();">查看全部 →</a></div>';
+            var html = '<div class="todayplan-widget-title">📋 今日计划<a onclick="showScreen(&apos;screen-todayplan&apos;);renderTodayplan();">查看全部 →</a></div>';
             for (var i = 0; i < Math.min(items.length, 4); i++) {
                 html += '<div class="todayplan-widget-item"><span class="todayplan-widget-time">' + (items[i].start||'') + '</span><span class="todayplan-widget-text">' + (items[i].text||'').replace(/</g,'&lt;') + '</span></div>';
             }
