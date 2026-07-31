@@ -18797,6 +18797,20 @@ border-radius: var(--radius);
 
 
 
+        .sheet-edit-btn {
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(212,99,66,0.35);
+            background: var(--accent);
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .sheet-edit-btn:active { opacity: 0.8; }
         .sheet-delete-btn {
 
 
@@ -23211,6 +23225,7 @@ border-radius: var(--radius);
 
 
 
+            <button class="sheet-edit-btn" id="sheetEditBtn">✏️ 编辑这条记录</button>
             <button class="sheet-delete-btn" id="sheetDeleteBtn">删除这条记录</button>
 
 
@@ -23482,7 +23497,8 @@ border-radius: var(--radius);
 
 
         let addTargetDate = null;
-
+        let editingEntryId = null;
+        let editingOriginalImages = [];
 
 
 
@@ -25598,7 +25614,7 @@ border-radius: var(--radius);
 
 
 
-        async function saveEntry(dateStr, text, images, tags, duration, startTime, endTime) {
+        async function saveEntry(dateStr, text, images, tags, duration, startTime, endTime, entryId, origImages) {
 
 
 
@@ -25662,6 +25678,15 @@ border-radius: var(--radius);
 
 
 
+                    if (entryId) {
+                        entry.images = (origImages || []).concat(urls);
+                        await firebaseHelpers.setDoc(firebaseHelpers.doc(db, 'entries', entryId), {
+                            date: dateStr, ts: ts, text: text, images: entry.images,
+                            tags: tags || [], duration: duration || 0,
+                            startTime: startTime || null, endTime: endTime || null
+                        });
+                        entry.id = entryId;
+                    } else {
                     entry.images = urls;
 
 
@@ -25747,6 +25772,7 @@ border-radius: var(--radius);
 
 
                     entry.id = docRef.id;
+                    }
 
 
 
@@ -25766,37 +25792,24 @@ border-radius: var(--radius);
 
 
 
-                    entry.id = 'local_' + ts;
+                    entry.id = entryId || ('local_' + ts);
 
-
-
-
-
-
-
-                    entry.images = images.map(function(i) { return i.dataUrl; });
-
-
-
-
-
-
+                    entry.images = (origImages || []).concat(images.map(function(i) { return i.dataUrl; }));
 
                     var all = localLoad();
 
-
-
-
-
-
-
-                    all.push(entry);
-
-
-
-
-
-
+                    if (entryId) {
+                        for (var k = 0; k < all.length; k++) {
+                            if (all[k].id === entryId) {
+                                all[k].date = dateStr; all[k].ts = ts; all[k].text = text;
+                                all[k].images = entry.images; all[k].tags = tags || [];
+                                all[k].duration = duration || 0; all[k].startTime = startTime || null;
+                                all[k].endTime = endTime || null;
+                            }
+                        }
+                    } else {
+                        all.push(entry);
+                    }
 
                     localSave(all);
 
@@ -25831,26 +25844,26 @@ border-radius: var(--radius);
 
 
 
+                    entry.id = entryId || ('local_' + ts);
 
+                    entry.images = (origImages || []).concat(images.map(function(i) { return i.dataUrl; }));
 
+                    var all = localLoad();
 
-                var all = localLoad();
+                    if (entryId) {
+                        for (var k = 0; k < all.length; k++) {
+                            if (all[k].id === entryId) {
+                                all[k].date = dateStr; all[k].ts = ts; all[k].text = text;
+                                all[k].images = entry.images; all[k].tags = tags || [];
+                                all[k].duration = duration || 0; all[k].startTime = startTime || null;
+                                all[k].endTime = endTime || null;
+                            }
+                        }
+                    } else {
+                        all.push(entry);
+                    }
 
-
-
-
-
-
-
-                all.push(entry);
-
-
-
-
-
-
-
-                localSave(all);
+                    localSave(all);
 
 
 
@@ -37497,11 +37510,13 @@ border-radius: var(--radius);
 
 
 
-        async function openAdd(dateStr) {
+        async function openAdd(dateStr, entry) {
 
 
 
             addTargetDate = dateStr;
+            editingEntryId = entry ? entry.id : null;
+            editingOriginalImages = (entry && entry.images) ? entry.images : [];
 
 
 
@@ -37517,7 +37532,7 @@ border-radius: var(--radius);
 
 
 
-            pendingTags = [];
+            pendingTags = entry && entry.tags ? entry.tags.slice() : [];
 
 
 
@@ -37525,7 +37540,7 @@ border-radius: var(--radius);
 
 
 
-            document.getElementById('addTextarea').value = '';
+            document.getElementById('addTextarea').value = entry ? (entry.text || '') : '';
 
 
 
@@ -37533,7 +37548,7 @@ border-radius: var(--radius);
 
 
 
-            document.getElementById('charCount').textContent = '0 / 500';
+            document.getElementById('charCount').textContent = (entry ? (entry.text || '').length : 0) + ' / 500';
 
 
 
@@ -37565,7 +37580,7 @@ border-radius: var(--radius);
 
 
 
-            document.getElementById('durationMinutes').value = '';
+            document.getElementById('durationMinutes').value = entry && entry.duration ? entry.duration : '';
 
 
 
@@ -37573,7 +37588,7 @@ border-radius: var(--radius);
 
 
 
-            document.getElementById('startTimeInput').value = '';
+            document.getElementById('startTimeInput').value = entry && entry.startTime ? entry.startTime : '';
 
 
 
@@ -37581,7 +37596,7 @@ border-radius: var(--radius);
 
 
 
-            document.getElementById('endTimeInput').value = '';
+            document.getElementById('endTimeInput').value = entry && entry.endTime ? entry.endTime : '';
 
 
 
@@ -37598,6 +37613,15 @@ border-radius: var(--radius);
 
 
             rebuildImageArea();
+            var editImgHint = document.getElementById('editImgHint');
+            if (editImgHint) editImgHint.remove();
+            if (editingEntryId && editingOriginalImages.length > 0) {
+                var hint = document.createElement('div');
+                hint.id = 'editImgHint';
+                hint.style.cssText = 'font-family:Ma Shan Zheng,serif;font-size:16px;color:var(--text-muted);padding:4px 2px 8px;';
+                hint.textContent = '📷 原有 ' + editingOriginalImages.length + ' 张图片保持不变（可继续追加新图）';
+                document.getElementById('imgUploadArea').insertAdjacentElement('beforebegin', hint);
+            }
 
 
 
@@ -39141,7 +39165,7 @@ border-radius: var(--radius);
 
 
 
-            openEntryId = { id: entry.id, date: dateStr };
+            openEntryId = { id: entry.id, date: dateStr, entry: entry };
 
 
 
@@ -42124,7 +42148,9 @@ border-radius: var(--radius);
 
 
 
-                    await saveEntry(addTargetDate, text, pendingImages, pendingTags, duration, startTime, endTime);
+                    await saveEntry(addTargetDate, text, pendingImages, pendingTags, duration, startTime, endTime, editingEntryId, editingOriginalImages);
+                    editingEntryId = null;
+                    editingOriginalImages = [];
 
 
 
@@ -42371,6 +42397,14 @@ border-radius: var(--radius);
 
 
 
+
+            document.getElementById('sheetEditBtn').addEventListener('click', function() {
+                if (!openEntryId) return;
+                var ed = openEntryId.entry;
+                var dt = openEntryId.date;
+                closeBottomSheet();
+                openAdd(dt, ed);
+            });
 
             document.getElementById('sheetDeleteBtn').addEventListener('click', async function() {
 
