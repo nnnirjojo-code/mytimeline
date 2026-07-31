@@ -6572,6 +6572,44 @@ border-radius: 24px;
             flex-direction: column;
             overflow: hidden;
         }
+        .tp-date-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 6px 12px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.75);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .tp-date-nav {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            font-family: 'Archivo Black', sans-serif;
+            transition: opacity 0.15s;
+        }
+        .tp-date-nav:active { opacity: 0.6; }
+        .tp-date-label {
+            border: none;
+            background: transparent;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 17px;
+            color: var(--text-primary);
+            cursor: pointer;
+            padding: 5px 12px;
+            border-radius: 8px;
+            min-width: 130px;
+            text-align: center;
+        }
+        .tp-date-label:hover { background: rgba(0,0,0,0.05); }
+        .tp-date-label.not-today { color: var(--accent); }
         .todayplan-scroll {
             flex: 1;
             overflow-y: auto;
@@ -22022,6 +22060,11 @@ border-radius: var(--radius);
 
     <div class="screen hidden" id="screen-todayplan">
         <div class="nav-bar"><button class="nav-back" id="tpBackBtn">←</button><span class="nav-title">📋 今日计划</span><button class="nav-action" id="tpAddBtn" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;">+ 添加</button></div>
+        <div class="tp-date-bar">
+            <button class="tp-date-nav" id="tpPrevDay">‹</button>
+            <button class="tp-date-label" id="tpDateLabel">今天</button>
+            <button class="tp-date-nav" id="tpNextDay">›</button>
+        </div>
         <div class="todayplan-scroll" id="tpScroll"></div>
         <!-- 计划编辑弹窗 -->
         <div class="note-modal-overlay" id="tpModalOverlay">
@@ -42438,15 +42481,28 @@ border-radius: var(--radius);
             return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
         }
 
-window.renderTodayplan = function() {
+        function shiftDateStr(dateStr, delta) {
+            var d = new Date(dateStr + 'T00:00:00');
+            d.setDate(d.getDate() + delta);
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+window.renderTodayplan = function(dateStr) {
             var all = loadTodayPlan();
-            var today = getTodayKey();
+            var today = dateStr || getTodayKey();
+            window.tpViewDate = today;
+            var isToday = today === getTodayKey();
             var items = all.filter(function(x) { return x.date === today; });
             items.sort(function(a,b) { return (a.start||'00:00').localeCompare(b.start||'00:00'); });
             var container = document.getElementById('tpScroll');
             if (!container) return;
+            var label = document.getElementById('tpDateLabel');
+            if (label) {
+                label.textContent = isToday ? '今天 ' + today : today;
+                label.classList.toggle('not-today', !isToday);
+            }
             if (items.length === 0) {
-                container.innerHTML = '<div class="todayplan-empty">📋 今天还没有计划，点 + 添加</div>';
+                container.innerHTML = '<div class="todayplan-empty">' + (isToday ? '📋 今天还没有计划，点 + 添加' : '这一天没有计划') + '</div>';
                 renderTodayplanWidget();
                 return;
             }
@@ -42559,7 +42615,7 @@ window.renderTodayplan = function() {
             var text = document.getElementById('tpTextInput').value.trim();
             if (!text) { toast('请填写要做什么'); return; }
             var all = loadTodayPlan();
-            var today = getTodayKey();
+            var today = window.tpViewDate || getTodayKey();
             if (editingPlanIdx >= 0 && editingPlanIdx < all.length) {
                 all[editingPlanIdx].start = start;
                 all[editingPlanIdx].end = end;
@@ -42686,6 +42742,21 @@ window.renderNotes = function() {
             /* ---- 笔记事件 ---- */
             document.getElementById('tpBackBtn').addEventListener('click', function() { showScreen('screen-home'); });
             document.getElementById('tpAddBtn').addEventListener('click', function() { openPlanEditor(null, -1); });
+            document.getElementById('tpPrevDay').addEventListener('click', function() {
+                var cur = window.tpViewDate || getTodayKey();
+                window.renderTodayplan(shiftDateStr(cur, -1));
+            });
+            document.getElementById('tpNextDay').addEventListener('click', function() {
+                var cur = window.tpViewDate || getTodayKey();
+                var next = shiftDateStr(cur, 1);
+                if (next > getTodayKey()) next = getTodayKey();
+                window.renderTodayplan(next);
+            });
+            document.getElementById('tpDateLabel').addEventListener('click', function() {
+                var cur = window.tpViewDate || getTodayKey();
+                var d = prompt('输入日期 (YYYY-MM-DD)：', cur);
+                if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) window.renderTodayplan(d);
+            });
             document.getElementById('tpSaveBtn').addEventListener('click', savePlanFromEditor);
             document.getElementById('tpCancelBtn').addEventListener('click', closePlanEditor);
             document.getElementById('tpDeleteBtn').addEventListener('click', deleteCurrentPlan);
