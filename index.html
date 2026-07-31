@@ -6586,19 +6586,13 @@ border-radius: 24px;
             padding: 60px 0;
         }
         .agenda {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 68px 1fr;
             gap: 1px;
         }
-        .agenda-row {
-            display: flex;
-            align-items: stretch;
-            border-radius: 10px;
-            overflow: hidden;
-        }
         .agenda-time {
-            width: 68px;
-            flex-shrink: 0;
+            grid-column: 1;
+            min-height: 44px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -6617,34 +6611,21 @@ border-radius: 24px;
             font-size: 11px;
             color: #aaa;
         }
-        .agenda-content {
-            flex: 1;
-            min-height: 44px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            justify-content: center;
-            padding: 3px 0 3px 8px;
-        }
-        .agenda-row.empty { min-height: 34px; }
-        .agenda-row.empty .agenda-content { min-height: 34px; }
-        .agenda-row.empty .agenda-time { padding: 4px 2px; }
+        .agenda-time.past .h { color: #d0d0d0; }
+        .agenda-time.past .m { color: #e0e0e0; }
 
-        .agenda-row.past .agenda-time .h { color: #d0d0d0; }
-        .agenda-row.past .agenda-time .m { color: #e0e0e0; }
-
-        .agenda-row.current .agenda-time {
+        .agenda-time.current {
             background: #D46342;
         }
-        .agenda-row.current .agenda-time .h {
+        .agenda-time.current .h {
             color: #fff;
             font-size: 24px;
         }
-        .agenda-row.current .agenda-time .m {
+        .agenda-time.current .m {
             color: rgba(255,255,255,0.75);
             font-size: 12px;
         }
-        .agenda-row.current .agenda-time::after {
+        .agenda-time.current::after {
             content: '';
             position: absolute;
             right: -8px;
@@ -6654,14 +6635,22 @@ border-radius: 24px;
             border-left-color: #D46342;
             border-right: 0;
         }
+        .agenda-block-wrap {
+            grid-column: 2;
+            display: flex;
+            align-items: stretch;
+            margin: 1px 0;
+            min-width: 0;
+        }
         .agenda-block {
             background: #faf0ea;
             border-left: 5px solid #D46342;
             border-radius: 0 8px 8px 0;
             padding: 8px 14px;
-            margin: 1px 0;
             cursor: pointer;
             transition: background 0.12s ease;
+            flex: 1;
+            min-width: 0;
         }
         .agenda-block:active { background: #f5e2d6; }
         .agenda-block .time {
@@ -6677,13 +6666,6 @@ border-radius: 24px;
             color: #1a1a1a;
             line-height: 1.2;
         }
-        .agenda-row.current .agenda-block {
-            background: #fae2d8;
-            border-left-color: #D46342;
-            border-left-width: 6px;
-        }
-        .agenda-row.current .agenda-block .time { color: #D46342; }
-        .agenda-row.current { background: rgba(212,99,66,0.04); }
         .agenda-done .agenda-block { opacity: 0.45; }
         .agenda-done .agenda-block .text { text-decoration: line-through; }
         .agenda-done .agenda-block .time { text-decoration: line-through; }
@@ -6722,6 +6704,7 @@ border-radius: 24px;
             min-width: 0;
         }
                 .agenda-now-empty {
+            grid-column: 2;
             padding: 8px 14px;
             font-size: 20px;
             color: #aaa;
@@ -42470,45 +42453,44 @@ window.renderTodayplan = function() {
             var now = new Date();
             var nowMin = now.getHours() * 60 + now.getMinutes();
             var html = '<div class="agenda">';
+            // 小时标签列（24行）
             for (var h = 0; h <= 23; h++) {
-                var hStart = h * 60, hEnd = (h + 1) * 60;
-                var hourPlans = [];
-                for (var pi = 0; pi < items.length; pi++) {
-                    var p = items[pi];
-                    var ps = parseInt(p.start.split(':')[0]) * 60 + parseInt(p.start.split(':')[1]);
-                    var pe = parseInt(p.end.split(':')[0]) * 60 + parseInt(p.end.split(':')[1]);
-                    if (ps < hEnd && pe > hStart) hourPlans.push(p);
-                }
-                var cls = 'agenda-row';
-                if (nowMin >= hEnd) cls += ' past';
-                else if (nowMin >= hStart && nowMin < hEnd) cls += ' current';
-                if (hourPlans.length === 0) cls += ' empty';
-                html += '<div class="' + cls + '">';
-                html += '<div class="agenda-time"><span class="h">' + String(h).padStart(2,'0') + '</span><span class="m">00</span></div>';
-                html += '<div class="agenda-content">';
-                if (hourPlans.length === 0) {
-                    if (cls.indexOf('current') >= 0) {
-                        html += '<div class="agenda-now-empty">现在空闲</div>';
-                    }
-                } else {
-                    for (var j = 0; j < hourPlans.length; j++) {
-                        var bp = hourPlans[j];
-                        var bidx = all.indexOf(bp);
-                        var done = bp.done ? true : false;
-                        var blockCls = 'agenda-block';
-                        var rowCls = '';
-                        if (done) { blockCls += ' agenda-done-block'; rowCls = ' agenda-done'; }
-                        html += '<div class="agenda-row' + rowCls + '">';
-                        html += '<div class="' + blockCls + '" data-idx="' + bidx + '">';
-                        html += '<div class="agenda-block-inner">';
-                        html += '<span class="agenda-check' + (done ? ' checked' : '') + '" data-check-idx="' + bidx + '">' + (done ? '✓' : '') + '</span>';
-                        html += '<div class="agenda-block-texts">';
-                        html += '<span class="time">' + bp.start + ' — ' + bp.end + '</span>';
-                        html += '<span class="text">' + (bp.text||'').replace(/</g,'&lt;') + '</span>';
-                        html += '</div></div></div></div>';
-                    }
-                }
-                html += '</div></div>';
+                var tcls = 'agenda-time';
+                if (nowMin >= (h + 1) * 60) tcls += ' past';
+                else if (nowMin >= h * 60 && nowMin < (h + 1) * 60) tcls += ' current';
+                html += '<div class="' + tcls + '"><span class="h">' + String(h).padStart(2,'0') + '</span><span class="m">00</span></div>';
+            }
+            // 计划块：跨小时合并为一行（grid-row 跨越）
+            for (var j = 0; j < items.length; j++) {
+                var bp = items[j];
+                var bidx = all.indexOf(bp);
+                var done = bp.done ? true : false;
+                var psMin = parseInt(bp.start.split(':')[0]) * 60 + parseInt(bp.start.split(':')[1]);
+                var peMin = parseInt(bp.end.split(':')[0]) * 60 + parseInt(bp.end.split(':')[1]);
+                if (peMin <= psMin) peMin = psMin + 60;
+                var startRow = Math.floor(psMin / 60) + 1;
+                var endRow = Math.ceil(peMin / 60) + 1;
+                if (endRow <= startRow + 1) endRow = startRow + 1;
+                var blockCls = 'agenda-block' + (done ? ' agenda-done-block' : '');
+                var wrapCls = 'agenda-block-wrap' + (done ? ' agenda-done' : '');
+                html += '<div class="' + wrapCls + '" style="grid-row: ' + startRow + ' / ' + endRow + ';">';
+                html += '<div class="' + blockCls + '" data-idx="' + bidx + '">';
+                html += '<div class="agenda-block-inner">';
+                html += '<span class="agenda-check' + (done ? ' checked' : '') + '" data-check-idx="' + bidx + '">' + (done ? '✓' : '') + '</span>';
+                html += '<div class="agenda-block-texts">';
+                html += '<span class="time">' + bp.start + ' — ' + bp.end + '</span>';
+                html += '<span class="text">' + (bp.text||'').replace(/</g,'&lt;') + '</span>';
+                html += '</div></div></div></div>';
+            }
+            // 当前小时空闲提示
+            var curH = now.getHours();
+            var curBusy = items.some(function(p) {
+                var ps2 = parseInt(p.start.split(':')[0]) * 60 + parseInt(p.start.split(':')[1]);
+                var pe2 = parseInt(p.end.split(':')[0]) * 60 + parseInt(p.end.split(':')[1]);
+                return ps2 < (curH + 1) * 60 && pe2 > curH * 60;
+            });
+            if (!curBusy) {
+                html += '<div class="agenda-now-empty" style="grid-row: ' + (curH + 1) + ';">现在空闲</div>';
             }
             html += '</div>';
             container.innerHTML = html;
