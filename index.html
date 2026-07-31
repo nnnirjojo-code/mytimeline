@@ -6508,6 +6508,11 @@ border-radius: 24px;
         .checkin-heatmap .heatmap-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; font-family: var(--font-sans); }
 
         /* ===== 笔记卡片 ===== */
+        #screen-notes {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
         .notes-scroll {
             flex: 1;
             overflow-y: auto;
@@ -6562,6 +6567,11 @@ border-radius: 24px;
 
 
         /* ===== 今日计划 X² ===== */
+        #screen-todayplan {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
         .todayplan-scroll {
             flex: 1;
             overflow-y: auto;
@@ -12627,6 +12637,12 @@ border-radius: var(--radius);
 
 
 
+
+        #screen-stats {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
         #screen-stats .stats-scroll {
 
