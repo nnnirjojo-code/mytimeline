@@ -22626,8 +22626,10 @@ async function pushAllToSupabase(overrides) {
         if (overrides) Object.assign(st, overrides);
         await supabaseSet(SB_KV_KEY, st);
         console.log('[supabase] pushed');
+        if (typeof toast === 'function') toast('☁️ 已同步到云端');
     } catch(e) {
         console.warn('[supabase] push failed:', e.message);
+        if (typeof toast === 'function') toast('⚠️ 云端同步失败，数据已保存在本地，稍后自动重试');
         // 60 秒后自动重试（断网恢复后补推）
         setTimeout(function() { pushAllToSupabase(overrides); }, 60000);
     }
