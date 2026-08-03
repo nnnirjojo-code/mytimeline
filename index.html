@@ -5776,6 +5776,23 @@ border-radius: 24px;
             z-index: 2;
         }
         .photo-card:hover .photo-source { opacity: 1; }
+        .photo-card.load-fail {
+            background: #12121a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .photo-card.load-fail img { display: none; }
+        .photo-card.load-fail::after {
+            content: '⚠️ 图片加载失败\n点击卡片重新加载';
+            color: #8888a0;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+            white-space: pre-line;
+            line-height: 1.5;
+        }
+        .photo-card.load-fail.retrying::after { content: '⏳ 重新加载中…'; }
         .photos-empty {
             grid-column: 1 / -1;
             display: flex;
@@ -21251,8 +21268,9 @@ border-radius: var(--radius);
         </div>
     </div>
     <div class="screen hidden" id="screen-photos">
-        <div class="nav-bar"><button class="nav-back" id="photosBackBtn">←</button><span class="nav-title">📷 照片墙</span><button class="nav-action" id="photosAddBtn" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;">+ 添加</button></div>
+        <div class="nav-bar"><button class="nav-back" id="photosBackBtn">←</button><span class="nav-title">📷 照片墙</span><div style="display:flex;gap:8px;align-items:center;"><button class="nav-action" id="photosBackupBtn" title="备份照片" style="background:rgba(255,255,255,0.1);color:#e8e8ee;border:1px solid rgba(255,255,255,0.2);padding:6px 12px;border-radius:20px;font-size:14px;cursor:pointer;">💾</button><button class="nav-action" id="photosRestoreBtn" title="恢复照片" style="background:rgba(255,255,255,0.1);color:#e8e8ee;border:1px solid rgba(255,255,255,0.2);padding:6px 12px;border-radius:20px;font-size:14px;cursor:pointer;">📥</button><button class="nav-action" id="photosAddBtn" style="background:#c0392b;color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;">+ 添加</button></div></div>
         <div class="photos-scroll" id="photosScroll"></div>
+        <input type="file" id="photosImportInput" accept=".json" style="display:none;" />
         <!-- 添加照片弹窗 -->
         <div class="photo-modal-overlay" id="photoModalOverlay">
             <div class="photo-modal">
@@ -22526,7 +22544,97 @@ border-radius: var(--radius);
 
 
 
-        const FIREBASE_CONFIG = {
+        const SUPABASE_URL = "https://ljrlqysicezqjmljlwtb.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqcmxxeXNpY2V6cWptbGpsd3RiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMDM5MzMsImV4cCI6MjEwMDg3OTkzM30.JIDh_r0KnF-BCBpjHCQDzbIrMtPUSAPpDnUhQtoxhwM";
+
+/* ===== Supabase 云同步 ===== */
+const SB_KV_KEY = 'mytimeline_all';
+let sbReady = false;
+
+async function supabaseGet(key) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/kv?key=eq.' + encodeURIComponent(key) + '&select=value', {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!r.ok) throw new Error('supabase get ' + r.status);
+    const rows = await r.json();
+    return rows.length ? rows[0].value : null;
+}
+
+async function supabaseSet(key, value) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/kv?on_conflict=key', {
+        method: 'POST',
+        headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: 'Bearer ' + SUPABASE_KEY,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ key: key, value: value })
+    });
+    if (!r.ok) throw new Error('supabase set ' + r.status);
+    return true;
+}
+
+function collectAllState() {
+    var out = { entries: localLoad() };
+    try { out.todos = JSON.parse(localStorage.getItem(TODO_KEY) || '[]'); } catch(e) { out.todos = []; }
+    try { out.reminder = localStorage.getItem(REMINDER_KEY) || ''; } catch(e) { out.reminder = ''; }
+    try { out.manualTags = JSON.parse(localStorage.getItem(MANUAL_TAGS_KEY) || '[]'); } catch(e) { out.manualTags = []; }
+    try { out.checkinData = JSON.parse(localStorage.getItem(CHECKIN_KEY) || '{}'); } catch(e) { out.checkinData = {}; }
+    try { out.notesData = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]'); } catch(e) { out.notesData = []; }
+    try { out.planData = JSON.parse(localStorage.getItem(PLAN_KEY) || '[]'); } catch(e) { out.planData = []; }
+    try { out.photosData = JSON.parse(localStorage.getItem(PHOTOS_KEY) || '[]'); } catch(e) { out.photosData = []; }
+    return out;
+}
+
+function applyStateToLocal(st) {
+    if (!st || typeof st !== 'object') return;
+    try { if (Array.isArray(st.entries)) localStorage.setItem(LOCAL_KEY, JSON.stringify(st.entries)); } catch(e) {}
+    try { if (st.todos !== undefined) localStorage.setItem(TODO_KEY, JSON.stringify(st.todos)); } catch(e) {}
+    try { if (st.reminder !== undefined) localStorage.setItem(REMINDER_KEY, st.reminder); } catch(e) {}
+    try { if (st.manualTags !== undefined) localStorage.setItem(MANUAL_TAGS_KEY, JSON.stringify(st.manualTags)); } catch(e) {}
+    try { if (st.checkinData !== undefined) localStorage.setItem(CHECKIN_KEY, JSON.stringify(st.checkinData)); } catch(e) {}
+    try { if (st.notesData !== undefined) localStorage.setItem(NOTES_KEY, JSON.stringify(st.notesData)); } catch(e) {}
+    try { if (st.planData !== undefined) localStorage.setItem(PLAN_KEY, JSON.stringify(st.planData)); } catch(e) {}
+    try { if (st.photosData !== undefined) localStorage.setItem(PHOTOS_KEY, JSON.stringify(st.photosData)); } catch(e) {}
+}
+
+let sbPushTimer = null;
+function scheduleSupabasePush() {
+    if (sbPushTimer) clearTimeout(sbPushTimer);
+    sbPushTimer = setTimeout(pushAllToSupabase, 900);
+}
+
+async function pushAllToSupabase() {
+    if (!sbReady) return;
+    try {
+        await supabaseSet(SB_KV_KEY, collectAllState());
+        console.log('[supabase] pushed');
+    } catch(e) {
+        console.warn('[supabase] push failed:', e.message);
+    }
+}
+
+async function initSupabaseSync() {
+    try {
+        var cloud = await supabaseGet(SB_KV_KEY);
+        if (cloud && cloud.entries !== undefined) {
+            // 云端存在 → 合并到本地（entries 按 ts 去重，其余字段云端覆盖本地）
+            applyStateToLocal(cloud);
+            console.log('[supabase] loaded cloud state, entries:', cloud.entries.length);
+        } else {
+            // 云端为空 → 把本地推上去（首次迁移）
+            await supabaseSet(SB_KV_KEY, collectAllState());
+            console.log('[supabase] first-time upload done');
+        }
+        sbReady = true;
+    } catch(e) {
+        console.warn('[supabase] init failed, local-only mode:', e.message);
+        sbReady = false;
+    }
+}
+
+const FIREBASE_CONFIG = {
 
 
 
@@ -23542,6 +23650,7 @@ border-radius: var(--radius);
 
 
             syncStateToFirestore('todos', todos);
+            scheduleSupabasePush();
 
 
 
@@ -23590,6 +23699,7 @@ border-radius: var(--radius);
 
 
             syncStateToFirestore('reminder', text);
+            scheduleSupabasePush();
 
 
 
@@ -23638,6 +23748,7 @@ border-radius: var(--radius);
 
 
             syncStateToFirestore('manualTags', tags);
+            scheduleSupabasePush();
 
 
 
@@ -23686,6 +23797,7 @@ border-radius: var(--radius);
 
 
             syncStateToFirestore('checkinData', data);
+            scheduleSupabasePush();
 
 
 
@@ -23702,6 +23814,7 @@ border-radius: var(--radius);
         function saveNotes(notes) {
             localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
             syncStateToFirestore('notesData', notes);
+            scheduleSupabasePush();
         }
 
         /* ---- 今日计划 ---- */
@@ -23711,6 +23824,7 @@ border-radius: var(--radius);
         function saveTodayPlan(items) {
             localStorage.setItem(PLAN_KEY, JSON.stringify(items));
             syncStateToFirestore('planData', items);
+            scheduleSupabasePush();
         }
         function loadPhotos() {
             try { return JSON.parse(localStorage.getItem(PHOTOS_KEY) || '[]'); } catch(e) { return []; }
@@ -23718,6 +23832,7 @@ border-radius: var(--radius);
         function savePhotos(photos) {
             localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
             syncStateToFirestore('photosData', photos);
+            scheduleSupabasePush();
         }
 
 
@@ -24126,7 +24241,8 @@ border-radius: var(--radius);
 
 
 
-        function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries)); }
+        function localSave(entries) { localStorage.setItem(LOCAL_KEY, JSON.stringify(entries));
+            scheduleSupabasePush(); }
 
 
 
@@ -38959,6 +39075,8 @@ border-radius: var(--radius);
 
             await pullStateFromFirestore();
 
+            await initSupabaseSync();
+
 
 
 
@@ -41261,12 +41379,29 @@ window.renderNotes = function() {
             container.innerHTML = html;
             container.querySelectorAll('.photo-card').forEach(function(card) {
                 var del = card.querySelector('.photo-del');
+                var img = card.querySelector('img');
+                // 图片加载失败 → 标记占位
+                if (img) {
+                    img.addEventListener('error', function() {
+                        card.classList.add('load-fail');
+                    });
+                }
                 card.addEventListener('click', function(e) {
                     if (e.target === del) return;
                     var idx = parseInt(this.dataset.idx);
                     if (isNaN(idx)) return;
                     var p = window.currentPhotoList[idx];
                     if (!p) return;
+                    // 加载失败的卡片：点击重新加载图片
+                    if (card.classList.contains('load-fail') && img) {
+                        card.classList.remove('load-fail');
+                        card.classList.add('retrying');
+                        img.src = p.src; // 重新赋值触发重新加载
+                        setTimeout(function() {
+                            card.classList.remove('retrying');
+                        }, 1500);
+                        return;
+                    }
                     if (p.fromTimeline && p.entry) {
                         var en = p.entry;
                         var dstr = en.date;
@@ -41364,6 +41499,49 @@ window.renderNotes = function() {
             target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             target.classList.add('highlight');
             setTimeout(function() { target.classList.remove('highlight'); }, 2600);
+        }
+
+        function backupPhotos() {
+            var photos = loadPhotos();
+            var json = JSON.stringify(photos, null, 2);
+            var blob = new Blob([json], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'photos_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast('💾 已导出 ' + photos.length + ' 张照片的备份');
+        }
+
+        function restorePhotos(file) {
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    var arr = JSON.parse(e.target.result);
+                    if (!Array.isArray(arr)) throw new Error('bad');
+                    var existing = loadPhotos();
+                    var seen = {};
+                    existing.forEach(function(p) { if (p && p.src) seen[p.src] = 1; });
+                    var added = 0;
+                    arr.forEach(function(p) {
+                        if (p && p.src && !seen[p.src]) {
+                            existing.push(p);
+                            seen[p.src] = 1;
+                            added++;
+                        }
+                    });
+                    savePhotos(existing);
+                    renderPhotos();
+                    toast('✅ 导入完成，新增 ' + added + ' 张照片');
+                } catch(err) {
+                    toast('❌ 备份文件格式不对');
+                }
+            };
+            reader.readAsText(file);
         }
 
         function openPhotoModal() {
@@ -41540,6 +41718,14 @@ window.renderNotes = function() {
             /* ---- 照片墙事件 ---- */
             document.getElementById('photosBackBtn').addEventListener('click', function() { showScreen('screen-home'); });
             document.getElementById('photosAddBtn').addEventListener('click', openPhotoModal);
+            document.getElementById('photosBackupBtn').addEventListener('click', backupPhotos);
+            document.getElementById('photosRestoreBtn').addEventListener('click', function() {
+                document.getElementById('photosImportInput').click();
+            });
+            document.getElementById('photosImportInput').addEventListener('change', function(e) {
+                restorePhotos(e.target.files[0]);
+                e.target.value = '';
+            });
             document.getElementById('photoTabUpload').addEventListener('click', function() { switchPhotoTab('upload'); });
             document.getElementById('photoTabUrl').addEventListener('click', function() { switchPhotoTab('url'); });
             document.getElementById('photoFileInput').addEventListener('change', function(e) {
