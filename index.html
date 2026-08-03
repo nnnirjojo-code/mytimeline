@@ -41828,6 +41828,109 @@ window.renderNotes = function() {
 
 
 
+            /* ===== 快捷记录模式 (?quick) ===== */
+            function initQuickMode() {
+                var q = (location.search + location.hash).toLowerCase();
+                if (q.indexOf('quick') === -1) return;
+                // 等数据初始化完成后显示
+                setTimeout(buildQuickUI, 1500);
+            }
+
+            function buildQuickUI() {
+                if (document.getElementById('quickOverlay')) return;
+                var ov = document.createElement('div');
+                ov.id = 'quickOverlay';
+                ov.style.cssText = 'position:fixed;inset:0;background:#0a0a0f;z-index:2000;display:flex;flex-direction:column;padding:24px 20px;box-sizing:border-box;';
+                var samples = ['9点到11点，吃饭', '明天 14:00 开会', '9:30~10:30 晨跑'];
+                ov.innerHTML =
+                    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+                    '<div style="color:#e8e8ee;font-family:\'Archivo Black\',sans-serif;font-size:22px;">⚡ 快捷记录</div>' +
+                    '<a href="index.html" style="color:#8888a0;font-size:14px;text-decoration:none;">✕ 退出</a></div>' +
+                    '<div style="color:#8888a0;font-size:14px;margin-bottom:12px;">输入内容自动同步到时间轴，例如：</div>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">' +
+                    samples.map(function(s, i) {
+                        return '<button data-ex="' + i + '" style="background:#12121a;border:1px solid rgba(255,255,255,0.1);color:#e8e8ee;border-radius:16px;padding:6px 12px;font-size:13px;cursor:pointer;">' + s + '</button>';
+                    }).join('') + '</div>' +
+                    '<textarea id="quickInput" placeholder="例如：9点到11点，吃饭" style="flex:1;width:100%;box-sizing:border-box;background:#12121a;border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:#e8e8ee;font-size:20px;padding:16px;outline:none;resize:none;font-family:\'Ma Shan Zheng\',serif;"></textarea>' +
+                    '<button id="quickSaveBtn" style="margin-top:14px;background:#c0392b;color:#fff;border:none;border-radius:16px;padding:14px 0;font-size:18px;font-weight:600;cursor:pointer;">⚡ 同步到时间轴</button>';
+                document.body.appendChild(ov);
+
+                var input = document.getElementById('quickInput');
+                var saveBtn = document.getElementById('quickSaveBtn');
+
+                ov.querySelectorAll('[data-ex]').forEach(function(b) {
+                    b.addEventListener('click', function() {
+                        input.value = samples[parseInt(this.dataset.ex)];
+                        input.focus();
+                    });
+                });
+
+                function doQuickSave() {
+                    var raw = input.value.trim();
+                    if (!raw) { toast('请输入内容'); return; }
+                    var parsed = parseQuickText(raw);
+                    if (!parsed) {
+                        toast('⚠️ 没识别到时间，格式如：9点到11点，吃饭');
+                        return;
+                    }
+                    var entryText = parsed.text;
+                    if (!entryText) entryText = parsed.start + '-' + parsed.end;
+                    saveEntry(parsed.date, entryText, [], [], 0, parsed.start, parsed.end);
+                    toast('✅ 已同步 ' + parsed.date + ' ' + parsed.start + '-' + parsed.end + ' ' + entryText);
+                    input.value = '';
+                    input.focus();
+                }
+                saveBtn.addEventListener('click', doQuickSave);
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doQuickSave(); }
+                });
+                setTimeout(function() { input.focus(); }, 300);
+            }
+
+            function parseQuickText(raw) {
+                var text = raw.trim();
+                if (!text) return null;
+                var dateStr = getTodayKey();
+                var dm = text.match(/^(今天|明天|后天|昨天)/);
+                if (dm) {
+                    var offset = { '今天': 0, '明天': 1, '后天': 2, '昨天': -1 }[dm[1]];
+                    var d = new Date();
+                    d.setDate(d.getDate() + offset);
+                    dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                    text = text.slice(dm[0].length).replace(/^[，,、\s]+/, '');
+                }
+                function timeTok(h, min, half) {
+                    var hh = parseInt(h);
+                    if (isNaN(hh) || hh > 23) return null;
+                    var mm = min !== undefined && min !== '' ? parseInt(min) : (half ? 30 : 0);
+                    if (isNaN(mm) || mm > 59) return null;
+                    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+                }
+                // 时间范围: 9点到11点 / 9:00-11:30 / 9-11点 / 9-11 / 9点半到11点
+                var m = text.match(/^(\d{1,2})(?:[:：点时](\d{1,2})?(半)?)?\s*(?:到|至|-|~|～|—)\s*(\d{1,2})(?:[:：点时](\d{1,2})?(半)?)?/);
+                if (m) {
+                    var start = timeTok(m[1], m[2], m[3]);
+                    var end = timeTok(m[4], m[5], m[6]);
+                    if (start && end) {
+                        var rest = text.slice(m[0].length).replace(/^[，,、:：\s]+/, '');
+                        return { date: dateStr, start: start, end: end, text: rest };
+                    }
+                }
+                // 单时间: 14:00 开会 / 14点 开会 / 21点睡觉
+                var m2 = text.match(/^(\d{1,2})[:：点时](\d{1,2})?(半)?\s*(?:[，,、\s]+|(?=[\u4e00-\u9fa5]))(.+)$/);
+                if (m2) {
+                    var start2 = timeTok(m2[1], m2[2], m2[3]);
+                    if (start2) {
+                        var parts = start2.split(':');
+                        var eh = (parseInt(parts[0]) + 1) % 24;
+                        return { date: dateStr, start: start2, end: String(eh).padStart(2, '0') + ':' + parts[1], text: m2[4] };
+                    }
+                }
+                return null;
+            }
+
+            initQuickMode();
+
             })();
 
 
