@@ -22552,27 +22552,41 @@ const SB_KV_KEY = 'mytimeline_all';
 let sbReady = false;
 
 async function supabaseGet(key) {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/kv?key=eq.' + encodeURIComponent(key) + '&select=value', {
-        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-    });
-    if (!r.ok) throw new Error('supabase get ' + r.status);
-    const rows = await r.json();
-    return rows.length ? rows[0].value : null;
+    const ctrl = new AbortController();
+    const timer = setTimeout(function() { ctrl.abort(); }, 8000);
+    try {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/kv?key=eq.' + encodeURIComponent(key) + '&select=value', {
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY },
+            signal: ctrl.signal
+        });
+        if (!r.ok) throw new Error('supabase get ' + r.status);
+        const rows = await r.json();
+        return rows.length ? rows[0].value : null;
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 async function supabaseSet(key, value) {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/kv?on_conflict=key', {
-        method: 'POST',
-        headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: 'Bearer ' + SUPABASE_KEY,
-            'Content-Type': 'application/json',
-            Prefer: 'resolution=merge-duplicates'
-        },
-        body: JSON.stringify({ key: key, value: value })
-    });
-    if (!r.ok) throw new Error('supabase set ' + r.status);
-    return true;
+    const ctrl = new AbortController();
+    const timer = setTimeout(function() { ctrl.abort(); }, 8000);
+    try {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/kv?on_conflict=key', {
+            method: 'POST',
+            headers: {
+                apikey: SUPABASE_KEY,
+                Authorization: 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json',
+                Prefer: 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify({ key: key, value: value }),
+            signal: ctrl.signal
+        });
+        if (!r.ok) throw new Error('supabase set ' + r.status);
+        return true;
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 function collectAllState() {
@@ -22600,36 +22614,41 @@ function applyStateToLocal(st) {
 }
 
 let sbPushTimer = null;
-function scheduleSupabasePush() {
+function scheduleSupabasePush(overrides) {
     if (sbPushTimer) clearTimeout(sbPushTimer);
-    sbPushTimer = setTimeout(pushAllToSupabase, 900);
+    sbPushTimer = setTimeout(function() { pushAllToSupabase(overrides); }, 900);
 }
 
-async function pushAllToSupabase() {
+async function pushAllToSupabase(overrides) {
     if (!sbReady) return;
     try {
-        await supabaseSet(SB_KV_KEY, collectAllState());
+        var st = collectAllState();
+        if (overrides) Object.assign(st, overrides);
+        await supabaseSet(SB_KV_KEY, st);
         console.log('[supabase] pushed');
     } catch(e) {
         console.warn('[supabase] push failed:', e.message);
+        // 60 秒后自动重试（断网恢复后补推）
+        setTimeout(function() { pushAllToSupabase(overrides); }, 60000);
     }
 }
 
 function mergeState(local, cloud) {
     if (!cloud || typeof cloud !== 'object') return local;
     var out = {};
-    // entries: 按 (ts+date+text) 去重合并
-    var seen = {};
-    var entries = [];
+    // entries: 按 (ts+date) 合并，同一条保留 text 更长者（防编辑后重复）
+    var byKey = {};
     [local.entries || [], cloud.entries || []].forEach(function(arr) {
         arr.forEach(function(e) {
             if (!e) return;
-            var k = (e.ts || '') + '|' + (e.date || '') + '|' + (e.text || '');
-            if (seen[k]) return;
-            seen[k] = true;
-            entries.push(e);
+            var k = (e.ts || '') + '|' + (e.date || '');
+            if (!byKey[k] || (e.text || '').length > (byKey[k].text || '').length) {
+                byKey[k] = e;
+            }
         });
     });
+    var entries = Object.keys(byKey).map(function(k) { return byKey[k]; });
+    entries.sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
     out.entries = entries;
     // 数组字段: 取更长的一方（防空覆盖）
     ['todos', 'manualTags', 'notesData', 'planData', 'photosData'].forEach(function(f) {
@@ -22668,6 +22687,8 @@ async function initSupabaseSync() {
     } catch(e) {
         console.warn('[supabase] init failed, local-only mode:', e.message);
         sbReady = false;
+        // 网络恢复后自动重试
+        setTimeout(initSupabaseSync, 60000);
     }
 }
 
@@ -23867,9 +23888,13 @@ const FIREBASE_CONFIG = {
             try { return JSON.parse(localStorage.getItem(PHOTOS_KEY) || '[]'); } catch(e) { return []; }
         }
         function savePhotos(photos) {
-            localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
+            try {
+                localStorage.setItem(PHOTOS_KEY, JSON.stringify(photos));
+            } catch(e) {
+                console.warn('[photos] localStorage full, cloud-only for photos');
+            }
             syncStateToFirestore('photosData', photos);
-            scheduleSupabasePush();
+            scheduleSupabasePush({ photosData: photos });
         }
 
 
@@ -24071,6 +24096,9 @@ const FIREBASE_CONFIG = {
 
 
 
+            // Supabase 已接管后，Firestore 不再使用（避免被墙请求挂起）
+            if (sbReady) return;
+
             if (!firebaseReady || !firebaseHelpers || !firebaseHelpers.setDoc) return;
 
 
@@ -24151,6 +24179,13 @@ const FIREBASE_CONFIG = {
 
 
 
+        function withTimeout(promise, ms) {
+            return Promise.race([
+                promise,
+                new Promise(function(resolve) { setTimeout(function() { resolve('__timeout__'); }, ms || 4000); })
+            ]);
+        }
+
         async function pullStateFromFirestore() {
 
 
@@ -24167,7 +24202,8 @@ const FIREBASE_CONFIG = {
 
 
 
-                const snap = await firebaseHelpers.getDoc(firebaseHelpers.doc(db, 'appstate', 'main'));
+                const snap = await withTimeout(firebaseHelpers.getDoc(firebaseHelpers.doc(db, 'appstate', 'main')), 4000);
+                if (snap === '__timeout__') return;
 
 
 
@@ -24409,11 +24445,12 @@ const FIREBASE_CONFIG = {
 
             if (allEntriesCache) return allEntriesCache;
 
-
-
-
-
-
+            // Supabase 模式：数据已同步到 localStorage，直接走本地（跳过被墙的 Firestore）
+            if (sbReady) {
+                result = localLoad();
+                allEntriesCache = result;
+                return result;
+            }
 
             var result;
 
@@ -24431,7 +24468,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                    const snap = await firebaseHelpers.getDocs(firebaseHelpers.collection(db, 'entries'));
+                    const snap = await withTimeout(firebaseHelpers.getDocs(firebaseHelpers.collection(db, 'entries')), 4000);
 
 
 
@@ -24989,11 +25026,11 @@ const FIREBASE_CONFIG = {
 
                     if (entryId) {
                         entry.images = (origImages || []).concat(urls);
-                        await firebaseHelpers.setDoc(firebaseHelpers.doc(db, 'entries', entryId), {
+                        await (sbReady ? null : firebaseHelpers.setDoc(firebaseHelpers.doc(db, 'entries', entryId), {
                             date: dateStr, ts: ts, text: text, images: entry.images,
                             tags: tags || [], duration: duration || 0,
                             startTime: startTime || null, endTime: endTime || null
-                        });
+                        }));
                         entry.id = entryId;
                     } else {
                     entry.images = urls;
@@ -25004,7 +25041,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                    var docRef = await firebaseHelpers.addDoc(firebaseHelpers.collection(db, 'entries'), {
+                    var docRef = await (sbReady ? null : firebaseHelpers.addDoc(firebaseHelpers.collection(db, 'entries'), {
 
 
 
@@ -25072,7 +25109,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                    });
+                    }));
 
 
 
@@ -25080,7 +25117,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                    entry.id = docRef.id;
+                    entry.id = docRef ? docRef.id : ('local_' + ts);
                     }
 
 
@@ -25224,7 +25261,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                    await firebaseHelpers.deleteDoc(firebaseHelpers.doc(db, 'entries', entryId));
+                    await (sbReady ? null : firebaseHelpers.deleteDoc(firebaseHelpers.doc(db, 'entries', entryId)));
 
 
 
@@ -26080,7 +26117,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                            await firebaseHelpers.addDoc(firebaseHelpers.collection(db, 'entries'), {
+                            await (sbReady ? null : firebaseHelpers.addDoc(firebaseHelpers.collection(db, 'entries'), {
 
 
 
@@ -26148,7 +26185,7 @@ const FIREBASE_CONFIG = {
 
 
 
-                            });
+                            }));
 
 
 
@@ -39110,7 +39147,7 @@ const FIREBASE_CONFIG = {
 
 
 
-            await pullStateFromFirestore();
+            // Firestore 已废弃（Supabase 接管），不再拉取
 
             await initSupabaseSync();
 
@@ -41602,8 +41639,8 @@ window.renderNotes = function() {
             document.getElementById('photoPanelUrl').classList.toggle('active', !isUpload);
         }
 
-        // canvas 压缩图片 → dataURL（最长边 1000px, JPEG 0.75）
-        function compressImage(file) {
+        // canvas 压缩图片 → dataURL（照片墙专用：最长边 1000px, JPEG 0.75）
+        function compressPhotoImage(file) {
             return new Promise(function(resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function(e) {
@@ -41636,7 +41673,7 @@ window.renderNotes = function() {
             var caption = document.getElementById('photoCaptionInput').value.trim();
             var list = Array.prototype.slice.call(files);
             toast('⏳ 正在压缩图片…');
-            Promise.all(list.map(compressImage)).then(function(dataUrls) {
+            Promise.all(list.map(compressPhotoImage)).then(function(dataUrls) {
                 var photos = loadPhotos();
                 for (var i = 0; i < dataUrls.length; i++) {
                     photos.push({ src: dataUrls[i], caption: caption || '', createdAt: Date.now() });
