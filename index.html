@@ -22615,13 +22615,50 @@ async function pushAllToSupabase() {
     }
 }
 
+function mergeState(local, cloud) {
+    if (!cloud || typeof cloud !== 'object') return local;
+    var out = {};
+    // entries: 按 (ts+date+text) 去重合并
+    var seen = {};
+    var entries = [];
+    [local.entries || [], cloud.entries || []].forEach(function(arr) {
+        arr.forEach(function(e) {
+            if (!e) return;
+            var k = (e.ts || '') + '|' + (e.date || '') + '|' + (e.text || '');
+            if (seen[k]) return;
+            seen[k] = true;
+            entries.push(e);
+        });
+    });
+    out.entries = entries;
+    // 数组字段: 取更长的一方（防空覆盖）
+    ['todos', 'manualTags', 'notesData', 'planData', 'photosData'].forEach(function(f) {
+        var l = Array.isArray(local[f]) ? local[f] : [];
+        var c = Array.isArray(cloud[f]) ? cloud[f] : [];
+        out[f] = c.length > l.length ? c : l;
+    });
+    // checkinData: 键并集
+    var ck = {};
+    [local.checkinData || {}, cloud.checkinData || {}].forEach(function(obj) {
+        Object.keys(obj).forEach(function(k) { ck[k] = obj[k]; });
+    });
+    out.checkinData = ck;
+    // reminder: 非空优先
+    out.reminder = (local.reminder || cloud.reminder || '');
+    return out;
+}
+
 async function initSupabaseSync() {
     try {
         var cloud = await supabaseGet(SB_KV_KEY);
+        var local = collectAllState();
         if (cloud && cloud.entries !== undefined) {
-            // 云端存在 → 合并到本地（entries 按 ts 去重，其余字段云端覆盖本地）
-            applyStateToLocal(cloud);
-            console.log('[supabase] loaded cloud state, entries:', cloud.entries.length);
+            // 云端存在 → 安全合并（本地优先，防空数据覆盖）
+            var merged = mergeState(local, cloud);
+            applyStateToLocal(merged);
+            console.log('[supabase] merged cloud state. entries:', merged.entries.length, 'photos:', (merged.photosData || []).length);
+            // 合并结果立即推回云端
+            await supabaseSet(SB_KV_KEY, collectAllState());
         } else {
             // 云端为空 → 把本地推上去（首次迁移）
             await supabaseSet(SB_KV_KEY, collectAllState());
