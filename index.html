@@ -22669,6 +22669,43 @@ function mergeState(local, cloud) {
     return out;
 }
 
+async function refreshFromSupabase() {
+    if (!sbReady) return;
+    try {
+        var cloud = await supabaseGet(SB_KV_KEY);
+        if (!cloud || cloud.entries === undefined) return;
+        var local = collectAllState();
+        var merged = mergeState(local, cloud);
+        // 检测变化：entries 数量或最新一条时间戳
+        var ml = merged.entries.length, ll = local.entries.length;
+        var mt = ml ? merged.entries[ml - 1].ts : 0;
+        var lt = ll ? local.entries[ll - 1].ts : 0;
+        if (ml !== ll || mt !== lt) {
+            applyStateToLocal(merged);
+            if (typeof invalidateEntriesCache === 'function') invalidateEntriesCache();
+            // 重新渲染当前视图
+            try {
+                var cur = document.querySelector('.screen:not(.hidden)');
+                var id = cur ? cur.id : '';
+                if (id === 'screen-detail' && typeof renderTimeline === 'function' && selectedDate) renderTimeline(selectedDate);
+                else if (id === 'screen-todayplan' && window.renderTodayplan) renderTodayplan();
+                else if (id === 'screen-notes' && window.renderNotes) renderNotes();
+                else if (id === 'screen-photos' && window.renderPhotos) renderPhotos();
+                else if (id === 'screen-stats' && typeof renderStats === 'function') renderStats();
+                else if (typeof renderCalendar === 'function') renderCalendar();
+            } catch(e) {}
+            if (typeof toast === 'function') toast('🔄 已同步其他设备的新记录');
+        }
+    } catch(e) { /* 静默，下次轮询再试 */ }
+}
+
+function startSupabasePolling() {
+    setInterval(function() {
+        if (!sbReady || document.hidden) return;
+        refreshFromSupabase();
+    }, 30000);
+}
+
 async function initSupabaseSync() {
     try {
         var cloud = await supabaseGet(SB_KV_KEY);
@@ -22686,7 +22723,8 @@ async function initSupabaseSync() {
             console.log('[supabase] first-time upload done');
         }
         sbReady = true;
-    } catch(e) {
+        startSupabasePolling();
+        } catch(e) {
         console.warn('[supabase] init failed, local-only mode:', e.message);
         sbReady = false;
         // 网络恢复后自动重试
