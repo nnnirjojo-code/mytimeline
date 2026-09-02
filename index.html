@@ -5619,6 +5619,31 @@ border-radius: 24px;
 
         .checkin-heatmap .heatmap-title { font-size: 15px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; font-family: var(--font-sans); }
 
+        /* ===== 搜索 ===== */
+        #screen-search {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .search-item {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(4px);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .search-item:active { transform: scale(0.98); }
+        .search-item .si-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; font-family: var(--font-sans); }
+        .search-item .si-text { font-family: 'Ma Shan Zheng', serif; font-size: 19px; color: var(--text-primary); line-height: 1.5; word-break: break-word; }
+        .search-item .si-text mark { background: rgba(212,99,66,0.25); color: var(--accent); border-radius: 3px; padding: 0 2px; font-weight: 600; }
+        .search-item .si-tags { margin-top: 6px; }
+        .search-item .si-tags .si-tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 10px; background: rgba(212,99,66,0.12); color: var(--accent); margin-right: 6px; font-family: var(--font-sans); }
+        .search-empty { padding: 60px 0; text-align: center; color: var(--text-muted); font-family: 'Ma Shan Zheng', serif; font-size: 20px; opacity: 0.7; }
+
         /* ===== 笔记卡片 ===== */
         #screen-notes {
             display: flex;
@@ -20099,6 +20124,7 @@ border-radius: var(--radius);
 
 
 
+                <button class="nav-action" id="homeSearchBtn" title="搜索" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:15px;cursor:pointer;font-weight:600;margin-right:8px;">🔍 搜索</button>
                 <button class="nav-action" id="homeAddBtn">+ 记录</button>
 
 
@@ -20677,6 +20703,17 @@ border-radius: var(--radius);
 
 
 
+    <div class="screen hidden" id="screen-search">
+        <div class="nav-bar">
+            <button class="nav-back" id="searchBackBtn">←</button>
+            <span class="nav-title">🔍 搜索</span>
+            <span></span>
+        </div>
+        <div style="padding: 4px 20px 10px; flex-shrink: 0;">
+            <input type="search" id="searchInput" placeholder="搜记录内容或标签…" style="width:100%;padding:12px 14px;border:2px solid rgba(0,0,0,0.1);border-radius:14px;font-size:17px;outline:none;box-sizing:border-box;background:#fff;" />
+        </div>
+        <div class="timeline-scroll" id="searchResults" style="flex:1;overflow-y:auto;padding:4px 20px 120px;"></div>
+    </div>
     <div class="screen hidden" id="screen-detail">
 
 
@@ -41868,6 +41905,107 @@ window.renderNotes = function() {
 
 
 
+
+            /* ===== 搜索 ===== */
+            var searchTimer = null;
+
+            function openSearch() {
+                showScreen('screen-search');
+                var inp = document.getElementById('searchInput');
+                inp.value = '';
+                document.getElementById('searchResults').innerHTML = '<div class="search-empty">输入关键词搜索记录内容或标签</div>';
+                // 预热数据缓存
+                fetchAllEntries().catch(function() {});
+                setTimeout(function() { inp.focus(); }, 120);
+            }
+
+            function escapeHtml(s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+
+            function highlightText(text, keywords) {
+                var t = escapeHtml(text);
+                keywords.forEach(function(k) {
+                    if (!k) return;
+                    var re = new RegExp('(' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+                    t = t.replace(re, '<mark>$1</mark>');
+                });
+                return t;
+            }
+
+            function doSearch(q) {
+                var kw = (q || '').trim().toLowerCase();
+                var box = document.getElementById('searchResults');
+                if (!kw) {
+                    box.innerHTML = '<div class="search-empty">输入关键词搜索记录内容或标签</div>';
+                    return;
+                }
+                fetchAllEntries().then(function(entries) {
+                    var keywords = kw.split(/\s+/).filter(Boolean);
+                    var results = entries.filter(function(e) {
+                        var hay = ((e.text || '') + ' ' + (e.tags || []).join(' ')).toLowerCase();
+                        return keywords.every(function(k) { return hay.indexOf(k) !== -1; });
+                    });
+                    results.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+                    if (!results.length) {
+                        box.innerHTML = '<div class="search-empty">没有找到包含「' + escapeHtml(q.trim()) + '」的记录</div>';
+                        return;
+                    }
+                    var html = '';
+                    results.slice(0, 100).forEach(function(e) {
+                        var d = e.ts ? new Date(e.ts) : null;
+                        var dateStr = e.date || (d ? d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') : '');
+                        var meta = dateStr;
+                        if (e.startTime) meta += ' ' + (e.endTime && e.endTime !== e.startTime ? e.startTime + ' - ' + e.endTime : e.startTime);
+                        if (d) meta += ' · ' + (WEEKDAYS_ZH[d.getDay()] || '');
+                        html += '<div class="search-item" data-date="' + dateStr + '" data-ts="' + (e.ts || '') + '">';
+                        html += '<div class="si-meta">' + escapeHtml(meta) + '</div>';
+                        if (e.text) html += '<div class="si-text">' + highlightText(e.text, keywords) + '</div>';
+                        if (e.tags && e.tags.length) {
+                            html += '<div class="si-tags">' + e.tags.map(function(t) { return '<span class="si-tag">#' + escapeHtml(t) + '</span>'; }).join('') + '</div>';
+                        }
+                        html += '</div>';
+                    });
+                    if (results.length > 100) html += '<div class="search-empty">仅显示前 100 条，共 ' + results.length + ' 条</div>';
+                    box.innerHTML = html;
+                    box.querySelectorAll('.search-item').forEach(function(item) {
+                        item.addEventListener('click', function() {
+                            var dateStr = this.dataset.date;
+                            var ts = parseInt(this.dataset.ts);
+                            if (!dateStr) return;
+                            openDetail(dateStr).then(function() {
+                                setTimeout(function() {
+                                    // 定位并高亮该记录
+                                    var container = document.getElementById('timelineScroll');
+                                    if (container) {
+                                        var target = null;
+                                        container.querySelectorAll('.entry-card[data-ts]').forEach(function(c) {
+                                            if (parseInt(c.dataset.ts) === ts) target = c;
+                                        });
+                                        if (target) {
+                                            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                            target.classList.add('highlight');
+                                            setTimeout(function() { target.classList.remove('highlight'); }, 2600);
+                                        }
+                                    }
+                                }, 120);
+                            });
+                        });
+                    });
+                }).catch(function() {
+                    box.innerHTML = '<div class="search-empty">加载数据失败</div>';
+                });
+            }
+
+            document.getElementById('homeSearchBtn').addEventListener('click', openSearch);
+            document.getElementById('searchBackBtn').addEventListener('click', function() { showScreen('screen-home'); });
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                if (searchTimer) clearTimeout(searchTimer);
+                searchTimer = setTimeout(function() { doSearch(e.target.value); }, 250);
+            });
+            document.getElementById('searchInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); doSearch(this.value); }
+            });
 
             /* ===== 快捷记录模式 (?quick) ===== */
             function initQuickMode() {
