@@ -22657,6 +22657,38 @@ function scheduleSupabasePush(overrides) {
     sbPushTimer = setTimeout(function() { pushAllToSupabase(overrides); }, 900);
 }
 
+/* 每小时快照（云端保留 72 小时，防覆盖丢数据） */
+function snapKeyFor(date) {
+    return 'mytimeline_snap_' + date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0') + '_' +
+        String(date.getHours()).padStart(2, '0');
+}
+
+async function saveHourlySnapshot() {
+    if (!sbReady) return;
+    try {
+        var snapKey = snapKeyFor(new Date());
+        var existing = await supabaseGet(snapKey);
+        if (existing) return; // 本小时已存
+        var st = collectAllState();
+        delete st.photosData; // 快照不含照片（体积大，照片有独立备份）
+        await supabaseSet(snapKey, st);
+        console.log('[supabase] snapshot saved:', snapKey);
+        cleanupOldSnapshots();
+    } catch(e) { /* 快照失败不影响主流程 */ }
+}
+
+async function cleanupOldSnapshots() {
+    try {
+        var old = new Date(Date.now() - 72 * 3600 * 1000);
+        await fetch(SUPABASE_URL + '/rest/v1/kv?and=(key.like.mytimeline_snap_*,key.lt.' + snapKeyFor(old) + ')', {
+            method: 'DELETE',
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+        });
+    } catch(e) {}
+}
+
 async function pushAllToSupabase(overrides) {
     if (!sbReady) return;
     try {
@@ -22674,6 +22706,7 @@ async function pushAllToSupabase(overrides) {
         await supabaseSet(SB_KV_KEY, st);
         console.log('[supabase] pushed');
         if (typeof toast === 'function') toast('☁️ 已同步到云端');
+        saveHourlySnapshot();
     } catch(e) {
         console.warn('[supabase] push failed:', e.message);
         if (typeof toast === 'function') toast('⚠️ 云端同步失败，数据已保存在本地，稍后自动重试');
@@ -22775,6 +22808,7 @@ async function initSupabaseSync() {
         }
         sbReady = true;
         startSupabasePolling();
+        saveHourlySnapshot();
         } catch(e) {
         console.warn('[supabase] init failed, local-only mode:', e.message);
         sbReady = false;
