@@ -22690,7 +22690,7 @@ async function cleanupOldSnapshots() {
 }
 
 async function pushAllToSupabase(overrides) {
-    if (!sbReady) return;
+    if (!sbReady) return false;
     try {
         var st = collectAllState();
         if (overrides) Object.assign(st, overrides);
@@ -22707,11 +22707,13 @@ async function pushAllToSupabase(overrides) {
         console.log('[supabase] pushed');
         if (typeof toast === 'function') toast('☁️ 已同步到云端');
         saveHourlySnapshot();
+        return true;
     } catch(e) {
         console.warn('[supabase] push failed:', e.message);
         if (typeof toast === 'function') toast('⚠️ 云端同步失败，数据已保存在本地，稍后自动重试');
         // 60 秒后自动重试（断网恢复后补推）
         setTimeout(function() { pushAllToSupabase(overrides); }, 60000);
+        return false;
     }
 }
 
@@ -42111,11 +42113,14 @@ window.renderNotes = function() {
                     if (!entryText) entryText = parsed.start + '-' + parsed.end;
                     setStatus('⏳ 正在保存…', true);
                     saveEntry(parsed.date, entryText, [], [], 0, parsed.start, parsed.end);
-                    setStatus('✅ 已同步：' + parsed.start + '-' + parsed.end + ' ' + entryText, true);
-                    // 立即推送云端（不等防抖，防止随手关页面丢推送）
-                    setTimeout(function() { pushAllToSupabase(); }, 100);
                     input.value = '';
                     input.focus();
+                    setStatus('⏳ 正在同步到云端…', true);
+                    pushAllToSupabase().then(function(ok) {
+                        setStatus(ok
+                            ? '✅ 已同步到云端：' + parsed.start + (parsed.end ? '-' + parsed.end : '') + ' ' + entryText
+                            : '⚠️ 已存本地，云端暂未同步（会自动重试）', ok);
+                    });
                 }
                 saveBtn.addEventListener('click', doQuickSave);
                 input.addEventListener('keydown', function(e) {
