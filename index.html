@@ -22751,6 +22751,10 @@ function startSupabasePolling() {
         if (!sbReady || document.hidden) return;
         refreshFromSupabase();
     }, 30000);
+    // 页面切到后台/关闭前，立即推送一次（防止未推送的改动丢失）
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && sbReady) pushAllToSupabase();
+    });
 }
 
 async function initSupabaseSync() {
@@ -42074,6 +42078,8 @@ window.renderNotes = function() {
                     setStatus('⏳ 正在保存…', true);
                     saveEntry(parsed.date, entryText, [], [], 0, parsed.start, parsed.end);
                     setStatus('✅ 已同步：' + parsed.start + '-' + parsed.end + ' ' + entryText, true);
+                    // 立即推送云端（不等防抖，防止随手关页面丢推送）
+                    setTimeout(function() { pushAllToSupabase(); }, 100);
                     input.value = '';
                     input.focus();
                 }
