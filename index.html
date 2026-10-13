@@ -22689,6 +22689,49 @@ async function cleanupOldSnapshots() {
     } catch(e) {}
 }
 
+/* Siri/外部收件箱：消费 mytimeline_inbox_* 条目 */
+async function deleteInboxItem(key) {
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/kv?key=eq.' + encodeURIComponent(key), {
+            method: 'DELETE',
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+        });
+    } catch(e) {}
+}
+
+async function consumeInbox() {
+    if (!sbReady) return;
+    try {
+        var r = await fetch(SUPABASE_URL + '/rest/v1/kv?key=like.mytimeline_inbox_*&select=key,value', {
+            headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+        });
+        if (!r.ok) return;
+        var rows = await r.json();
+        if (!rows.length) return;
+        var added = 0;
+        for (var i = 0; i < rows.length; i++) {
+            var it = rows[i].value || {};
+            var raw = (it.text || '').trim();
+            if (!raw) { await deleteInboxItem(rows[i].key); continue; }
+            var parsed = null;
+            try { parsed = parseQuickText(raw); } catch(e) {}
+            var text = (parsed && parsed.text) ? parsed.text : raw;
+            var date = (parsed && parsed.date) ? parsed.date : (it.date || getTodayKey());
+            var start = (parsed && parsed.start) ? parsed.start : (it.time || null);
+            var end = (parsed && parsed.end) ? parsed.end : null;
+            saveEntry(date, text, [], [], 0, start, end);
+            await deleteInboxItem(rows[i].key);
+            added++;
+        }
+        if (added > 0) {
+            if (typeof invalidateEntriesCache === 'function') invalidateEntriesCache();
+            if (typeof toast === 'function') toast('📩 已加入 ' + added + ' 条 Siri 记录');
+            console.log('[supabase] inbox consumed:', added);
+            setTimeout(function() { pushAllToSupabase(); }, 500);
+        }
+    } catch(e) { /* 静默 */ }
+}
+
 async function pushAllToSupabase(overrides) {
     if (!sbReady) return false;
     try {
@@ -22785,6 +22828,7 @@ function startSupabasePolling() {
     setInterval(function() {
         if (!sbReady || document.hidden) return;
         refreshFromSupabase();
+        consumeInbox();
     }, 30000);
     // 页面切到后台/关闭前，立即推送一次（防止未推送的改动丢失）
     document.addEventListener('visibilitychange', function() {
@@ -22810,6 +22854,7 @@ async function initSupabaseSync() {
         }
         sbReady = true;
         startSupabasePolling();
+                consumeInbox();
         saveHourlySnapshot();
         } catch(e) {
         console.warn('[supabase] init failed, local-only mode:', e.message);
