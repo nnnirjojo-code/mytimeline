@@ -22662,6 +22662,15 @@ async function pushAllToSupabase(overrides) {
     try {
         var st = collectAllState();
         if (overrides) Object.assign(st, overrides);
+        // 推送前先拉云端合并（防止本机旧数据覆盖其他设备的新记录）
+        try {
+            var cloud = await supabaseGet(SB_KV_KEY);
+            if (cloud && cloud.entries !== undefined) {
+                st = mergeState(st, cloud);
+                applyStateToLocal(st);
+                if (typeof invalidateEntriesCache === 'function') invalidateEntriesCache();
+            }
+        } catch(e2) { /* 拉取失败则按本地推送 */ }
         await supabaseSet(SB_KV_KEY, st);
         console.log('[supabase] pushed');
         if (typeof toast === 'function') toast('☁️ 已同步到云端');
