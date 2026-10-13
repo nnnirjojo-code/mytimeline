@@ -42079,6 +42079,8 @@ window.renderNotes = function() {
                     samples.map(function(s, i) {
                         return '<button data-ex="' + i + '" style="background:#12121a;border:1px solid rgba(255,255,255,0.1);color:#e8e8ee;border-radius:16px;padding:6px 12px;font-size:13px;cursor:pointer;">' + s + '</button>';
                     }).join('') + '</div>' +
+                    '<div id="quickRecent" style="margin-bottom:12px;display:flex;flex-wrap:wrap;align-items:center;min-height:0;"></div>' +
+                    '<div style="font-size:12px;color:#8888a0;margin-bottom:8px;">💡 打完「。」自动保存 · 键盘 🎤 语音输入更快 · 回车也可保存</div>' +
                     '<textarea id="quickInput" placeholder="例如：9点到11点，吃饭" style="flex:1;width:100%;box-sizing:border-box;background:#12121a;border:1px solid rgba(255,255,255,0.15);border-radius:16px;color:#e8e8ee;font-size:20px;padding:16px;outline:none;resize:none;font-family:\'Ma Shan Zheng\',serif;"></textarea>' +
                     '<div id="quickStatus" style="min-height:44px;margin-top:10px;display:flex;align-items:center;justify-content:center;font-family:\'Ma Shan Zheng\',serif;font-size:17px;text-align:center;line-height:1.5;"></div>' +
                     '<button id="quickSaveBtn" style="margin-top:4px;background:#c0392b;color:#fff;border:none;border-radius:16px;padding:14px 0;font-size:18px;font-weight:600;cursor:pointer;">⚡ 同步到时间轴</button>';
@@ -42126,7 +42128,54 @@ window.renderNotes = function() {
                 input.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doQuickSave(); }
                 });
+                // 句号自动提交（打完「。」直接保存，省去点按钮）
+                var composing = false;
+                input.addEventListener('compositionstart', function() { composing = true; });
+                input.addEventListener('compositionend', function() {
+                    composing = false;
+                    checkAutoSubmit();
+                });
+                function checkAutoSubmit() {
+                    if (composing) return;
+                    var v = input.value;
+                    if (v.length < 3 || !/[。.！!]\s*$/.test(v)) return;
+                    var cleaned = v.replace(/[。.！!]\s*$/, '').trim();
+                    if (!cleaned) return;
+                    if (!parseQuickText(cleaned)) return; // 解析不出时间就不提交（保护长文本）
+                    input.value = cleaned;
+                    doQuickSave();
+                }
+                input.addEventListener('input', function() {
+                    if (composing) return;
+                    checkAutoSubmit();
+                });
                 setTimeout(function() { input.focus(); }, 300);
+
+                // 最近记录快捷填充（一键复用常用内容）
+                fetchAllEntries().then(function(entries) {
+                    var seen = {}, recent = [];
+                    var sorted = (entries || []).slice().sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
+                    for (var i = 0; i < sorted.length && recent.length < 5; i++) {
+                        var t = (sorted[i].text || '').trim();
+                        if (!t || t.length > 20 || seen[t]) continue;
+                        seen[t] = 1;
+                        recent.push(t);
+                    }
+                    if (!recent.length) return;
+                    var rec = document.getElementById('quickRecent');
+                    if (!rec) return;
+                    rec.innerHTML = '<span style="font-size:12px;color:#8888a0;margin-right:6px;">最近：</span>' +
+                        recent.map(function(t, i) {
+                            return '<button data-rec="' + i + '" style="background:#1a1a26;border:1px solid rgba(255,255,255,0.12);color:#e8e8ee;border-radius:14px;padding:5px 11px;font-size:13px;cursor:pointer;margin:0 4px 6px 0;">' + escapeHtml(t) + '</button>';
+                        }).join('');
+                    rec.querySelectorAll('[data-rec]').forEach(function(b) {
+                        b.addEventListener('click', function() {
+                            input.value = recent[parseInt(this.dataset.rec)];
+                            input.focus();
+                            input.setSelectionRange ? input.setSelectionRange(input.value.length, input.value.length) : null;
+                        });
+                    });
+                }).catch(function() {});
             }
 
             function parseQuickText(raw) {
@@ -42168,7 +42217,13 @@ window.renderNotes = function() {
                         return { date: dateStr, start: start2, end: String(eh).padStart(2, '0') + ':' + parts[1], text: m2[4] };
                     }
                 }
-                return null;
+                var nowD = new Date();
+                return {
+                    date: dateStr,
+                    start: String(nowD.getHours()).padStart(2, '0') + ':' + String(nowD.getMinutes()).padStart(2, '0'),
+                    end: null,
+                    text: text
+                };
             }
 
             initQuickMode();
